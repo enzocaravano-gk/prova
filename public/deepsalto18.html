@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Jump — Analisi Biomeccanica Professionale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ========== STILI COMPLETI (mantenuti dalla versione precedente) ========== */
+:root {
+  --bg:#050a0f; --surface:#0c1520; --surface2:#13202f; --surface3:#1a2d40;
+  --border:#1e3448; --border2:#2a4660;
+  --accent:#00e5ff; --accent2:#0099cc;
+  --gold:#ffb300; --green:#00e676; --red:#ff5252; --purple:#b388ff;
+  --orange:#ff9800;
+  --text:#e8f4fd; --muted:#5a8099; --muted2:#3a5a72;
+  --font-d:'Barlow Condensed',sans-serif;
+  --font-b:'Barlow',sans-serif;
+  --font-m:'JetBrains Mono',monospace;
+}
+[data-theme="light"] {
+  --bg:#f0f4f8; --surface:#fff; --surface2:#f8fafc; --surface3:#eef2f7;
+  --border:#dde6ef; --border2:#c5d5e4;
+  --accent:#0077aa; --accent2:#005588;
+  --gold:#d97706; --green:#059669; --red:#dc2626; --purple:#7c3aed;
+  --orange:#ea580c;
+  --text:#0f2030; --muted:#6b8fa8; --muted2:#93b4c8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:5px;background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.25}
+#app{position:relative;z-index:1}
+header{position:sticky;top:0;z-index:100;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(5,10,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+[data-theme="light"] header{background:rgba(240,244,248,.92)}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--font-d);font-weight:900;font-size:22px}
+.logo-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;color:#050a0f;box-shadow:0 0 20px rgba(0,229,255,.3)}
+.logo-badge{font-size:9px;padding:2px 7px;border-radius:20px;background:rgba(0,229,255,.12);color:var(--accent);border:1px solid rgba(0,229,255,.25);font-family:var(--font-m)}
+.nav-pills{display:flex;gap:6px}
+.nav-pill{padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-d);transition:all .15s}
+.nav-pill:hover{border-color:var(--accent);color:var(--accent)}
+.nav-pill.active{border-color:var(--accent);background:rgba(0,229,255,.1);color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:10px}
+.theme-toggle{width:48px;height:26px;border-radius:13px;background:var(--surface3);border:1px solid var(--border2);cursor:pointer;position:relative}
+.theme-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--accent);transition:left .3s;display:flex;align-items:center;justify-content:center;font-size:10px}
+[data-theme="light"] .theme-knob{left:25px;background:var(--gold)}
+main{max-width:1160px;margin:0 auto;padding:32px 20px}
+.page{display:none;animation:fadeUp .4s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(0,229,255,.25)}50%{box-shadow:0 0 40px rgba(0,229,255,.55)}}
+.hero{text-align:center;padding:40px 0 32px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;margin-bottom:20px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.2);font-size:11px;color:var(--accent);font-family:var(--font-m)}
+.hero h1{font-family:var(--font-d);font-size:clamp(44px,8vw,80px);font-weight:900;letter-spacing:-.03em;line-height:.92;margin-bottom:18px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:16px;max-width:480px;margin:0 auto 32px}
+.steps{display:flex;gap:8px;max-width:560px;margin:0 auto 24px}
+.step{flex:1;padding:11px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);display:flex;align-items:center}
+.step.done{border-color:var(--accent);background:rgba(0,229,255,.06)}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0}
+.step.done .step-num{background:var(--accent);color:#050a0f}
+.step-label{font-size:12px;font-weight:700;color:var(--muted);font-family:var(--font-d);margin-left:8px}
+.step.done .step-label{color:var(--accent)}
+.step-value{font-size:11px;color:var(--accent);margin-left:auto;font-family:var(--font-m)}
+.athlete-selector{max-width:560px;margin:0 auto 16px}
+.field-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--font-m)}
+.input-row{display:flex;gap:8px}
+select,input,textarea{background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:10px 14px;outline:none}
+select:focus,input:focus,textarea:focus{border-color:var(--accent)}
+.btn-icon{padding:10px;border-radius:8px;background:var(--surface);border:1px solid var(--border2);color:var(--muted);cursor:pointer}
+.athlete-chip{margin-top:8px;padding:9px 14px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);border-radius:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:12px}
+.dropzone{max-width:560px;margin:0 auto;border:2px dashed var(--border2);border-radius:14px;background:var(--surface);transition:all .2s}
+.dropzone.dragging{border-color:var(--accent);background:rgba(0,229,255,.04)}
+.dropzone.has-video{border-color:var(--accent2);border-style:solid}
+.dropzone-click-area{cursor:pointer;padding:40px 24px;text-align:center}
+.dropzone.has-video .dropzone-click-area{display:none}
+.dropzone-icon{font-size:44px;margin-bottom:10px}
+.dropzone h3{font-family:var(--font-d);font-size:18px;font-weight:700}
+.dropzone p{color:var(--muted);font-size:13px}
+.video-container{padding:12px;display:none}
+.dropzone.has-video .video-container{display:block}
+.video-zoom-wrapper{position:relative;overflow:auto;background:#000;border-radius:8px;max-height:500px}
+.video-zoom-inner{position:relative;display:inline-block;transform-origin:0 0;transition:transform 0.05s linear}
+.video-zoom-inner video{display:block;width:100%;height:auto;border-radius:8px}
+.video-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.drag-handle{position:absolute;width:16px;height:32px;border-radius:8px;cursor:grab;z-index:30;transform:translateX(-50%) translateY(-50%);top:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;pointer-events:auto;border:1px solid rgba(255,255,255,0.3)}
+.drag-handle:active{cursor:grabbing}
+.drag-handle:hover{transform:translateX(-50%) translateY(-50%) scale(1.1)}
+.drag-handle::before{content:"⋮⋮";color:white;font-size:12px;font-weight:bold}
+.start-handle{background:linear-gradient(135deg,#00e5ff,#0099cc)}
+.end-handle{background:linear-gradient(135deg,#ffb300,#ff8c00)}
+.landing-handle{background:linear-gradient(135deg,#00e676,#00a86b)}
+.zoom-controls{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px}
+.zoom-btn{padding:5px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);cursor:pointer;font-size:12px;font-weight:600}
+.zoom-btn:hover{border-color:var(--accent);color:var(--accent)}
+.zoom-slider{width:100px;cursor:pointer;accent-color:var(--accent)}
+.zoom-value{font-size:11px;font-family:var(--font-m);color:var(--muted);min-width:45px}
+.video-meta{font-size:11px;color:var(--muted);margin-top:8px}
+.calibration-info{background:rgba(0,229,255,.1);border:1px solid var(--accent);border-radius:8px;padding:8px;margin-top:8px;font-size:11px}
+.frame-controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.frame-btn{padding:5px 12px;border-radius:6px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);cursor:pointer;font-size:11px;font-weight:600}
+.frame-btn:hover{border-color:var(--accent);color:var(--accent)}
+.mark-buttons{display:flex;gap:8px;margin-top:12px;justify-content:center;flex-wrap:wrap}
+.mark-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.mark-btn:hover{border-color:var(--accent)}
+.mark-btn.done{background:var(--green);border-color:var(--green);color:#fff}
+.test-types{display:flex;gap:8px;max-width:560px;margin:16px auto 0;flex-wrap:wrap}
+.tt-btn{flex:1;padding:10px 8px;border-radius:8px;text-align:center;border:1px solid var(--border2);background:var(--surface);cursor:pointer}
+.tt-btn.active{border-color:var(--accent);background:rgba(0,229,255,.08)}
+.tt-code{font-family:var(--font-d);font-size:18px;font-weight:900;color:var(--muted)}
+.tt-btn.active .tt-code{color:var(--accent)}
+.tt-name{font-size:10px;color:var(--muted);margin-top:2px}
+.btn-analyze{display:block;width:100%;max-width:560px;margin:20px auto 0;padding:16px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#050a0f;font-family:var(--font-d);font-size:18px;font-weight:900;cursor:pointer;box-shadow:0 0 30px rgba(0,229,255,.3);animation:glow 2.5s ease infinite}
+.btn-analyze:hover{transform:translateY(-1px)}
+.btn-analyze:disabled{opacity:.4;cursor:not-allowed;animation:none}
+.info-strip{display:flex;max-width:560px;margin:20px auto 0;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.isi{flex:1;padding:12px;text-align:center;background:var(--surface);border-right:1px solid var(--border)}
+.isi:last-child{border-right:none}
+.isi-icon{font-size:18px;margin-bottom:4px}
+.isi-title{font-size:12px;font-weight:700}
+.isi-sub{font-size:10px;color:var(--muted)}
+.analyzing-center{max-width:520px;margin:80px auto;text-align:center}
+.analyzer-orb{width:110px;height:110px;border-radius:50%;border:2px solid var(--accent);margin:0 auto 28px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;animation:glow 1.5s ease infinite}
+.analyzer-orb::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(0,229,255,.2);animation:spin 3s linear infinite;border-top-color:var(--accent)}
+.progress-bar{background:var(--surface2);border-radius:8px;height:6px;overflow:hidden;margin-bottom:6px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .5s ease}
+.results-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:14px}
+.res-tag{display:inline-block;font-size:10px;font-weight:700;font-family:var(--font-m);color:var(--accent);padding:3px 10px;border-radius:20px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2)}
+.res-h2{font-family:var(--font-d);font-size:28px;font-weight:900}
+.res-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-d);border:1px solid var(--border2);background:transparent;color:var(--muted)}
+.btn-ghost:hover{border-color:var(--text);color:var(--text)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#050a0f}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;border-top:3px solid var(--accent);position:relative}
+.kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.kpi-card.gold{border-top-color:var(--gold)}
+.kpi-card.green{border-top-color:var(--green)}
+.kpi-label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--font-m)}
+.kpi-value{font-family:var(--font-m);font-size:32px;font-weight:700;color:var(--accent);line-height:1}
+.kpi-card.gold .kpi-value{color:var(--gold)}
+.kpi-unit{font-size:11px;color:var(--muted);margin-top:5px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-d);margin-bottom:-1px}
+.tab.active{border-bottom-color:var(--accent);color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:14px;font-family:var(--font-m)}
+.phase-timeline{height:32px;display:flex;border-radius:8px;overflow:hidden;gap:2px}
+.ph-f{background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:9px}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{padding:10px 14px;text-align:left;font-size:10px;color:var(--muted);font-weight:700;background:var(--surface2);border-bottom:1px solid var(--border);font-family:var(--font-m)}
+.data-table td{padding:12px 14px;border-bottom:1px solid var(--border)}
+.insight{display:flex;gap:14px;padding:14px 18px;border-radius:10px;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--green);margin-bottom:10px}
+.insight.warning{border-left-color:var(--gold)}
+.insight-icon{font-size:20px}
+.insight-badge{font-size:9px;font-weight:700;font-family:var(--font-m);margin-bottom:4px;color:var(--green)}
+.insight.warning .insight-badge{color:var(--gold)}
+.insight-text{font-size:13px}
+.empty-state{text-align:center;padding:60px 20px;background:var(--surface);border:1px solid var(--border);border-radius:14px}
+.es-icon{font-size:48px;margin-bottom:14px}
+.athlete-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.ath-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;position:relative}
+.ath-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.ath-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#7c3aed);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff}
+.ath-card-hdr{display:flex;justify-content:space-between;margin-bottom:10px}
+.ath-badge{font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,255,.1);color:var(--accent)}
+.ath-name{font-size:16px;font-weight:800;margin-bottom:6px}
+.ath-stats{margin-top:12px;padding:10px;background:var(--surface2);border-radius:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.as-val{font-size:16px;font-weight:900}
+.as-lbl{font-size:9px;color:var(--muted)}
+.detail-grid{display:grid;grid-template-columns:280px 1fr;gap:16px}
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.detail-key{color:var(--muted)}
+.detail-val{font-weight:600}
+.test-session-card{background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:10px}
+.test-session-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
+.test-session-header:hover{background:rgba(0,229,255,.05)}
+.delete-session-btn{background:var(--red);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:8px}
+.session-details{padding:12px 14px;border-top:1px solid var(--border);background:var(--surface)}
+.session-details.hidden{display:none}
+.team-section{background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:20px}
+.team-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;cursor:pointer}
+.team-name{font-size:18px;font-weight:800;color:var(--orange)}
+.team-count{font-size:11px;color:var(--muted)}
+.team-actions{display:flex;gap:8px}
+.add-athlete-btn{background:var(--green);border:none;color:#fff;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer}
+.team-athletes{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:12px}
+.remove-athlete-btn{position:absolute;top:8px;right:8px;background:var(--red);border:none;color:#fff;padding:2px 6px;border-radius:4px;font-size:9px;cursor:pointer;opacity:0;transition:opacity .2s}
+.ath-card:hover .remove-athlete-btn{opacity:1}
+.form-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field label{font-size:11px;color:var(--muted)}
+@media(max-width:720px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:44px}
+  .detail-grid{grid-template-columns:1fr}
+  .test-types{flex-wrap:wrap}
+}
+</style>
+
+<!-- SUPABASE BRIDGE v3 — sincronizzato con SH2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const _sb = supabase.createClient('https://xjsoqcopalvoskbnarzn.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqc29xY29wYWx2b3NrYm5hcnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjE2ODAsImV4cCI6MjA5MDYzNzY4MH0.6AhQ5ogFLKRHkfsdMFDD2tB06vcXAf8mINJ3XUdcq_8');
+  window._sb = _sb;
+  window._sbState = { ready:false, session:null, coachId:null, teamId:null, allTeams:[], activeTeamName:'' };
+
+  function _hashUUID(u){ let h=0; for(let i=0;i<u.length;i++) h=(Math.imul(31,h)+u.charCodeAt(i))|0; return Math.abs(h)+800000; }
+
+  window._sbInit = async function(){
+    const {data:{session}} = await _sb.auth.getSession();
+    if (!session) return;
+    window._sbState.session = session;
+    window._sbState.coachId = session.user.id;
+    const {data:teams} = await _sb.rpc('get_coach_teams', {_coach_id: session.user.id});
+    if (!teams || !teams.length) return;
+    window._sbState.allTeams = teams;
+    const lastHash = localStorage.getItem('teamStats_lastTeam');
+    const active = lastHash
+      ? (teams.find(t => String(_hashUUID(t.team_id)) === String(lastHash)) || teams[0])
+      : teams[0];
+    window._sbState.teamId = active.team_id;
+    window._sbState.activeTeamName = active.team_name;
+    window._sbState.ready = true;
+  };
+
+  window._sbGetAthletes = async function(){
+    if (!window._sbState.teamId) return [];
+    const {data} = await _sb.from('athletes')
+      .select('id, full_name, position, jersey_number')
+      .eq('team_id', window._sbState.teamId)
+      .order('jersey_number');
+    return data || [];
+  };
+
+  window._sbSaveJumpTest = async function(athleteId, result){
+    if (!window._sbState.ready) return;
+    await _sb.from('jump_tests').insert({
+      athlete_id: athleteId, team_id: window._sbState.teamId, coach_id: window._sbState.coachId,
+      test_type: result.testType || 'SV', is_long_jump: result.isLongJump || false,
+      best_height_cm: result.bestHeightCm || result.avgHeightCm || null,
+      avg_height_cm: result.avgHeightCm || null, flight_time_s: result.flightTime || null,
+      takeoff_speed: parseFloat(result.takeoffSpeed) || null, distance_cm: result.distanceCm || null,
+      date: new Date().toISOString().split('T')[0]
+    });
+  };
+
+  // Avvia e quando pronto popola i selettori atleta
+  _sbInit().then(() => {
+    setTimeout(async () => {
+      if (!window._sbState.ready) return;
+      try {
+        const athletes = await window._sbGetAthletes();
+
+        // Popola App.athletes nel formato atteso da deepsalto18
+        const cached = localStorage.getItem('jump_data');
+        let localTests = {};
+        if (cached) { try { const d=JSON.parse(cached); (d.athletes||[]).forEach(a=>{localTests[a.id]=a.tests||[]}); }catch(e){} }
+
+        if (typeof App !== 'undefined') {
+          App.athletes = athletes.map(a => {
+            const parts = a.full_name.trim().split(' ');
+            return {
+              id: a.id, _sbId: a.id, _fullName: a.full_name,
+              nome: parts.slice(1).join(' ') || parts[0] || '',
+              cognome: parts[0] || '',
+              sport: a.position || '',
+              teamId: window._sbState.teamId,
+              tests: localTests[a.id] || []
+            };
+          });
+          if (typeof updateAthleteSelects === 'function') updateAthleteSelects();
+          if (typeof renderAthletesList === 'function') renderAthletesList();
+        }
+
+        // Banner squadra
+        let b = document.getElementById('_jump_banner');
+        if (!b) {
+          b = document.createElement('div');
+          b.id = '_jump_banner';
+          b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;padding:4px 16px;display:flex;align-items:center;gap:8px;font-size:12px;font-family:monospace;height:26px;background:rgba(0,229,255,0.07);border-bottom:1px solid rgba(0,229,255,0.2)';
+          document.body && document.body.prepend(b);
+        }
+        if (athletes.length) {
+          b.innerHTML = `<span style="color:#00e5ff">⚽ ${window._sbState.activeTeamName} · ${athletes.length} atleti</span>`;
+        } else {
+          b.innerHTML = `<span style="color:#ff9100">⚠ Apri prima Dashboard e seleziona una squadra</span>`;
+        }
+
+        // Cambio squadra se multi-team
+        if (window._sbState.allTeams.length > 1) {
+          const btn = document.createElement('button');
+          btn.textContent = '⇄ Cambia';
+          btn.style.cssText = 'background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:#00e5ff;padding:2px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:monospace;margin-left:auto';
+          btn.onclick = () => _sbShowJumpPicker();
+          b.appendChild(btn);
+        }
+      } catch(e) { console.error('[Jump bridge]', e); }
+    }, 200);
+  });
+
+  window._sbShowJumpPicker = function(){
+    const teams = window._sbState.allTeams;
+    const old = document.getElementById('_jump_picker');
+    if (old) { old.remove(); return; }
+    const wrap = document.createElement('div');
+    wrap.id = '_jump_picker';
+    wrap.style.cssText = 'position:fixed;top:30px;left:50%;transform:translateX(-50%);z-index:99999;background:#0d1117;border:1px solid rgba(0,229,255,0.3);border-radius:12px;padding:14px;min-width:240px;box-shadow:0 20px 60px rgba(0,0,0,.7)';
+    wrap.innerHTML = '<div style="font-size:10px;color:#00e5ff;letter-spacing:2px;text-transform:uppercase;font-family:monospace;margin-bottom:8px">Seleziona Squadra</div>' +
+      teams.map(t => `<button onclick="_sbSwitchJumpTeam('${t.team_id}')" style="display:block;width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;background:#131920;border:1px solid rgba(255,255,255,.07);border-radius:7px;color:#f0f4f8;font-size:13px;cursor:pointer"><span style="color:#00e5ff;font-weight:700">${t.team_name}</span></button>`).join('');
+    document.body.appendChild(wrap);
+    setTimeout(() => document.addEventListener('click', function h(e){ if(!wrap.contains(e.target)){ wrap.remove(); document.removeEventListener('click',h); } }), 100);
+  };
+
+  window._sbSwitchJumpTeam = async function(teamId){
+    document.getElementById('_jump_picker')?.remove();
+    window._sbState.teamId = teamId;
+    const t = window._sbState.allTeams.find(x => x.team_id === teamId);
+    window._sbState.activeTeamName = t?.team_name || '';
+    localStorage.setItem('teamStats_lastTeam', String(_hashUUID(teamId)));
+    // Ricarica
+    const athletes = await window._sbGetAthletes();
+    const cached = localStorage.getItem('jump_data');
+    let localTests = {};
+    if (cached) { try { const d=JSON.parse(cached); (d.athletes||[]).forEach(a=>{localTests[a.id]=a.tests||[]}); }catch(e){} }
+    if (typeof App !== 'undefined') {
+      App.athletes = athletes.map(a => {
+        const parts = a.full_name.trim().split(' ');
+        return { id:a.id, _sbId:a.id, _fullName:a.full_name,
+          nome:parts.slice(1).join(' ')||parts[0]||'', cognome:parts[0]||'',
+          sport:a.position||'', teamId:window._sbState.teamId, tests:localTests[a.id]||[] };
+      });
+      if (typeof updateAthleteSelects === 'function') updateAthleteSelects();
+    }
+    const b = document.getElementById('_jump_banner');
+    if (b) b.innerHTML = `<span style="color:#00e5ff">⚽ ${window._sbState.activeTeamName} · ${athletes.length} atleti</span>`;
+  };
+})();
+</script>
+
+<body>
+<div id="app">
+<header>
+  <div class="logo"><div class="logo-mark">J</div><span>Jump</span><span class="logo-badge">v2.0</span></div>
+  <div class="nav-pills">
+    <button class="nav-pill active" data-page="analysis">⚡ Analisi Verticale</button>
+    <button class="nav-pill" data-page="longjump" style="border-color:var(--orange);color:var(--orange)">🏃 Salto in Lungo</button>
+    <button class="nav-pill ath" data-page="athletes">👥 Rosa</button>
+  </div>
+  <div class="header-right">
+    <div style="display:flex;gap:6px" id="tt-pills">
+      <button class="nav-pill" data-test="CMJ">CMJ</button>
+      <button class="nav-pill" data-test="SJ">SJ</button>
+      <button class="nav-pill" data-test="DJ">DJ</button>
+      <button class="nav-pill" data-test="SV">SV</button>
+    </div>
+    <button class="theme-toggle" id="themeToggle"><div class="theme-knob">🌙</div></button>
+  </div>
+</header>
+<main>
+
+<!-- PAGE: ANALISI VERTICALE -->
+<div class="page active" id="page-analysis">
+  <div class="hero">
+    <div class="hero-badge">🧬 BIOMECHANICS · FRAME-BY-FRAME · PRECISE</div>
+    <h1>Analisi Salto <span>Verticale</span></h1>
+    <p>Segna decollo e atterraggio per calcolare l'altezza del salto</p>
+  </div>
+  <div class="steps">
+    <div class="step" id="v-step-athlete"><div class="step-num">1</div><span class="step-label">ATLETA</span><span class="step-value" id="v-sv-athlete"></span></div>
+    <div class="step" id="v-step-video"><div class="step-num">2</div><span class="step-label">VIDEO</span><span class="step-value" id="v-sv-video"></span></div>
+    <div class="step" id="v-step-markers"><div class="step-num">3</div><span class="step-label">MARCATORI</span><span class="step-value" id="v-sv-markers"></span></div>
+  </div>
+  
+  <div class="athlete-selector">
+    <div class="field-label">Atleta</div>
+    <div class="input-row">
+      <select id="v-athleteSelect"><option value="">Test rapido</option></select>
+      <button class="btn-icon" id="v-newAthleteBtn">+</button>
+    </div>
+    <div id="v-athleteChip" class="athlete-chip" style="display:none"></div>
+  </div>
+  
+  <div class="dropzone" id="v-dropzone">
+    <div class="dropzone-click-area" id="v-dropzoneClickArea">
+      <div class="dropzone-icon">📹</div>
+      <h3>Trascina il video qui</h3>
+      <p>oppure clicca per selezionare · MP4, MOV, AVI</p>
+    </div>
+    <input type="file" id="v-fileInput" accept="video/*" style="display:none">
+    <div class="video-container" id="v-videoContainer">
+      <div class="video-zoom-wrapper" id="v-videoZoomWrapper">
+        <div class="video-zoom-inner" id="v-videoZoomInner">
+          <div style="position:relative;display:inline-block">
+            <video id="v-previewVideo" controls></video>
+            <canvas id="v-videoOverlay" class="video-overlay"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="v-zoomOutBtn">−</button>
+        <input type="range" id="v-zoomSlider" class="zoom-slider" min="100" max="300" step="10" value="100">
+        <span class="zoom-value" id="v-zoomValue">100%</span>
+        <button class="zoom-btn" id="v-zoomInBtn">+</button>
+        <button class="zoom-btn" id="v-resetZoomBtn">Reset</button>
+      </div>
+      <div class="video-meta" id="v-videoMeta"></div>
+      <div class="frame-controls">
+        <button class="frame-btn" id="v-frameBackBtn" disabled>◀ Frame</button>
+        <button class="frame-btn" id="v-playPauseBtn" disabled>⏸️ Pausa</button>
+        <button class="frame-btn" id="v-frameForwardBtn" disabled>Frame ▶</button>
+      </div>
+      <div class="mark-buttons">
+        <button class="mark-btn" id="v-markTakeoffBtn" disabled>🦶 Segna DECOLLO</button>
+        <button class="mark-btn" id="v-markLandingBtn" disabled>🏁 Segna ATTERRAGGIO</button>
+        <button class="mark-btn" id="v-resetMarkersBtn" disabled>🔄 Reset</button>
+        <button class="mark-btn" id="v-resetVideoBtn" style="background:var(--red);color:#fff">🗑️ Cambia Video</button>
+      </div>
+      <div id="v-statusMsg" style="color:var(--gold);font-size:11px;margin-top:8px"></div>
+    </div>
+  </div>
+  
+  <div class="test-types">
+    <div class="tt-btn" data-test="CMJ"><div class="tt-code">CMJ</div><div class="tt-name">Countermovement</div></div>
+    <div class="tt-btn" data-test="SJ"><div class="tt-code">SJ</div><div class="tt-name">Squat Jump</div></div>
+    <div class="tt-btn" data-test="DJ"><div class="tt-code">DJ</div><div class="tt-name">Drop Jump</div></div>
+    <div class="tt-btn active" data-test="SV"><div class="tt-code">SV</div><div class="tt-name">Salto Verticale</div></div>
+  </div>
+  <button class="btn-analyze" id="v-analyzeBtn" disabled>⚡ Avvia Analisi</button>
+  <div class="info-strip">
+    <div class="isi"><div class="isi-icon">🔍</div><div class="isi-title">Zoom</div><div class="isi-sub">Slider o pinch</div></div>
+    <div class="isi"><div class="isi-icon">🎯</div><div class="isi-title">Preciso</div><div class="isi-sub">Frame by frame</div></div>
+    <div class="isi"><div class="isi-icon">💾</div><div class="isi-title">Persistente</div><div class="isi-sub">Dati salvati</div></div>
+  </div>
+</div>
+
+<!-- PAGE: SALTO IN LUNGO -->
+<div class="page" id="page-longjump">
+  <div class="hero">
+    <div class="hero-badge" style="background:rgba(255,152,0,.1);border-color:var(--orange);color:var(--orange)">🏃 SALTO IN LUNGO · 3 LINEE TRASCINABILI</div>
+    <h1>Analisi Salto <span style="color:var(--orange)">in Lungo</span></h1>
+    <p>Trascina le linee: <span style="color:#00e5ff">🔵 STACCO</span> · <span style="color:#ffb300">🟠 RIFERIMENTO</span> · <span style="color:#00e676">🟢 ATTERRAGGIO</span></p>
+  </div>
+  <div class="steps">
+    <div class="step" id="lj-step-athlete"><div class="step-num">1</div><span class="step-label">ATLETA</span><span class="step-value" id="lj-sv-athlete"></span></div>
+    <div class="step" id="lj-step-video"><div class="step-num">2</div><span class="step-label">VIDEO</span><span class="step-value" id="lj-sv-video"></span></div>
+    <div class="step" id="lj-step-lines"><div class="step-num">3</div><span class="step-label">LINEE</span><span class="step-value" id="lj-sv-lines"></span></div>
+  </div>
+  
+  <div class="athlete-selector">
+    <div class="field-label">Atleta</div>
+    <div class="input-row">
+      <select id="lj-athleteSelect"><option value="">Test rapido</option></select>
+      <button class="btn-icon" id="lj-newAthleteBtn">+</button>
+    </div>
+    <div id="lj-athleteChip" class="athlete-chip" style="display:none"></div>
+  </div>
+  
+  <div class="dropzone" id="lj-dropzone">
+    <div class="dropzone-click-area" id="lj-dropzoneClickArea">
+      <div class="dropzone-icon">📹</div>
+      <h3>Trascina il video qui</h3>
+      <p>oppure clicca per selezionare · MP4, MOV, AVI</p>
+    </div>
+    <input type="file" id="lj-fileInput" accept="video/*" style="display:none">
+    <div class="video-container" id="lj-videoContainer">
+      <div class="video-zoom-wrapper" id="lj-videoZoomWrapper">
+        <div class="video-zoom-inner" id="lj-videoZoomInner">
+          <div style="position:relative;display:inline-block">
+            <video id="lj-previewVideo" controls></video>
+            <canvas id="lj-videoOverlay" class="video-overlay"></canvas>
+            <div id="lj-startHandle" class="drag-handle start-handle" style="display:none"></div>
+            <div id="lj-refHandle" class="drag-handle end-handle" style="display:none"></div>
+            <div id="lj-landingHandle" class="drag-handle landing-handle" style="display:none;background:linear-gradient(135deg,#00e676,#00a86b)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="lj-zoomOutBtn">−</button>
+        <input type="range" id="lj-zoomSlider" class="zoom-slider" min="100" max="300" step="10" value="100">
+        <span class="zoom-value" id="lj-zoomValue">100%</span>
+        <button class="zoom-btn" id="lj-zoomInBtn">+</button>
+        <button class="zoom-btn" id="lj-resetZoomBtn">Reset</button>
+      </div>
+      <div class="video-meta" id="lj-videoMeta"></div>
+      <div id="lj-calibrationInfo" class="calibration-info" style="display:none"></div>
+      <div class="frame-controls">
+        <button class="frame-btn" id="lj-frameBackBtn" disabled>◀ Frame</button>
+        <button class="frame-btn" id="lj-playPauseBtn" disabled>⏸️ Pausa</button>
+        <button class="frame-btn" id="lj-frameForwardBtn" disabled>Frame ▶</button>
+      </div>
+      <div class="mark-buttons">
+        <button class="mark-btn" id="lj-activateLinesBtn" style="background:var(--orange);color:#fff">📏 Attiva Linee</button>
+        <button class="mark-btn" id="lj-setDistanceBtn" disabled>📐 Imposta Distanza (Start→Ref)</button>
+        <button class="mark-btn" id="lj-resetLinesBtn" disabled>🔄 Reset Linee</button>
+        <button class="mark-btn" id="lj-resetVideoBtn" style="background:var(--red);color:#fff">🗑️ Cambia Video</button>
+      </div>
+      <div id="lj-statusMsg" style="color:var(--gold);font-size:11px;margin-top:8px"></div>
+    </div>
+  </div>
+  
+  <button class="btn-analyze" id="lj-analyzeBtn" disabled style="background:linear-gradient(135deg,var(--orange),#e65100)">⚡ Calcola Distanza Salto</button>
+  <div class="info-strip">
+    <div class="isi"><div class="isi-icon">🔵</div><div class="isi-title">Linea STACCO</div><div class="isi-sub">Punto di partenza</div></div>
+    <div class="isi"><div class="isi-icon">🟠</div><div class="isi-title">Linea RIFERIMENTO</div><div class="isi-sub">Distanza nota (es. 5m)</div></div>
+    <div class="isi"><div class="isi-icon">🟢</div><div class="isi-title">Linea ATTERRAGGIO</div><div class="isi-sub">Punto di caduta</div></div>
+  </div>
+</div>
+
+<!-- PAGE: ANALYZING -->
+<div class="page" id="page-analyzing">
+  <div class="analyzing-center">
+    <div class="analyzer-orb">🏃</div>
+    <h2>Analisi in corso...</h2>
+    <div id="stepMsg" style="color:var(--muted);margin-bottom:16px">Inizializzazione...</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div id="logBox" style="background:#000;border-radius:8px;padding:12px;margin-top:20px;max-height:120px;overflow-y:auto;text-align:left;font-size:11px;font-family:var(--font-m)"></div>
+  </div>
+</div>
+
+<!-- PAGE: RESULTS -->
+<div class="page" id="page-results">
+  <div class="results-header">
+    <div><div class="res-tag">✓ ANALISI COMPLETATA</div><div class="res-h2" id="resTitle"></div><div class="res-sub" id="resSub"></div></div>
+    <div class="btn-group"><button class="btn btn-ghost" id="newTestBtn">← Nuovo test</button><button class="btn btn-primary" id="exportPDFBtn">📄 PDF</button><button class="btn btn-primary" id="exportCSVBtn">⬇ CSV</button></div>
+  </div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="tabs"><button class="tab active" data-tab="overview">📊 Dettagli</button><button class="tab" data-tab="data">🗃 Dati</button></div>
+  <div id="tab-overview"><div class="card" id="detailsCard"></div></div>
+  <div id="tab-data" style="display:none"><div class="card" id="dataCard"></div></div>
+</div>
+
+<!-- PAGE: NEW ATHLETE -->
+<div class="page" id="page-new-athlete">
+  <div style="max-width:600px;margin:0 auto">
+    <button class="backBtn" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;margin-bottom:16px">← Indietro</button>
+    <div class="form-section">
+      <div class="card-title" style="color:var(--accent)">📋 Nuovo Atleta</div>
+      <div class="form-grid">
+        <div class="form-field"><label>Nome *</label><input type="text" id="athleteNome" placeholder="Mario"></div>
+        <div class="form-field"><label>Cognome *</label><input type="text" id="athleteCognome" placeholder="Rossi"></div>
+        <div class="form-field"><label>Squadra</label><select id="athleteSquadra"><option value="">Nessuna</option></select></div>
+        <div class="form-field"><label>Sport</label><input type="text" id="athleteSport" placeholder="Calcio"></div>
+      </div>
+      <button class="btn-primary" id="saveAthleteBtn" style="width:100%;margin-top:16px;padding:12px">💾 Salva atleta</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: ATHLETES -->
+<div class="page" id="page-athletes">
+  <div style="display:flex;justify-content:space-between;margin-bottom:20px"><h2>Atleti</h2><button class="btn-primary" id="addAthleteBtn">+ Nuovo</button></div>
+  <div id="athletesList"></div>
+</div>
+
+<!-- PAGE: TEAMS -->
+<div class="page" id="page-teams">
+  <div style="display:flex;justify-content:space-between;margin-bottom:20px"><h2>Squadre</h2><button class="btn-primary" id="newTeamBtn">+ Nuova squadra</button></div>
+  <div id="teamsList"></div>
+</div>
+
+<!-- PAGE: ATHLETE DETAIL -->
+<div class="page" id="page-athlete-detail">
+  <button class="backBtn" style="background:none;border:none;color:var(--muted);cursor:pointer;margin-bottom:16px">← Indietro</button>
+  <div id="athleteDetail"></div>
+</div>
+
+<!-- MODAL NUOVA SQUADRA -->
+<div id="teamModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border-radius:20px;padding:24px;max-width:320px;width:100%">
+    <h3>Nuova Squadra</h3>
+    <input type="text" id="newTeamName" placeholder="Nome squadra" style="width:100%;margin:12px 0;padding:8px;border-radius:8px;background:var(--surface);border:1px solid var(--border2);color:var(--text)">
+    <input type="color" id="newTeamColor" value="#ff9800" style="width:100%;margin-bottom:12px">
+    <div style="display:flex;gap:8px"><button id="closeTeamModalBtn" style="flex:1;padding:8px;border-radius:8px;background:var(--surface);border:1px solid var(--border2)">Annulla</button><button id="createTeamBtn" style="flex:1;padding:8px;border-radius:8px;background:var(--accent);border:none;color:#050a0f">Crea</button></div>
+  </div>
+</div>
+
+<!-- MODAL AGGIUNGI ATLETA A SQUADRA -->
+<div id="addAthleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border-radius:20px;padding:24px;max-width:400px;width:100%">
+    <h3 id="modalTeamName"></h3>
+    <div id="athleteSelectList" style="max-height:300px;overflow-y:auto;margin:12px 0"></div>
+    <button id="closeAddAthleteModalBtn" style="width:100%;padding:8px;border-radius:8px;background:var(--surface);border:1px solid var(--border2)">Chiudi</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ========== STATO GLOBALE ==========
+const App = {
+  theme: 'dark',
+  athletes: [],
+  teams: [],
+  selectedAthlete: null,
+  results: null,
+  currentTestType: 'vertical',
+  
+  // Salto verticale
+  v: {
+    testType: 'SV',
+    videoFile: null,
+    videoUrl: null,
+    takeoffTime: null,
+    landingTime: null,
+    hasMarkedTakeoff: false,
+    hasMarkedLanding: false,
+    zoomLevel: 100,
+    frameRate: 30
+  },
+  
+  // Salto in lungo
+  lj: {
+    videoFile: null,
+    videoUrl: null,
+    zoomLevel: 100,
+    frameRate: 30,
+    startX: null,
+    refX: null,
+    landingX: null,
+    realDistanceCm: null,
+    pixelsPerCm: null,
+    calibrated: false
+  }
+};
+
+// ========== PERSISTENZA ==========
+function saveToLocalStorage() {
+  // Salva solo tema e test (gli atleti vengono da Supabase)
+  // Manteniamo i test localmente come backup
+  localStorage.setItem('jump_data', JSON.stringify({
+    athletes: App.athletes, // backup test locali
+    theme: App.theme
+  }));
+}
+
+function loadFromLocalStorage() {
+  // Carica tema dal localStorage
+  const saved = localStorage.getItem('jump_data');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.theme) {
+        App.theme = data.theme;
+        document.documentElement.setAttribute('data-theme', App.theme === 'light' ? 'light' : '');
+        document.querySelector('.theme-knob').textContent = App.theme === 'dark' ? '🌙' : '☀️';
+      }
+    } catch(e) {}
+  }
+  // Atleti caricati da Supabase tramite _sbInit callback
+  // _sbLoadAthletes() viene chiamata da _sbInit().then(...)
+  // Se Supabase non disponibile, usa cache localStorage come fallback
+  const cachedFallback = localStorage.getItem('jump_data');
+  if (cachedFallback) {
+    try {
+      const d = JSON.parse(cachedFallback);
+      if (d.athletes && d.athletes.length) {
+        App.athletes = d.athletes;
+        updateAthleteSelects();
+        renderAthletesList();
+      }
+    } catch(e) {}
+  }
+}
+
+async function _sbLoadAthletes() {
+  if (window._sbGetAthletes && window._sbState && window._sbState.ready) {
+    try {
+      const sbAthletes = await window._sbGetAthletes();
+      if (sbAthletes && sbAthletes.length > 0) {
+        // Converti formato Supabase → formato App
+        // Preserva i test già presenti in localStorage per quell'atleta
+        const cached = localStorage.getItem('jump_data');
+        let localTests = {};
+        if (cached) {
+          try { 
+            const d = JSON.parse(cached);
+            (d.athletes||[]).forEach(a => { localTests[a.id] = a.tests || []; });
+          } catch(e) {}
+        }
+
+        App.athletes = sbAthletes.map(a => ({
+          id: a.id,
+          _sbId: a.id,
+          _fullName: a.full_name, // nome completo originale da Supabase
+          nome: a.full_name.split(' ').slice(1).join(' ') || a.full_name,
+          cognome: a.full_name.split(' ')[0] || '',
+          sport: a.position || '',
+          teamId: window._sbState.teamId,
+          tests: localTests[a.id] || []
+        }));
+
+        // Mostra badge squadra corrente
+        const teamName = window._sbState.allTeams
+          ? (window._sbState.allTeams.find(t => t.team_id === window._sbState.teamId)?.team_name || '')
+          : '';
+        const activeTeamName = window._sbState.activeTeamName || teamName;
+        _sbShowTeamBanner(activeTeamName, sbAthletes.length);
+
+        // Se multi-squadra, mostra selettore
+        if (window._sbState.allTeams && window._sbState.allTeams.length > 1) {
+          _sbShowTeamSwitcher();
+        }
+
+        console.log('[Jump] Atleti caricati da Supabase:', sbAthletes.length);
+      } else {
+        _sbShowTeamBanner('', 0);
+        console.log('[Jump] Nessun atleta su Supabase, usa + nella Dashboard per aggiungerne');
+      }
+    } catch(e) {
+      console.error('[Jump] Errore caricamento atleti:', e);
+    }
+  } else {
+    // Fallback: cache locale
+    const cached = localStorage.getItem('jump_data');
+    if (cached) {
+      try { 
+        const d = JSON.parse(cached);
+        App.athletes = d.athletes || [];
+      } catch(e) {}
+    }
+    console.warn('[Jump] Supabase non disponibile, uso cache locale');
+  }
+
+  updateAthleteSelects();
+  renderAthletesList();
+}
+
+function _sbShowTeamBanner(teamName, count) {
+  let banner = document.getElementById('_jump_team_banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = '_jump_team_banner';
+    banner.style.cssText = 'position:fixed;top:56px;left:0;right:0;z-index:999;background:rgba(0,229,255,0.08);border-bottom:1px solid rgba(0,229,255,0.2);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-family:monospace';
+    document.body.appendChild(banner);
+    // Sposta il contenuto principale sotto il banner
+    const main = document.querySelector('.app-container') || document.querySelector('main') || document.querySelector('.container');
+    if (main) main.style.paddingTop = '36px';
+  }
+  banner.innerHTML = teamName 
+    ? `<span style="color:#00e5ff">⚽ ${teamName}</span><span style="color:#4d6070">${count} atleti</span>`
+    : `<span style="color:#ff9100">⚠️ Nessuna squadra attiva — aggiungi atleti dalla Dashboard</span>`;
+}
+
+function _sbShowTeamSwitcher() {
+  const banner = document.getElementById('_jump_team_banner');
+  if (!banner || !window._sbState.allTeams) return;
+  const btn = document.createElement('button');
+  btn.textContent = '⇄ Cambia';
+  btn.style.cssText = 'background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:#00e5ff;padding:2px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:monospace';
+  btn.onclick = () => _sbShowTeamPicker();
+  banner.appendChild(btn);
+}
+
+function _sbShowTeamPicker() {
+  const teams = window._sbState.allTeams;
+  if (!teams) return;
+  const existing = document.getElementById('_jump_picker');
+  if (existing) { existing.remove(); return; }
+  const wrap = document.createElement('div');
+  wrap.id = '_jump_picker';
+  wrap.style.cssText = 'position:fixed;top:96px;left:50%;transform:translateX(-50%);z-index:9999;background:#0d1117;border:1px solid rgba(0,229,255,0.3);border-radius:12px;padding:16px;min-width:260px;box-shadow:0 20px 60px rgba(0,0,0,.7)';
+  wrap.innerHTML = '<div style="font-size:11px;color:#00e5ff;letter-spacing:2px;text-transform:uppercase;font-family:monospace;margin-bottom:10px">Seleziona Squadra</div>' +
+    teams.map(t => `<button onclick="_sbSwitchJumpTeam('${t.team_id}')" style="display:block;width:100%;text-align:left;padding:9px 12px;margin-bottom:5px;background:#131920;border:1px solid rgba(255,255,255,.07);border-radius:8px;color:#f0f4f8;font-size:13px;cursor:pointer">
+      <span style="color:#00e5ff;font-weight:700">${t.team_name}</span>
+      ${t.society_name ? `<span style="font-size:11px;color:#4d6070;margin-left:6px">${t.society_name}</span>` : ''}
+    </button>`).join('');
+  document.body.appendChild(wrap);
+  setTimeout(() => document.addEventListener('click', function h(e) {
+    if (!wrap.contains(e.target)) { wrap.remove(); document.removeEventListener('click', h); }
+  }), 100);
+}
+
+async function _sbSwitchJumpTeam(teamId) {
+  document.getElementById('_jump_picker')?.remove();
+  if (window._sbState) {
+    window._sbState.teamId = teamId;
+    const t = window._sbState.allTeams && window._sbState.allTeams.find(x=>x.team_id===teamId);
+    window._sbState.activeTeamName = t ? t.team_name : '';
+    // Salva in localStorage così SH2 e Jump rimangono sincronizzati
+    function _hashUUID(u){let h=0;for(let i=0;i<u.length;i++)h=(Math.imul(31,h)+u.charCodeAt(i))|0;return Math.abs(h)+800000;}
+    localStorage.setItem('teamStats_lastTeam', String(_hashUUID(teamId)));
+  }
+  await _sbLoadAthletes();
+}
+
+function updateAthleteSelects() {
+  const vSelect = document.getElementById('v-athleteSelect');
+  const ljSelect = document.getElementById('lj-athleteSelect');
+  const options = '<option value="">— Seleziona atleta —</option>' + 
+    App.athletes.map(a => {
+      // Usa _fullName se disponibile (da Supabase), altrimenti ricostruisce
+      const label = a._fullName || (a.cognome ? `${a.nome} ${a.cognome}` : a.nome) || '?';
+      const pos = a.sport && a.sport !== 'Calcio' ? ` · ${a.sport}` : '';
+      return `<option value="${a.id}">${label}${pos}</option>`;
+    }).join('');
+  if (vSelect) vSelect.innerHTML = options;
+  if (ljSelect) ljSelect.innerHTML = options;
+}
+
+function updateTeamSelect() {
+  const select = document.getElementById('athleteSquadra');
+  if (select) {
+    select.innerHTML = '<option value="">Nessuna squadra</option>' + App.teams.map(t => `<option value="${t.id}">🏆 ${t.name}</option>`).join('');
+  }
+}
+
+// ========== UI FUNZIONI COMUNI ==========
+function toggleTheme() {
+  App.theme = App.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', App.theme === 'light' ? 'light' : '');
+  document.querySelector('.theme-knob').textContent = App.theme === 'dark' ? '🌙' : '☀️';
+  saveToLocalStorage();
+}
+
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${pageId}`).classList.add('active');
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  const activeNav = document.querySelector(`.nav-pill[data-page="${pageId}"]`);
+  if (activeNav) activeNav.classList.add('active');
+  if (pageId === 'athletes') renderAthletesList();
+  if (pageId === 'teams') renderTeamsList();
+}
+
+function setVerticalTestType(type) {
+  App.v.testType = type;
+  document.querySelectorAll('#tt-pills .nav-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector(`#tt-pills .nav-pill[data-test="${type}"]`).classList.add('active');
+  document.querySelectorAll('.tt-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.tt-btn[data-test="${type}"]`).classList.add('active');
+}
+
+// ========== SALTO VERTICALE ==========
+function initVertical() {
+  const video = document.getElementById('v-previewVideo');
+  
+  // Zoom
+  const zoomSlider = document.getElementById('v-zoomSlider');
+  const zoomValue = document.getElementById('v-zoomValue');
+  const zoomInner = document.getElementById('v-videoZoomInner');
+  zoomSlider.addEventListener('input', () => {
+    App.v.zoomLevel = parseInt(zoomSlider.value);
+    zoomValue.textContent = App.v.zoomLevel + '%';
+    zoomInner.style.transform = `scale(${App.v.zoomLevel / 100})`;
+  });
+  document.getElementById('v-zoomInBtn').addEventListener('click', () => { zoomSlider.value = Math.min(300, App.v.zoomLevel + 10); zoomSlider.dispatchEvent(new Event('input')); });
+  document.getElementById('v-zoomOutBtn').addEventListener('click', () => { zoomSlider.value = Math.max(100, App.v.zoomLevel - 10); zoomSlider.dispatchEvent(new Event('input')); });
+  document.getElementById('v-resetZoomBtn').addEventListener('click', () => { zoomSlider.value = 100; zoomSlider.dispatchEvent(new Event('input')); });
+  
+  // Frame controls
+  document.getElementById('v-frameBackBtn').addEventListener('click', () => {
+    if (video.duration) { video.currentTime = Math.max(0, video.currentTime - 1/App.v.frameRate); video.pause(); }
+  });
+  document.getElementById('v-frameForwardBtn').addEventListener('click', () => {
+    if (video.duration) { video.currentTime = Math.min(video.duration, video.currentTime + 1/App.v.frameRate); video.pause(); }
+  });
+  document.getElementById('v-playPauseBtn').addEventListener('click', () => { video.paused ? video.play() : video.pause(); });
+  
+  // Marcatori
+  document.getElementById('v-markTakeoffBtn').addEventListener('click', () => {
+    if (!video.paused) { document.getElementById('v-statusMsg').innerHTML = '⏸️ Metti in pausa prima!'; return; }
+    App.v.takeoffTime = video.currentTime;
+    App.v.hasMarkedTakeoff = true;
+    document.getElementById('v-markTakeoffBtn').classList.add('done');
+    document.getElementById('v-markTakeoffBtn').innerHTML = '✅ DECOLLO SEGNATO';
+    document.getElementById('v-markLandingBtn').disabled = false;
+    document.getElementById('v-statusMsg').innerHTML = `🎯 Decollo: ${App.v.takeoffTime.toFixed(3)}s`;
+    document.getElementById('v-sv-markers').textContent = 'Decollo ✓';
+  });
+  
+  document.getElementById('v-markLandingBtn').addEventListener('click', () => {
+    if (!video.paused) { document.getElementById('v-statusMsg').innerHTML = '⏸️ Metti in pausa prima!'; return; }
+    if (!App.v.hasMarkedTakeoff) { document.getElementById('v-statusMsg').innerHTML = '⚠️ Segna prima il decollo!'; return; }
+    App.v.landingTime = video.currentTime;
+    App.v.hasMarkedLanding = true;
+    if (App.v.landingTime <= App.v.takeoffTime) { document.getElementById('v-statusMsg').innerHTML = '⚠️ Atterraggio dopo il decollo!'; return; }
+    document.getElementById('v-markLandingBtn').classList.add('done');
+    document.getElementById('v-markLandingBtn').innerHTML = '✅ ATTERRAGGIO SEGNATO';
+    document.getElementById('v-statusMsg').innerHTML = `🎯 Atterraggio: ${App.v.landingTime.toFixed(3)}s`;
+    document.getElementById('v-sv-markers').textContent = 'Completo ✓';
+  });
+  
+  document.getElementById('v-resetMarkersBtn').addEventListener('click', () => {
+    App.v.takeoffTime = null;
+    App.v.landingTime = null;
+    App.v.hasMarkedTakeoff = false;
+    App.v.hasMarkedLanding = false;
+    document.getElementById('v-markTakeoffBtn').classList.remove('done');
+    document.getElementById('v-markLandingBtn').classList.remove('done');
+    document.getElementById('v-markTakeoffBtn').innerHTML = '🦶 Segna DECOLLO';
+    document.getElementById('v-markLandingBtn').innerHTML = '🏁 Segna ATTERRAGGIO';
+    document.getElementById('v-markLandingBtn').disabled = true;
+    document.getElementById('v-statusMsg').innerHTML = 'Marcatori resettati';
+    document.getElementById('v-sv-markers').textContent = '';
+  });
+  
+  document.getElementById('v-resetVideoBtn').addEventListener('click', () => {
+    if (App.v.videoUrl) URL.revokeObjectURL(App.v.videoUrl);
+    App.v.videoFile = null;
+    App.v.videoUrl = null;
+    document.getElementById('v-dropzone').classList.remove('has-video');
+    video.src = '';
+    document.getElementById('v-analyzeBtn').disabled = true;
+    document.getElementById('v-sv-video').textContent = '';
+  });
+  
+  // Carica video
+  document.getElementById('v-dropzoneClickArea').addEventListener('click', () => document.getElementById('v-fileInput').click());
+  document.getElementById('v-fileInput').addEventListener('change', (e) => {
+    if (e.target.files[0]) loadVerticalVideo(e.target.files[0]);
+  });
+  
+  // Drag & drop
+  const dropzone = document.getElementById('v-dropzone');
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragging'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragging'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragging');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('video/')) loadVerticalVideo(f);
+  });
+  
+  // Analisi
+  document.getElementById('v-analyzeBtn').addEventListener('click', startVerticalAnalysis);
+}
+
+function loadVerticalVideo(file) {
+  if (App.v.videoUrl) URL.revokeObjectURL(App.v.videoUrl);
+  App.v.videoFile = file;
+  App.v.videoUrl = URL.createObjectURL(file);
+  const video = document.getElementById('v-previewVideo');
+  video.src = App.v.videoUrl;
+  
+  document.getElementById('v-dropzone').classList.add('has-video');
+  document.getElementById('v-videoMeta').innerHTML = file.name;
+  document.getElementById('v-analyzeBtn').disabled = false;
+  document.getElementById('v-sv-video').textContent = file.name.substring(0, 20);
+  
+  video.addEventListener('loadedmetadata', () => {
+    App.v.frameRate = 30;
+    document.getElementById('v-frameBackBtn').disabled = false;
+    document.getElementById('v-frameForwardBtn').disabled = false;
+    document.getElementById('v-playPauseBtn').disabled = false;
+    document.getElementById('v-markTakeoffBtn').disabled = false;
+    document.getElementById('v-resetMarkersBtn').disabled = false;
+  });
+  
+  video.addEventListener('timeupdate', () => {
+    document.getElementById('v-statusMsg').innerHTML = `⏱️ Tempo: ${video.currentTime.toFixed(2)}s`;
+  });
+}
+
+async function startVerticalAnalysis() {
+  if (!App.v.videoFile) return;
+  if (!App.v.hasMarkedTakeoff || !App.v.hasMarkedLanding) {
+    alert('⚠️ Devi segnare DECOLLO e ATTERRAGGIO!');
+    return;
+  }
+  
+  showPage('analyzing');
+  addLog('Avvio analisi verticale', true);
+  setProgress(10, 'Calcolo altezza...');
+  await sleep(500);
+  
+  const flightTime = App.v.landingTime - App.v.takeoffTime;
+  const heightCm = 0.5 * 9.81 * Math.pow(flightTime / 2, 2) * 100;
+  const takeoffSpeed = 9.81 * flightTime / 2;
+  
+  addLog(`Tempo di volo: ${flightTime.toFixed(3)} s`, true);
+  addLog(`Altezza: ${heightCm.toFixed(1)} cm`, true);
+  setProgress(100, 'Completato!');
+  await sleep(500);
+  
+  const results = {
+    id: Date.now().toString(),
+    testType: App.v.testType,
+    isLongJump: false,
+    avgHeightCm: Math.round(heightCm * 10) / 10,
+    bestHeightCm: Math.round(heightCm * 10) / 10,
+    flightTime: flightTime,
+    takeoffSpeed: takeoffSpeed.toFixed(2),
+    athleteName: App.selectedAthlete ? `${App.selectedAthlete.nome} ${App.selectedAthlete.cognome}` : 'Atleta',
+    date: new Date(),
+    insights: []
+  };
+  
+  if (heightCm >= 40) results.insights.push({ t: 'success', i: '🏆', tx: `Eccellente! ${heightCm.toFixed(0)} cm` });
+  else if (heightCm >= 35) results.insights.push({ t: 'success', i: '✅', tx: `Ottimo salto! ${heightCm.toFixed(0)} cm` });
+  else if (heightCm >= 28) results.insights.push({ t: 'info', i: '📊', tx: `Buon salto! ${heightCm.toFixed(0)} cm` });
+  else results.insights.push({ t: 'warning', i: '⚠️', tx: `Salto: ${heightCm.toFixed(0)} cm. Lavora sulla forza esplosiva.` });
+  
+  if (App.selectedAthlete) {
+    if (!App.selectedAthlete.tests) App.selectedAthlete.tests = [];
+    App.selectedAthlete.tests.push(results);
+    saveToLocalStorage();
+    // ── SUPABASE SYNC ──
+    const _jSbId = App.selectedAthlete._sbId || App.selectedAthlete.id;
+    if (window._sbSaveJumpTest && _jSbId) {
+      window._sbSaveJumpTest(_jSbId, {
+        testType: results.testType, isLongJump: results.isLongJump || false,
+        avgHeightCm: results.avgHeightCm, bestHeightCm: results.bestHeightCm,
+        flightTime: results.flightTime, takeoffSpeed: results.takeoffSpeed,
+        distanceCm: results.distanceCm || null
+      });
+    }
+  }
+  
+  App.results = results;
+  renderResults(results);
+  showPage('results');
+}
+
+// ========== SALTO IN LUNGO ==========
+function initLongJump() {
+  const video = document.getElementById('lj-previewVideo');
+  const zoomInner = document.getElementById('lj-videoZoomInner');
+  
+  // Zoom
+  const zoomSlider = document.getElementById('lj-zoomSlider');
+  const zoomValue = document.getElementById('lj-zoomValue');
+  zoomSlider.addEventListener('input', () => {
+    App.lj.zoomLevel = parseInt(zoomSlider.value);
+    zoomValue.textContent = App.lj.zoomLevel + '%';
+    zoomInner.style.transform = `scale(${App.lj.zoomLevel / 100})`;
+    updateLjHandlesPosition();
+  });
+  document.getElementById('lj-zoomInBtn').addEventListener('click', () => { zoomSlider.value = Math.min(300, App.lj.zoomLevel + 10); zoomSlider.dispatchEvent(new Event('input')); });
+  document.getElementById('lj-zoomOutBtn').addEventListener('click', () => { zoomSlider.value = Math.max(100, App.lj.zoomLevel - 10); zoomSlider.dispatchEvent(new Event('input')); });
+  document.getElementById('lj-resetZoomBtn').addEventListener('click', () => { zoomSlider.value = 100; zoomSlider.dispatchEvent(new Event('input')); });
+  
+  // Frame controls
+  document.getElementById('lj-frameBackBtn').addEventListener('click', () => {
+    if (video.duration) { video.currentTime = Math.max(0, video.currentTime - 1/App.lj.frameRate); video.pause(); }
+  });
+  document.getElementById('lj-frameForwardBtn').addEventListener('click', () => {
+    if (video.duration) { video.currentTime = Math.min(video.duration, video.currentTime + 1/App.lj.frameRate); video.pause(); }
+  });
+  document.getElementById('lj-playPauseBtn').addEventListener('click', () => { video.paused ? video.play() : video.pause(); });
+  
+  // Reset video
+  document.getElementById('lj-resetVideoBtn').addEventListener('click', () => {
+    if (App.lj.videoUrl) URL.revokeObjectURL(App.lj.videoUrl);
+    App.lj.videoFile = null;
+    App.lj.videoUrl = null;
+    document.getElementById('lj-dropzone').classList.remove('has-video');
+    video.src = '';
+    document.getElementById('lj-analyzeBtn').disabled = true;
+    document.getElementById('lj-sv-video').textContent = '';
+    resetLjLines();
+  });
+  
+  // Carica video
+  document.getElementById('lj-dropzoneClickArea').addEventListener('click', () => document.getElementById('lj-fileInput').click());
+  document.getElementById('lj-fileInput').addEventListener('change', (e) => {
+    if (e.target.files[0]) loadLongJumpVideo(e.target.files[0]);
+  });
+  
+  // Drag & drop
+  const dropzone = document.getElementById('lj-dropzone');
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragging'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragging'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragging');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('video/')) loadLongJumpVideo(f);
+  });
+  
+  // Pulsanti LJ
+  document.getElementById('lj-activateLinesBtn').addEventListener('click', activateLjLines);
+  document.getElementById('lj-setDistanceBtn').addEventListener('click', setLjRealDistance);
+  document.getElementById('lj-resetLinesBtn').addEventListener('click', resetLjLines);
+  document.getElementById('lj-analyzeBtn').addEventListener('click', startLongJumpAnalysis);
+  
+  // Drag handles
+  initLjDragHandles();
+}
+
+function loadLongJumpVideo(file) {
+  if (App.lj.videoUrl) URL.revokeObjectURL(App.lj.videoUrl);
+  App.lj.videoFile = file;
+  App.lj.videoUrl = URL.createObjectURL(file);
+  const video = document.getElementById('lj-previewVideo');
+  video.src = App.lj.videoUrl;
+  
+  document.getElementById('lj-dropzone').classList.add('has-video');
+  document.getElementById('lj-videoMeta').innerHTML = file.name;
+  document.getElementById('lj-analyzeBtn').disabled = false;
+  document.getElementById('lj-sv-video').textContent = file.name.substring(0, 20);
+  
+  video.addEventListener('loadedmetadata', () => {
+    App.lj.frameRate = 30;
+    document.getElementById('lj-frameBackBtn').disabled = false;
+    document.getElementById('lj-frameForwardBtn').disabled = false;
+    document.getElementById('lj-playPauseBtn').disabled = false;
+    document.getElementById('lj-activateLinesBtn').disabled = false;
+    const canvas = document.getElementById('lj-videoOverlay');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    drawLjOverlay();
+  });
+  
+  video.addEventListener('timeupdate', () => {
+    document.getElementById('lj-statusMsg').innerHTML = `⏱️ Tempo: ${video.currentTime.toFixed(2)}s`;
+  });
+  
+  resetLjLines();
+}
+
+function resetLjLines() {
+  App.lj.startX = null;
+  App.lj.refX = null;
+  App.lj.landingX = null;
+  App.lj.realDistanceCm = null;
+  App.lj.pixelsPerCm = null;
+  App.lj.calibrated = false;
+  document.getElementById('lj-startHandle').style.display = 'none';
+  document.getElementById('lj-refHandle').style.display = 'none';
+  document.getElementById('lj-landingHandle').style.display = 'none';
+  document.getElementById('lj-calibrationInfo').style.display = 'none';
+  document.getElementById('lj-setDistanceBtn').disabled = true;
+  document.getElementById('lj-resetLinesBtn').disabled = true;
+  document.getElementById('lj-sv-lines').textContent = '';
+  drawLjOverlay();
+}
+
+function activateLjLines() {
+  const video = document.getElementById('lj-previewVideo');
+  if (!video.videoWidth) return;
+  
+  const defaultStart = video.videoWidth * 0.2;
+  const defaultRef = video.videoWidth * 0.5;
+  const defaultLanding = video.videoWidth * 0.8;
+  
+  App.lj.startX = defaultStart;
+  App.lj.refX = defaultRef;
+  App.lj.landingX = defaultLanding;
+  
+  const wrapper = document.getElementById('lj-videoZoomWrapper');
+  const rect = wrapper.getBoundingClientRect();
+  const scale = video.videoWidth / rect.width;
+  
+  const startHandle = document.getElementById('lj-startHandle');
+  const refHandle = document.getElementById('lj-refHandle');
+  const landingHandle = document.getElementById('lj-landingHandle');
+  
+  startHandle.style.display = 'block';
+  refHandle.style.display = 'block';
+  landingHandle.style.display = 'block';
+  
+  startHandle.style.left = (defaultStart / scale) + 'px';
+  refHandle.style.left = (defaultRef / scale) + 'px';
+  landingHandle.style.left = (defaultLanding / scale) + 'px';
+  startHandle.style.top = '50%';
+  refHandle.style.top = '50%';
+  landingHandle.style.top = '50%';
+  
+  document.getElementById('lj-setDistanceBtn').disabled = false;
+  document.getElementById('lj-resetLinesBtn').disabled = false;
+  document.getElementById('lj-statusMsg').innerHTML = '🟢 Linee attive! Trascina le maniglie per posizionarle.';
+  document.getElementById('lj-sv-lines').textContent = 'Linee posizionate';
+  drawLjOverlay();
+}
+
+function initLjDragHandles() {
+  const startHandle = document.getElementById('lj-startHandle');
+  const refHandle = document.getElementById('lj-refHandle');
+  const landingHandle = document.getElementById('lj-landingHandle');
+  const video = document.getElementById('lj-previewVideo');
+  const wrapper = document.getElementById('lj-videoZoomWrapper');
+  
+  function makeDraggable(handle, onDrag) {
+    let isDragging = false;
+    let startMouseX = 0;
+    let startHandleLeft = 0;
+    
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      isDragging = true;
+      startMouseX = e.clientX;
+      startHandleLeft = parseFloat(handle.style.left) || 0;
+      handle.style.cursor = 'grabbing';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const rect = wrapper.getBoundingClientRect();
+      let newLeft = startHandleLeft + (e.clientX - startMouseX);
+      newLeft = Math.max(0, Math.min(rect.width, newLeft));
+      handle.style.left = newLeft + 'px';
+      const videoRect = video.getBoundingClientRect();
+      const scaleX = video.videoWidth / videoRect.width;
+      const x = newLeft * scaleX;
+      onDrag(x);
+      drawLjOverlay();
+    });
+    
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        handle.style.cursor = 'grab';
+        updateLjCalibrationInfo();
+      }
+    });
+  }
+  
+  makeDraggable(startHandle, (x) => { App.lj.startX = x; drawLjOverlay(); });
+  makeDraggable(refHandle, (x) => { App.lj.refX = x; drawLjOverlay(); });
+  makeDraggable(landingHandle, (x) => { App.lj.landingX = x; drawLjOverlay(); });
+}
+
+function updateLjHandlesPosition() {
+  const video = document.getElementById('lj-previewVideo');
+  if (!video.videoWidth) return;
+  const wrapper = document.getElementById('lj-videoZoomWrapper');
+  const rect = wrapper.getBoundingClientRect();
+  const scale = video.videoWidth / rect.width;
+  
+  const startHandle = document.getElementById('lj-startHandle');
+  const refHandle = document.getElementById('lj-refHandle');
+  const landingHandle = document.getElementById('lj-landingHandle');
+  
+  if (App.lj.startX !== null && startHandle.style.display !== 'none') {
+    startHandle.style.left = (App.lj.startX / scale) + 'px';
+  }
+  if (App.lj.refX !== null && refHandle.style.display !== 'none') {
+    refHandle.style.left = (App.lj.refX / scale) + 'px';
+  }
+  if (App.lj.landingX !== null && landingHandle.style.display !== 'none') {
+    landingHandle.style.left = (App.lj.landingX / scale) + 'px';
+  }
+}
+
+function drawLjOverlay() {
+  const canvas = document.getElementById('lj-videoOverlay');
+  const video = document.getElementById('lj-previewVideo');
+  if (!video.videoWidth) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Linea START (azzurra)
+  if (App.lj.startX !== null) {
+    ctx.beginPath();
+    ctx.moveTo(App.lj.startX, 0);
+    ctx.lineTo(App.lj.startX, canvas.height);
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    ctx.stroke();
+    ctx.fillStyle = '#00e5ff';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText('🔵 STACCO', App.lj.startX + 5, 25);
+  }
+  
+  // Linea RIFERIMENTO (arancione)
+  if (App.lj.refX !== null) {
+    ctx.beginPath();
+    ctx.moveTo(App.lj.refX, 0);
+    ctx.lineTo(App.lj.refX, canvas.height);
+    ctx.strokeStyle = '#ffb300';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    ctx.stroke();
+    ctx.fillStyle = '#ffb300';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText('🟠 RIFERIMENTO', App.lj.refX + 5, 50);
+  }
+  
+  // Linea ATTERRAGGIO (verde)
+  if (App.lj.landingX !== null) {
+    ctx.beginPath();
+    ctx.moveTo(App.lj.landingX, 0);
+    ctx.lineTo(App.lj.landingX, canvas.height);
+    ctx.strokeStyle = '#00e676';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    ctx.stroke();
+    ctx.fillStyle = '#00e676';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText('🟢 ATTERRAGGIO', App.lj.landingX + 5, 75);
+  }
+  ctx.setLineDash([]);
+  
+  // Linea tratteggiata dalla START all'ATTERRAGGIO
+  if (App.lj.startX !== null && App.lj.landingX !== null) {
+    ctx.beginPath();
+    ctx.moveTo(App.lj.startX, canvas.height * 0.85);
+    ctx.lineTo(App.lj.landingX, canvas.height * 0.85);
+    ctx.strokeStyle = '#ff5252';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function setLjRealDistance() {
+  if (App.lj.startX === null || App.lj.refX === null) {
+    alert('Posiziona prima le linee STACCO e RIFERIMENTO');
+    return;
+  }
+  const distance = prompt('Inserisci la distanza reale tra STACCO e RIFERIMENTO (in cm):\nEsempio: 500 = 5 metri', '500');
+  if (distance && !isNaN(distance)) {
+    App.lj.realDistanceCm = parseFloat(distance);
+    const pixelDist = Math.abs(App.lj.refX - App.lj.startX);
+    App.lj.pixelsPerCm = pixelDist / App.lj.realDistanceCm;
+    App.lj.calibrated = true;
+    document.getElementById('lj-calibrationInfo').innerHTML = `✅ Calibrato: ${App.lj.realDistanceCm} cm = ${Math.round(pixelDist)} px · ${App.lj.pixelsPerCm.toFixed(2)} px/cm`;
+    document.getElementById('lj-calibrationInfo').style.display = 'block';
+    document.getElementById('lj-statusMsg').innerHTML = `✅ Calibrazione completata! Ora posiziona la linea VERDE (atterraggio)`;
+    document.getElementById('lj-sv-lines').textContent = `Calibrato ${App.lj.realDistanceCm}cm`;
+  }
+}
+
+function updateLjCalibrationInfo() {
+  if (App.lj.startX !== null && App.lj.refX !== null && App.lj.realDistanceCm) {
+    const pixelDist = Math.abs(App.lj.refX - App.lj.startX);
+    App.lj.pixelsPerCm = pixelDist / App.lj.realDistanceCm;
+    document.getElementById('lj-calibrationInfo').innerHTML = `✅ Calibrato: ${App.lj.realDistanceCm} cm = ${Math.round(pixelDist)} px · ${App.lj.pixelsPerCm.toFixed(2)} px/cm`;
+  } else if (App.lj.startX !== null && App.lj.refX !== null) {
+    const pixelDist = Math.abs(App.lj.refX - App.lj.startX);
+    document.getElementById('lj-calibrationInfo').innerHTML = `⚠️ Distanza in pixel: ${Math.round(pixelDist)} px. Imposta la distanza reale.`;
+    document.getElementById('lj-calibrationInfo').style.display = 'block';
+  }
+}
+
+async function startLongJumpAnalysis() {
+  if (!App.lj.videoFile) return;
+  if (App.lj.startX === null || App.lj.refX === null) {
+    alert('⚠️ Attiva le linee di calibrazione!');
+    return;
+  }
+  if (!App.lj.calibrated) {
+    alert('⚠️ Imposta la distanza reale tra STACCO e RIFERIMENTO!');
+    return;
+  }
+  if (App.lj.landingX === null) {
+    alert('⚠️ Posiziona la linea VERDE (atterraggio) sul punto di caduta!');
+    return;
+  }
+  
+  showPage('analyzing');
+  addLog('Avvio analisi Salto in Lungo', true);
+  setProgress(10, 'Calcolo distanza...');
+  await sleep(500);
+  
+  const pixelDistance = Math.abs(App.lj.landingX - App.lj.startX);
+  const distanceCm = pixelDistance / App.lj.pixelsPerCm;
+  const distanceM = distanceCm / 100;
+  
+  addLog(`Distanza misurata: ${distanceCm.toFixed(0)} cm (${distanceM.toFixed(2)} m)`, true);
+  setProgress(100, 'Completato!');
+  await sleep(500);
+  
+  const results = {
+    id: Date.now().toString(),
+    testType: 'LJ',
+    isLongJump: true,
+    distanceCm: distanceCm,
+    distanceM: distanceM,
+    calibrated: App.lj.realDistanceCm,
+    athleteName: App.selectedAthlete ? `${App.selectedAthlete.nome} ${App.selectedAthlete.cognome}` : 'Atleta',
+    date: new Date(),
+    insights: []
+  };
+  
+  if (distanceCm >= 500) results.insights.push({ t: 'success', i: '🏆', tx: `Eccellente salto! ${distanceM.toFixed(2)} m` });
+  else if (distanceCm >= 400) results.insights.push({ t: 'success', i: '✅', tx: `Ottimo salto! ${distanceM.toFixed(2)} m` });
+  else if (distanceCm >= 300) results.insights.push({ t: 'info', i: '📊', tx: `Buon salto! ${distanceM.toFixed(2)} m` });
+  else results.insights.push({ t: 'warning', i: '⚠️', tx: `Salto da migliorare.` });
+  
+  if (App.selectedAthlete) {
+    if (!App.selectedAthlete.tests) App.selectedAthlete.tests = [];
+    App.selectedAthlete.tests.push(results);
+    saveToLocalStorage();
+    // ── SUPABASE SYNC ──
+    const _jSbId = App.selectedAthlete._sbId || App.selectedAthlete.id;
+    if (window._sbSaveJumpTest && _jSbId) {
+      window._sbSaveJumpTest(_jSbId, {
+        testType: results.testType, isLongJump: results.isLongJump || false,
+        avgHeightCm: results.avgHeightCm, bestHeightCm: results.bestHeightCm,
+        flightTime: results.flightTime, takeoffSpeed: results.takeoffSpeed,
+        distanceCm: results.distanceCm || null
+      });
+    }
+  }
+  
+  App.results = results;
+  renderResults(results);
+  showPage('results');
+}
+
+// ========== FUNZIONI DI RENDERING RISULTATI ==========
+function renderResults(r) {
+  if (r.isLongJump) {
+    document.getElementById('resTitle').innerHTML = `${r.athleteName} — Salto in Lungo`;
+    document.getElementById('resSub').innerHTML = new Date(r.date).toLocaleDateString();
+    document.getElementById('kpiGrid').innerHTML = `
+      <div class="kpi-card gold"><div class="kpi-label">Distanza</div><div class="kpi-value">${r.distanceM.toFixed(2)}</div><div class="kpi-unit">metri</div></div>
+      <div class="kpi-card"><div class="kpi-label">Distanza</div><div class="kpi-value">${r.distanceCm.toFixed(0)}</div><div class="kpi-unit">cm</div></div>
+      <div class="kpi-card"><div class="kpi-label">Riferimento</div><div class="kpi-value">${r.calibrated}</div><div class="kpi-unit">cm</div></div>`;
+    document.getElementById('detailsCard').innerHTML = `
+      <p>🔵 STACCO X: ${App.lj.startX.toFixed(0)} px</p>
+      <p>🟢 ATTERRAGGIO X: ${App.lj.landingX.toFixed(0)} px</p>
+      <p>📏 Distanza in pixel: ${Math.abs(App.lj.landingX - App.lj.startX).toFixed(0)} px</p>
+      <p>📐 Calibrazione: ${r.calibrated} cm = ${Math.abs(App.lj.refX - App.lj.startX).toFixed(0)} px</p>
+      <p style="font-size:20px;font-weight:bold;margin-top:16px">${r.distanceM.toFixed(2)} metri (${r.distanceCm.toFixed(0)} cm)</p>
+      <p>${r.insights[0]?.tx || ''}</p>`;
+    document.getElementById('dataCard').innerHTML = `<table style="width:100%"><thead><th>Parametro</th><th>Valore</th></thead><tbody>
+      <tr><td>Distanza</td><td>${r.distanceM.toFixed(2)} m (${r.distanceCm.toFixed(0)} cm)</td></tr>
+      <tr><td>Calibrazione</td><td>${r.calibrated} cm</td></tr>
+    </tbody></table>`;
+  } else {
+    document.getElementById('resTitle').innerHTML = `${r.athleteName} — ${r.testType}`;
+    document.getElementById('resSub').innerHTML = new Date(r.date).toLocaleDateString();
+    document.getElementById('kpiGrid').innerHTML = `
+      <div class="kpi-card"><div class="kpi-label">Altezza</div><div class="kpi-value">${r.avgHeightCm}</div><div class="kpi-unit">cm</div></div>
+      <div class="kpi-card"><div class="kpi-label">Tempo volo</div><div class="kpi-value">${(r.flightTime*1000).toFixed(0)}</div><div class="kpi-unit">ms</div></div>
+      <div class="kpi-card"><div class="kpi-label">Velocità stacco</div><div class="kpi-value">${r.takeoffSpeed}</div><div class="kpi-unit">m/s</div></div>`;
+    document.getElementById('detailsCard').innerHTML = `<p>Decollo: ${App.v.takeoffTime.toFixed(3)} s</p><p>Atterraggio: ${App.v.landingTime.toFixed(3)} s</p><p>${r.insights[0]?.tx || ''}</p>`;
+    document.getElementById('dataCard').innerHTML = `<table style="width:100%"><thead><th>Parametro</th><th>Valore</th></thead><tbody>
+      <tr><td>Tempo volo</td><td>${(r.flightTime*1000).toFixed(0)} ms</td></tr>
+      <tr><td>Altezza</td><td>${r.avgHeightCm} cm</td></tr>
+      <tr><td>Velocità stacco</td><td>${r.takeoffSpeed} m/s</td></tr>
+    </tbody></table>`;
+  }
+}
+
+// ========== FUNZIONI COMUNI ==========
+function addLog(msg, ok) {
+  const b = document.getElementById('logBox');
+  if (!b) return;
+  const d = document.createElement('div');
+  d.innerHTML = `<span style="color:var(--muted2)">${new Date().toLocaleTimeString()}</span> <span style="color:${ok ? 'var(--accent)' : 'var(--muted)'}">${msg}</span>`;
+  b.appendChild(d);
+  b.scrollTop = b.scrollHeight;
+}
+
+function setProgress(pct, msg) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepMsg').textContent = msg;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('tab-overview').style.display = tab === 'overview' ? 'block' : 'none';
+  document.getElementById('tab-data').style.display = tab === 'data' ? 'block' : 'none';
+}
+
+function newTest() {
+  App.results = null;
+  showPage('analysis');
+  if (App.v.videoFile) {
+    if (App.v.videoUrl) URL.revokeObjectURL(App.v.videoUrl);
+    App.v.videoFile = null;
+    App.v.videoUrl = null;
+    document.getElementById('v-dropzone').classList.remove('has-video');
+    document.getElementById('v-previewVideo').src = '';
+  }
+  if (App.lj.videoFile) {
+    if (App.lj.videoUrl) URL.revokeObjectURL(App.lj.videoUrl);
+    App.lj.videoFile = null;
+    App.lj.videoUrl = null;
+    document.getElementById('lj-dropzone').classList.remove('has-video');
+    document.getElementById('lj-previewVideo').src = '';
+  }
+}
+
+function exportCSV() {
+  if (!App.results) return;
+  const r = App.results;
+  let csv = '';
+  if (r.isLongJump) {
+    csv = `Tipo,Salto in Lungo\nData,${new Date(r.date).toLocaleString()}\nDistanza cm,${r.distanceCm.toFixed(0)}\nDistanza m,${r.distanceM.toFixed(2)}`;
+  } else {
+    csv = `Tipo,${r.testType}\nData,${new Date(r.date).toLocaleString()}\nAltezza cm,${r.avgHeightCm}\nTempo volo ms,${(r.flightTime*1000).toFixed(0)}`;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = `jump_${r.testType}_${r.date.toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function exportPDF() {
+  if (!App.results) return;
+  const r = App.results;
+  const html = `<html><body style="font-family:Helvetica;padding:32px">
+    <h1>Jump Report</h1>
+    <p><strong>${r.athleteName}</strong> - ${r.isLongJump ? 'Salto in Lungo' : r.testType}<br>Data: ${new Date(r.date).toLocaleDateString()}</p>
+    <h2>${r.isLongJump ? `Distanza: ${r.distanceM.toFixed(2)} m` : `Altezza: ${r.avgHeightCm} cm`}</h2>
+    <p>${r.insights[0]?.tx || 'Analisi completata'}</p>
+    </body></html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+// ========== ATLETI ==========
+function onAthleteSelect(source) {
+  const select = document.getElementById(`${source}-athleteSelect`);
+  const id = select.value;
+  App.selectedAthlete = App.athletes.find(a => a.id === id) || null;
+  
+  const chip = document.getElementById(`${source}-athleteChip`);
+  const stepSpan = document.getElementById(`${source}-sv-athlete`);
+  if (App.selectedAthlete) {
+    chip.style.display = 'flex';
+    chip.innerHTML = `<span>🏅 ${App.selectedAthlete.sport || 'Sport'}</span><span>📊 ${App.selectedAthlete.tests?.length || 0} test</span>`;
+    stepSpan.textContent = `${App.selectedAthlete.nome} ${App.selectedAthlete.cognome}`;
+    document.getElementById(`${source}-step-athlete`).classList.add('done');
+  } else {
+    chip.style.display = 'none';
+    stepSpan.textContent = '';
+    document.getElementById(`${source}-step-athlete`).classList.remove('done');
+  }
+}
+
+function saveAthlete() {
+  const nome = document.getElementById('athleteNome').value.trim();
+  const cognome = document.getElementById('athleteCognome').value.trim();
+  if (!nome || !cognome) { alert('Nome e cognome obbligatori'); return; }
+  const a = {
+    id: Date.now().toString(),
+    nome, cognome,
+    sport: document.getElementById('athleteSport').value,
+    teamId: document.getElementById('athleteSquadra').value || null,
+    tests: []
+  };
+  App.athletes.push(a);
+  saveToLocalStorage();
+  updateAthleteSelects();
+  showPage('analysis');
+}
+
+function renderAthletesList() {
+  const el = document.getElementById('athletesList');
+  if (!App.athletes.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-secondary)">
+      <div style="font-size:48px;margin-bottom:12px">👥</div>
+      <p style="font-weight:600;margin-bottom:6px">Nessun atleta nella squadra</p>
+      <p style="font-size:13px;opacity:0.6">Aggiungi atleti dalla Dashboard allenatore</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = '<div class="athlete-grid">' + App.athletes.map(a => {
+    const best = a.tests.length ? Math.max(...a.tests.map(t => t.bestHeightCm || t.distanceCm || 0)) : 0;
+    const initials = ((a._fullName || (a.cognome + ' ' + a.nome)).trim().split(' ').map(w=>w[0]||'').join('').toUpperCase()).slice(0,2);
+    const displayName = a._fullName || (a.nome + ' ' + a.cognome);
+    const pos = a.sport || '';
+    return `<div class="ath-card" data-id="${a.id}">
+      <div class="ath-card-hdr">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="ath-avatar">${initials}</div>
+          <div>
+            <div class="ath-name" style="margin-bottom:2px">${displayName}</div>
+            ${pos ? `<div style="font-size:11px;opacity:0.6;letter-spacing:1px;text-transform:uppercase">${pos}</div>` : ''}
+          </div>
+        </div>
+        <span class="ath-badge" style="${a.tests.length > 0 ? 'background:var(--accent);color:#fff' : ''}">${a.tests.length} test</span>
+      </div>
+      <div class="ath-stats">
+        <div><div class="as-val" style="${best > 0 ? 'color:var(--accent)' : ''}">${best > 0 ? (best < 100 ? best.toFixed(1) + 'cm' : (best/100).toFixed(2) + 'm') : '—'}</div><div class="as-lbl">Best Jump</div></div>
+        <div><div class="as-val">${a.tests.length}</div><div class="as-lbl">Sessioni</div></div>
+      </div>
+      ${a.tests.length > 0 ? `<div style="margin-top:10px;font-size:11px;opacity:0.5">Ultimo: ${new Date(a.tests[a.tests.length-1]?.date||Date.now()).toLocaleDateString('it-IT')}</div>` : ''}
+    </div>`;
+  }).join('') + '</div>';
+  
+  document.querySelectorAll('.ath-card').forEach(card => {
+    card.addEventListener('click', () => showAthDetail(card.dataset.id));
+  });
+}
+
+function showAthDetail(id) {
+  const a = App.athletes.find(x => x.id === id);
+  if (!a) return;
+  const best = a.tests.length ? Math.max(...a.tests.map(t => t.bestHeightCm || t.distanceCm || 0)) : 0;
+  const bestTest = a.tests.length ? a.tests.reduce((b,t) => ((t.bestHeightCm||t.distanceCm||0) > (b.bestHeightCm||b.distanceCm||0)) ? t : b) : null;
+  const displayName = a._fullName || ((a.nome || '') + ' ' + (a.cognome || '')).trim();
+  const initials = displayName.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+  const teamName = window._sbState?.activeTeamName || '';
+
+  let historyHtml = '';
+  if (a.tests.length) {
+    historyHtml = a.tests.slice().reverse().map(t => `
+      <div class="test-session-card" style="background:var(--surface2);border-radius:10px;padding:12px 16px;margin-bottom:8px">
+        <div class="test-session-header" onclick="this.nextElementSibling.classList.toggle('hidden')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-weight:700;font-size:13px">${t.testType || 'SV'}</span>
+            <span style="font-size:11px;opacity:0.5">${new Date(t.date).toLocaleDateString('it-IT')}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:monospace;font-weight:700;color:var(--accent)">
+              ${t.isLongJump ? ((t.distanceCm/100)||0).toFixed(2)+'m' : (t.bestHeightCm||t.avgHeightCm||0).toFixed(1)+'cm'}
+            </span>
+            <button class="delete-session-btn" data-athlete="${a.id}" data-session="${t.id}" style="background:none;border:none;cursor:pointer;opacity:0.5;font-size:14px">🗑️</button>
+          </div>
+        </div>
+        <div class="session-details hidden" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px">
+          ${t.isLongJump ? 
+            `<div><span style="opacity:0.5">Distanza</span><br><b>${((t.distanceCm||0)/100).toFixed(2)} m</b></div>
+             <div><span style="opacity:0.5">cm</span><br><b>${(t.distanceCm||0).toFixed(0)}</b></div>` :
+            `<div><span style="opacity:0.5">Altezza media</span><br><b>${t.avgHeightCm||'—'} cm</b></div>
+             <div><span style="opacity:0.5">Miglior salto</span><br><b>${t.bestHeightCm||'—'} cm</b></div>
+             <div><span style="opacity:0.5">T. volo</span><br><b>${t.flightTime ? (t.flightTime*1000).toFixed(0)+' ms' : '—'}</b></div>
+             <div><span style="opacity:0.5">Vel. decollo</span><br><b>${t.takeoffSpeed ? parseFloat(t.takeoffSpeed).toFixed(2)+' m/s' : '—'}</b></div>`
+          }
+        </div>
+      </div>
+    `).join('');
+  } else {
+    historyHtml = '<div style="text-align:center;padding:30px;opacity:0.4"><div style="font-size:36px;margin-bottom:8px">📊</div><p>Nessun test ancora</p></div>';
+  }
+
+  document.getElementById('athleteDetail').innerHTML = `
+    <div class="card" style="padding:0;overflow:hidden">
+      <!-- Header atleta -->
+      <div style="background:linear-gradient(135deg,var(--accent),#7c3aed);padding:24px 20px;display:flex;align-items:center;gap:16px">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0">${initials}</div>
+        <div style="flex:1">
+          <div style="font-size:22px;font-weight:800;color:#fff">${displayName}</div>
+          <div style="color:rgba(255,255,255,0.7);font-size:13px">${a.sport||''} ${teamName ? '· '+teamName : ''}</div>
+        </div>
+      </div>
+
+      <div style="padding:20px">
+        <!-- KPI principali -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:900;color:var(--accent)">${best > 0 ? (best < 100 ? best.toFixed(1)+'cm' : (best/100).toFixed(2)+'m') : '—'}</div>
+            <div style="font-size:11px;opacity:0.5;margin-top:4px;text-transform:uppercase;letter-spacing:1px">Best</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:900">${a.tests.length}</div>
+            <div style="font-size:11px;opacity:0.5;margin-top:4px;text-transform:uppercase;letter-spacing:1px">Sessioni</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:900">${bestTest ? (bestTest.flightTime ? (bestTest.flightTime*1000).toFixed(0)+'ms' : '—') : '—'}</div>
+            <div style="font-size:11px;opacity:0.5;margin-top:4px;text-transform:uppercase;letter-spacing:1px">T. volo best</div>
+          </div>
+        </div>
+
+        <!-- Storico test -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:0.5;margin-bottom:12px">📊 Storico sessioni</div>
+          ${historyHtml}
+        </div>
+
+        <!-- CTA nuovo test -->
+        <button class="btn-primary new-test-for-athlete" data-id="${a.id}"
+          style="width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;letter-spacing:1px">
+          ⚡ NUOVO TEST PER ${displayName.split(' ')[0].toUpperCase()}
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.querySelectorAll('.delete-session-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteSession(btn.dataset.athlete, btn.dataset.session);
+    });
+  });
+  document.querySelector('.new-test-for-athlete')?.addEventListener('click', () => {
+    App.selectedAthlete = a;
+    updateAthleteSelects();
+    document.getElementById('v-athleteSelect').value = a.id;
+    document.getElementById('lj-athleteSelect').value = a.id;
+    onAthleteSelect('v');
+    onAthleteSelect('lj');
+    showPage('analysis');
+  });
+  
+  showPage('athlete-detail');
+}
+
+function deleteSession(athleteId, sessionId) {
+  if (confirm('Eliminare questa sessione?')) {
+    const athlete = App.athletes.find(a => a.id === athleteId);
+    athlete.tests = athlete.tests.filter(t => t.id !== sessionId);
+    saveToLocalStorage();
+    showAthDetail(athleteId);
+  }
+}
+
+// ========== SQUADRE ==========
+function renderTeamsList() {
+  const el = document.getElementById('teamsList');
+  if (!App.teams.length) {
+    el.innerHTML = '<div class="empty-state">🏆 Nessuna squadra</div>';
+    return;
+  }
+  el.innerHTML = App.teams.map(team => {
+    const teamAthletes = App.athletes.filter(a => a.teamId === team.id);
+    return `<div class="team-section" style="border-left:4px solid ${team.color}">
+      <div class="team-header" data-team="${team.id}">
+        <div><span class="team-name">🏆 ${team.name}</span><span class="team-count">${teamAthletes.length} atleti</span></div>
+        <div class="team-actions"><button class="add-athlete-btn" data-team="${team.id}" data-name="${team.name}">➕ Aggiungi</button>
+        <button class="delete-session-btn delete-team-btn" data-team="${team.id}">🗑️</button></div>
+      </div>
+      <div class="team-athletes" id="team-${team.id}-athletes">${teamAthletes.map(a => `
+        <div class="ath-card" data-id="${a.id}">
+          <button class="remove-athlete-btn" data-athlete="${a.id}" data-team="${team.id}">✕</button>
+          <div class="ath-card-hdr"><div class="ath-avatar">${a.nome[0]}${a.cognome[0]}</div><span class="ath-badge">${a.tests.length} test</span></div>
+          <div class="ath-name">${a.nome} ${a.cognome}</div>
+        </div>
+      `).join('') || '<div style="padding:20px;text-align:center">Nessun atleta</div>'}</div>
+    </div>`;
+  }).join('');
+  
+  document.querySelectorAll('.team-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      if (e.target.classList.contains('add-athlete-btn') || e.target.classList.contains('delete-team-btn')) return;
+      const teamId = header.dataset.team;
+      const container = document.getElementById(`team-${teamId}-athletes`);
+      if (container) container.style.display = container.style.display === 'none' ? 'grid' : 'none';
+    });
+  });
+  
+  document.querySelectorAll('.add-athlete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showAddAthleteModal(btn.dataset.team, btn.dataset.name);
+    });
+  });
+  
+  document.querySelectorAll('.delete-team-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteTeam(btn.dataset.team);
+    });
+  });
+  
+  document.querySelectorAll('.remove-athlete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeAthleteFromTeam(btn.dataset.athlete);
+    });
+  });
+  
+  document.querySelectorAll('.team-athletes .ath-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('remove-athlete-btn')) showAthDetail(card.dataset.id);
+    });
+  });
+}
+
+function showNewTeamModal() { document.getElementById('teamModal').style.display = 'flex'; }
+function closeTeamModal() { document.getElementById('teamModal').style.display = 'none'; document.getElementById('newTeamName').value = ''; }
+function createTeam() {
+  const name = document.getElementById('newTeamName').value.trim();
+  if (!name) { alert('Inserisci un nome'); return; }
+  const color = document.getElementById('newTeamColor').value;
+  App.teams.push({ id: Date.now().toString(), name, color });
+  saveToLocalStorage();
+  updateTeamSelect();
+  renderTeamsList();
+  closeTeamModal();
+}
+function deleteTeam(teamId) {
+  if (confirm('Eliminare questa squadra?')) {
+    App.athletes.forEach(a => { if (a.teamId === teamId) a.teamId = null; });
+    App.teams = App.teams.filter(t => t.id !== teamId);
+    saveToLocalStorage();
+    renderTeamsList();
+    renderAthletesList();
+  }
+}
+function showAddAthleteModal(teamId, teamName) {
+  const available = App.athletes.filter(a => a.teamId !== teamId);
+  document.getElementById('modalTeamName').innerHTML = `➕ Aggiungi atleta a ${teamName}`;
+  const list = document.getElementById('athleteSelectList');
+  if (!available.length) {
+    list.innerHTML = '<div style="padding:20px;text-align:center">Nessun atleta disponibile</div>';
+  } else {
+    list.innerHTML = available.map(a => `
+      <div style="display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid var(--border)">
+        <div><strong>${a.nome} ${a.cognome}</strong><div style="font-size:10px">${a.sport || ''} · ${a.tests.length} test</div></div>
+        <button class="add-athlete-to-team-btn" data-athlete="${a.id}" data-team="${teamId}" style="background:var(--green);border:none;color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer">➕</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('addAthleteModal').style.display = 'flex';
+  
+  document.querySelectorAll('.add-athlete-to-team-btn').forEach(btn => {
+    btn.addEventListener('click', () => addAthleteToTeam(btn.dataset.athlete, btn.dataset.team));
+  });
+}
+function closeAddAthleteModal() { document.getElementById('addAthleteModal').style.display = 'none'; }
+function addAthleteToTeam(athleteId, teamId) {
+  const athlete = App.athletes.find(a => a.id === athleteId);
+  athlete.teamId = teamId;
+  saveToLocalStorage();
+  renderTeamsList();
+  renderAthletesList();
+  closeAddAthleteModal();
+}
+function removeAthleteFromTeam(athleteId) {
+  const athlete = App.athletes.find(a => a.id === athleteId);
+  athlete.teamId = null;
+  saveToLocalStorage();
+  renderTeamsList();
+  renderAthletesList();
+}
+
+// ========== EVENTI GLOBALI ==========
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('addAthleteBtn').addEventListener('click', () => showPage('new-athlete'));
+document.getElementById('saveAthleteBtn').addEventListener('click', saveAthlete);
+document.getElementById('newTeamBtn').addEventListener('click', showNewTeamModal);
+document.getElementById('closeTeamModalBtn').addEventListener('click', closeTeamModal);
+document.getElementById('createTeamBtn').addEventListener('click', createTeam);
+document.getElementById('closeAddAthleteModalBtn').addEventListener('click', closeAddAthleteModal);
+document.getElementById('newTestBtn').addEventListener('click', newTest);
+document.getElementById('exportCSVBtn').addEventListener('click', exportCSV);
+document.getElementById('exportPDFBtn').addEventListener('click', exportPDF);
+document.querySelectorAll('.backBtn').forEach(btn => {
+  btn.addEventListener('click', () => showPage('analysis'));
+});
+
+// Selezioni atleti
+document.getElementById('v-athleteSelect').addEventListener('change', () => onAthleteSelect('v'));
+document.getElementById('lj-athleteSelect').addEventListener('change', () => onAthleteSelect('lj'));
+document.getElementById('v-newAthleteBtn').addEventListener('click', () => {
+  alert('Per aggiungere atleti usa la Dashboard allenatore (tab ⚽ SH2).');
+});
+document.getElementById('lj-newAthleteBtn').addEventListener('click', () => {
+  alert('Per aggiungere atleti usa la Dashboard allenatore (tab ⚽ SH2).');
+});
+
+// Test type verticale
+document.querySelectorAll('#tt-pills .nav-pill').forEach(btn => {
+  btn.addEventListener('click', () => setVerticalTestType(btn.dataset.test));
+});
+document.querySelectorAll('.tt-btn').forEach(btn => {
+  btn.addEventListener('click', () => setVerticalTestType(btn.dataset.test));
+});
+
+// Tabs risultati
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+// Navigazione
+document.querySelectorAll('.nav-pill').forEach(btn => {
+  btn.addEventListener('click', () => showPage(btn.dataset.page));
+});
+
+// Inizializzazione
+loadFromLocalStorage();
+initVertical();
+initLongJump();
+setVerticalTestType('SV');
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- TODO: Set the document title to the name of your application -->
+    <title>Lovable App</title>
+    <meta name="description" content="Lovable Generated Project" />
+    <meta name="author" content="Lovable" />
+
+    <!-- TODO: Update og:title to match your application name -->
+    <meta property="og:title" content="Lovable App" />
+    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <script>
+  window._ANALISI_EVENTI = [
+    { id: 'gol',              nome: '⚽ Gol',          colore: '#ff1744' },
+    { id: 'cross',            nome: 'Cross',            colore: '#3b82f6' },
+    { id: 'tiro',             nome: 'Tiro',             colore: '#ef4444' },
+    { id: 'palla_persa',      nome: 'Palla Persa',      colore: '#f59e0b' },
+    { id: 'palla_recuperata', nome: 'Palla Recuperata', colore: '#10b981' },
+    { id: 'tiro_fatto',       nome: 'Tiro in Porta',    colore: '#8b5cf6' },
+    { id: 'cross_fatto',      nome: 'Cross Riuscito',   colore: '#06b6d4' },
+    { id: 'filtrante',        nome: 'Filtrante',        colore: '#ec4899' },
+  ];
+
+  window._renderMatchReport = function(eventi, logs) {
+    const E = window._ANALISI_EVENTI;
+
+    // Totali per tipo
+    const totTipo = {};
+    E.forEach(e => totTipo[e.id] = 0);
+    Object.values(eventi || {}).forEach(zone =>
+      Object.entries(zone).forEach(([t, n]) => { if (totTipo[t] !== undefined) totTipo[t] += n; })
+    );
+
+    // KPI globali
+    let tot = 0, zonaMax = 1, zonaMaxVal = 0;
+    const zoneCounts = {};
+    for (let z = 1; z <= 16; z++) {
+      let c = 0;
+      Object.values((eventi[String(z)] || {})).forEach(n => c += n);
+      zoneCounts[z] = c; tot += c;
+      if (c > zonaMaxVal) { zonaMaxVal = c; zonaMax = z; }
+    }
+    const zoneAttive = Object.values(zoneCounts).filter(c => c > 0).length;
+    const maxTipo = Math.max(1, ...Object.values(totTipo));
+    const mx = Math.max(1, ...Object.values(zoneCounts));
+
+    // Barre eventi per tipologia
+    const barreHtml = E.map(e => `
+      <div class="mr-bar-row">
+        <div class="mr-bar-lbl">${e.nome}</div>
+        <div class="mr-bar-track"><div class="mr-bar-fill" style="width:${(totTipo[e.id]/maxTipo*100).toFixed(1)}%;background:${e.colore}"></div></div>
+        <div class="mr-bar-cnt">${totTipo[e.id]}</div>
+      </div>`).join('');
+
+    // Celle heatmap: stesso loop di MATCH.html
+    // row=0..3 esterno, col=0..3 interno → zona = col*4+row+1
+    // Con grid-auto-flow:column le celle vengono inserite colonna per colonna
+    // quindi le inseriamo in ordine riga per riga (Z1,Z2,Z3,Z4, Z5,Z6...) 
+    // ma con grid-auto-flow:column il CSS le disporrà correttamente
+    // Z1=col0row0, Z2=col0row1, Z3=col0row2, Z4=col0row3 → prima colonna = difesa
+    let celleHtml = '';
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        const zona = col * 4 + row + 1;
+        const c = zoneCounts[zona] || 0;
+        const bg = c > 0 ? `rgba(239,68,68,${Math.min(0.15 + (c/mx) * 0.75, 0.9).toFixed(2)})` : 'transparent';
+        celleHtml += `<div class="mr-zone" style="background:${bg}"><div class="mr-zone-lbl">Z${zona}${c > 0 ? `<br><b style="color:#fff;font-size:.65rem">${c}</b>` : ''}</div></div>`;
+      }
+    }
+
+    // Log cronologico
+    let logHtml = '';
+    if (logs && logs.length) {
+      logHtml = `
+        <div class="mr-section">
+          <div class="mr-section-title">LOG EVENTI (${logs.length})</div>
+          <div style="max-height:220px;overflow-y:auto">
+            ${logs.slice().reverse().map(l => {
+              const ev = E.find(e => e.id === l.tipo);
+              return `<div style="display:flex;align-items:center;gap:10px;font-size:.8rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+                <span style="color:${ev?.colore||'#ccc'};font-weight:700;min-width:130px">${ev?.nome||l.tipo}</span>
+                <span style="color:#4d6070">Zona ${l.zona}</span>
+                ${l.ts ? `<span style="color:#4d6070;margin-left:auto">${l.half ? l.half+'° · ' : ''}${l.ts}</span>` : ''}
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }
+
+    return `
+      <style>
+        /* Layout responsivo: 2 colonne su >700px, 1 su mobile */
+        .mr-wrap { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        @media(max-width:700px){ .mr-wrap { grid-template-columns:1fr; } }
+        .mr-kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+        .mr-kpi-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:14px 16px; display:flex; align-items:center; gap:10px; }
+        .mr-kpi-icon { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+        .mr-kpi-val { font-size:1.6rem; font-weight:900; color:#f0f4f8; line-height:1; }
+        .mr-kpi-lbl { font-size:.65rem; color:#4d6070; letter-spacing:1px; margin-top:2px; }
+        .mr-section { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:18px 20px; height:100%; box-sizing:border-box; }
+        .mr-section-title { font-size:.7rem; font-weight:700; letter-spacing:2px; color:#00e5ff; margin-bottom:14px; text-transform:uppercase; }
+        .mr-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+        .mr-bar-lbl { width:120px; font-size:.8rem; color:#8899aa; flex-shrink:0; }
+        .mr-bar-track { flex:1; height:7px; background:rgba(255,255,255,.06); border-radius:4px; overflow:hidden; }
+        .mr-bar-fill { height:100%; border-radius:4px; transition:width .4s; }
+        .mr-bar-cnt { width:24px; text-align:right; font-size:.8rem; font-weight:700; color:#f0f4f8; }
+        /* Campo */
+        .mr-cf { position:relative; background:#1a4a2e; aspect-ratio:105/68; width:100%; overflow:hidden; border-radius:6px;
+          background-image:linear-gradient(rgba(255,255,255,.45) 2px,transparent 2px),
+            linear-gradient(90deg,rgba(255,255,255,.45) 2px,transparent 2px),
+            linear-gradient(90deg,transparent calc(50% - 1px),rgba(255,255,255,.45) calc(50% - 1px),rgba(255,255,255,.45) calc(50% + 1px),transparent calc(50% + 1px)); }
+        .mr-cf::before { content:''; position:absolute; inset:0; pointer-events:none;
+          background:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/8 - 1px),rgba(0,0,0,.12) calc(100%/8 - 1px),rgba(0,0,0,.12) calc(100%/8)); }
+        .mr-c   { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:18%; aspect-ratio:1; border:2px solid rgba(255,255,255,.45); border-radius:50%; }
+        .mr-asx { position:absolute; top:50%; transform:translateY(-50%); left:0;  width:16%; height:57%; border:2px solid rgba(255,255,255,.45); border-left:none; }
+        .mr-adx { position:absolute; top:50%; transform:translateY(-50%); right:0; width:16%; height:57%; border:2px solid rgba(255,255,255,.45); border-right:none; }
+        .mr-psx { position:absolute; top:50%; transform:translateY(-50%); left:0;  width:5%; height:30%; border:2px solid rgba(255,255,255,.45); border-left:none; }
+        .mr-pdx { position:absolute; top:50%; transform:translateY(-50%); right:0; width:5%; height:30%; border:2px solid rgba(255,255,255,.45); border-right:none; }
+        /* Griglia 4x4 — grid-auto-flow:column per avere Z1 in alto-sx, Z2 sotto Z1 etc. */
+        .mr-zones { position:absolute; inset:0; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); }
+        .mr-zone { border:1px solid rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; }
+        .mr-zone-lbl { font-size:.55rem; font-weight:700; color:rgba(255,255,255,.6); text-align:center; line-height:1.2; pointer-events:none; }
+        .mr-labels { display:flex; justify-content:space-between; padding:5px 0; font-size:.65rem; font-weight:700; letter-spacing:2px; color:#4d6070; }
+      </style>
+
+      <div style="padding:14px 0">
+        <!-- KPI: 3 carte su tutta la larghezza -->
+        <div class="mr-kpi">
+          <div class="mr-kpi-card">
+            <div class="mr-kpi-icon" style="background:rgba(0,229,255,.1);color:#00e5ff"><i class="fas fa-bolt"></i></div>
+            <div><div class="mr-kpi-val">${tot}</div><div class="mr-kpi-lbl">TOTALE EVENTI</div></div>
+          </div>
+          <div class="mr-kpi-card">
+            <div class="mr-kpi-icon" style="background:rgba(0,230,118,.1);color:#00e676"><i class="fas fa-th"></i></div>
+            <div><div class="mr-kpi-val">${zoneAttive}/16</div><div class="mr-kpi-lbl">ZONE ATTIVE</div></div>
+          </div>
+          <div class="mr-kpi-card">
+            <div class="mr-kpi-icon" style="background:rgba(255,145,0,.1);color:#ff9100"><i class="fas fa-fire"></i></div>
+            <div><div class="mr-kpi-val">Z${zonaMax}</div><div class="mr-kpi-lbl">ZONA PIÙ ATTIVA</div></div>
+          </div>
+        </div>
+
+        <!-- Layout 2 colonne (responsivo) -->
+        <div class="mr-wrap">
+          <!-- Colonna sx: barre eventi -->
+          <div class="mr-section">
+            <div class="mr-section-title">Eventi per tipologia</div>
+            ${barreHtml}
+          </div>
+
+          <!-- Colonna dx: campo heatmap -->
+          <div class="mr-section">
+            <div class="mr-section-title">Heatmap campo</div>
+            <div class="mr-cf">
+              <div class="mr-c"></div>
+              <div class="mr-asx"></div><div class="mr-adx"></div>
+              <div class="mr-psx"></div><div class="mr-pdx"></div>
+              <div class="mr-zones">${celleHtml}</div>
+            </div>
+            <div class="mr-labels"><span>◀ DIFESA</span><span>ATTACCO ▶</span></div>
+          </div>
+        </div>
+
+        ${logHtml}
+      </div>
+    `;
+  };
+  </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

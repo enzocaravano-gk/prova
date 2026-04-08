@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Direttore — SPORTHUB+</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg1:#0d1117;--bg2:#131920;--bg3:#1a2230;
+  --border:rgba(255,255,255,0.07);--border-h:rgba(255,255,255,0.14);
+  --text1:#f0f4f8;--text2:#8899aa;--text3:#4d6070;
+  --neon:#00e5ff;--green:#00e676;--orange:#ff9100;--red:#ff1744;--purple:#d500f9;
+  --r:10px;--font:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text1);font-family:var(--font);min-height:100vh;padding:24px}
+h1{font-size:1.6rem;font-weight:700;letter-spacing:2px;color:var(--neon);margin-bottom:4px}
+.subtitle{color:var(--text3);font-size:0.8rem;font-family:var(--mono);margin-bottom:24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.kpi-val{font-size:2rem;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-lbl{font-size:0.7rem;color:var(--text3);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
+.kpi.c1 .kpi-val{color:var(--neon)}.kpi.c2 .kpi-val{color:var(--green)}.kpi.c3 .kpi-val{color:var(--orange)}.kpi.c4 .kpi-val{color:var(--red)}.kpi.c5 .kpi-val{color:var(--purple)}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.section-title{font-size:0.7rem;font-weight:700;letter-spacing:2px;color:var(--neon);margin-bottom:14px;text-transform:uppercase;font-family:var(--mono)}
+.team-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tf-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:0.78rem;cursor:pointer;transition:all .2s}
+.tf-btn.active,.tf-btn:hover{border-color:var(--neon);color:var(--neon);background:rgba(0,229,255,0.08)}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.team-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.team-name{font-size:1rem;font-weight:700;margin-bottom:10px}
+.team-stats{display:flex;gap:14px;flex-wrap:wrap}
+.ts-val{font-size:1.2rem;font-weight:700;color:var(--neon)}.ts-lbl{font-size:0.65rem;color:var(--text3);font-family:var(--mono)}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.charts-grid{grid-template-columns:1fr}}
+.chart-wrap{position:relative;height:200px}
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+th{color:var(--text3);font-family:var(--mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text2)}
+td:first-child{color:var(--text1);font-weight:600}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.match-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.match-row:last-child{border:none}
+.match-date{font-family:var(--mono);font-size:0.7rem;color:var(--text3);min-width:72px}
+.match-result{font-family:var(--mono);font-weight:700}
+.win{color:var(--green)}.loss{color:var(--red)}.draw{color:var(--orange)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-family:var(--mono);font-weight:700}
+.badge-win{background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.3)}
+.badge-loss{background:rgba(255,23,68,0.12);color:var(--red);border:1px solid rgba(255,23,68,0.3)}
+.badge-draw{background:rgba(255,145,0,0.12);color:var(--orange);border:1px solid rgba(255,145,0,0.3)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--bg3);border-top-color:var(--neon);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:30px;color:var(--text3);font-size:0.85rem}
+</style>
+</head>
+<body>
+<div id="loadingView" class="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--text3);font-family:var(--mono);font-size:0.8rem">Caricamento dati...</p>
+</div>
+<div id="mainView" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+    <h1>DASHBOARD DIRETTORE</h1>
+    <button onclick="init()" style="background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:var(--neon);padding:6px 14px;border-radius:8px;font-size:0.75rem;cursor:pointer;font-family:var(--mono)">
+      ↻ Aggiorna
+    </button>
+  </div>
+  <div class="subtitle" id="societyLabel"></div>
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="section">
+    <div class="section-title">Squadre</div>
+    <div class="team-filter" id="teamFilter"></div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Andamento stagionale</div>
+    <div class="charts-grid">
+      <div><div style="font-size:0.7rem;color:var(--text3);margin-bottom:8px;font-family:var(--mono)">RISULTATI</div><div class="chart-wrap"><canvas id="matchChart"></canvas></div></div>
+      <div><div style="font-size:0.7rem;color:var(--text3);margin-bottom:8px;font-family:var(--mono)">PRESENZE ALLENAMENTI</div><div class="chart-wrap"><canvas id="attendanceChart"></canvas></div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Ultime partite</div>
+    <div id="recentMatches"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Classifica marcatori</div>
+    <table><thead><tr><th>Atleta</th><th>Squadra</th><th>Gol</th><th>Assist</th><th>Presenze</th></tr></thead><tbody id="topScorers"></tbody></table>
+  </div>
+</div>
+<script>
+const SB_URL='https://xjsoqcopalvoskbnarzn.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqc29xY29wYWx2b3NrYm5hcnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjE2ODAsImV4cCI6MjA5MDYzNzY4MH0.6AhQ5ogFLKRHkfsdMFDD2tB06vcXAf8mINJ3XUdcq_8';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+let D={society:null,teams:[],athletes:[],matches:[],sessions:[],attendances:[],scorers:[],assists:[]};
+let selTeam=null,mChart=null,aChart=null;
+
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){
+    document.getElementById('loadingView').innerHTML='<div class="empty"><i class="fas fa-lock" style="font-size:2rem;margin-bottom:12px;color:var(--text3)"></i><br>Accedi come direttore per vedere questa dashboard.</div>';
+    return;
+  }
+  console.log('[DIR] Sessione trovata:', session.user.email);
+
+  const {data:soc}=await sb.from('societies').select('*').eq('director_id',session.user.id).maybeSingle();
+  if(!soc){
+    document.getElementById('loadingView').innerHTML='<div class="empty">Nessuna societ\u00e0 trovata. Creane una dalla sezione Gestione.</div>';
+    return;
+  }
+  D.society=soc;
+  console.log('[DIR] Societ\u00e0:', soc.name);
+
+  const {data:teams,error:teamsErr}=await sb.from('teams').select('*').eq('society_id',soc.id).order('name');
+  D.teams=teams||[];
+  console.log('[DIR] Squadre:', D.teams.length, teamsErr?.message||'');
+
+  if(!D.teams.length){show();renderKPIs();return;}
+  const tIds=D.teams.map(t=>t.id);
+
+  // Carica tutti i dati in parallelo — filtrati per squadra
+  const [r1,r2,r3,r4,r5,r6,r7]=await Promise.all([
+    sb.from('athletes').select('*').in('team_id',tIds).order('full_name'),
+    sb.from('matches').select('*').in('team_id',tIds).order('date',{ascending:false}),
+    sb.from('training_sessions').select('*').in('team_id',tIds).order('date',{ascending:false}),
+    sb.from('training_attendances').select('session_id,athlete_id,present'),
+    sb.from('match_scorers').select('match_id,athlete_id,goals'),
+    sb.from('match_assists').select('match_id,athlete_id,assists'),
+    sb.from('match_goalkeepers').select('match_id,athlete_id,goals_conceded')
+  ]);
+
+  D.athletes=r1.data||[];
+  D.matches=r2.data||[];
+  D.sessions=r3.data||[];
+  D.attendances=r4.data||[];
+  D.scorers=r5.data||[];
+  D.assists=r6.data||[];
+  D.goalkeepers=r7.data||[];
+
+  console.log('[DIR] Atleti:', D.athletes.length, '| Partite:', D.matches.length, '| Sessioni:', D.sessions.length);
+
+  show();render();
+}
+
+function show(){
+  document.getElementById('loadingView').style.display='none';
+  document.getElementById('mainView').style.display='block';
+  document.getElementById('societyLabel').textContent=(D.society?.name||'')+' \u00b7 '+D.teams.length+' squadre \u00b7 '+D.athletes.length+' atleti';
+}
+
+// Auto-refresh ogni 30 secondi
+setInterval(()=>{ init(); }, 30000);
+
+function fd(){
+  if(!selTeam)return D;
+  return{...D,athletes:D.athletes.filter(a=>a.team_id===selTeam),matches:D.matches.filter(m=>m.team_id===selTeam),sessions:D.sessions.filter(s=>s.team_id===selTeam)};
+}
+
+function render(){renderKPIs();renderFilter();renderTeams();renderCharts();renderMatches();renderScorers();}
+
+function renderKPIs(){
+  const d=fd();
+  const W=d.matches.filter(m=>m.goals_for>m.goals_against).length;
+  const Dr=d.matches.filter(m=>m.goals_for===m.goals_against).length;
+  const L=d.matches.filter(m=>m.goals_for<m.goals_against).length;
+  const G=d.matches.reduce((s,m)=>s+(m.goals_for||0),0);
+  const Gs=d.matches.reduce((s,m)=>s+(m.goals_against||0),0);
+  const avgP=d.sessions.length?Math.round(d.sessions.reduce((s,sess)=>{
+    const p=D.attendances.filter(a=>a.session_id===sess.id&&a.present).length;
+    const t=D.athletes.filter(a=>a.team_id===sess.team_id).length;
+    return s+(t>0?p/t:0);
+  },0)/d.sessions.length*100):0;
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi c1"><div class="kpi-val">${d.athletes.length}</div><div class="kpi-lbl">Atleti</div></div>
+    <div class="kpi c2"><div class="kpi-val">${W}</div><div class="kpi-lbl">Vittorie</div></div>
+    <div class="kpi c3"><div class="kpi-val">${Dr}</div><div class="kpi-lbl">Pareggi</div></div>
+    <div class="kpi c4"><div class="kpi-val">${L}</div><div class="kpi-lbl">Sconfitte</div></div>
+    <div class="kpi c2"><div class="kpi-val">${G}</div><div class="kpi-lbl">Gol Fatti</div></div>
+    <div class="kpi c4"><div class="kpi-val">${Gs}</div><div class="kpi-lbl">Gol Subiti</div></div>
+    <div class="kpi c5"><div class="kpi-val">${d.sessions.length}</div><div class="kpi-lbl">Allenamenti</div></div>
+    <div class="kpi c2"><div class="kpi-val">${avgP}%</div><div class="kpi-lbl">Media Presenze</div></div>
+    <div class="kpi c1"><div class="kpi-val">${d.matches.length}</div><div class="kpi-lbl">Partite</div></div>`;
+}
+
+function renderFilter(){
+  document.getElementById('teamFilter').innerHTML=`<button class="tf-btn ${!selTeam?'active':''}" onclick="sel(null)">Tutte</button>`+
+    D.teams.map(t=>`<button class="tf-btn ${selTeam===t.id?'active':''}" onclick="sel('${t.id}')">${t.name}</button>`).join('');
+}
+function sel(id){selTeam=id;render();}
+
+function renderTeams(){
+  const teams=selTeam?D.teams.filter(t=>t.id===selTeam):D.teams;
+  document.getElementById('teamGrid').innerHTML=teams.map(team=>{
+    const ath=D.athletes.filter(a=>a.team_id===team.id);
+    const mat=D.matches.filter(m=>m.team_id===team.id);
+    const W=mat.filter(m=>m.goals_for>m.goals_against).length;
+    const ses=D.sessions.filter(s=>s.team_id===team.id);
+    const G=D.scorers.filter(s=>(D.athletes.find(a=>a.id===s.athlete_id)||{}).team_id===team.id).reduce((s,x)=>s+(x.goals||0),0);
+    return`<div class="team-card"><div class="team-name">${team.name}</div><div class="team-stats">
+      <div class="ts"><div class="ts-val">${ath.length}</div><div class="ts-lbl">Atleti</div></div>
+      <div class="ts"><div class="ts-val">${mat.length}</div><div class="ts-lbl">Partite</div></div>
+      <div class="ts"><div class="ts-val" style="color:var(--green)">${W}</div><div class="ts-lbl">Vittorie</div></div>
+      <div class="ts"><div class="ts-val" style="color:var(--orange)">${G}</div><div class="ts-lbl">Gol</div></div>
+      <div class="ts"><div class="ts-val" style="color:var(--purple)">${ses.length}</div><div class="ts-lbl">Training</div></div>
+    </div></div>`;
+  }).join('')||'<div class="empty">Nessuna squadra</div>';
+}
+
+function renderCharts(){
+  const d=fd();
+  if(mChart)mChart.destroy();if(aChart)aChart.destroy();
+  Chart.defaults.color='#8899aa';
+  const W=d.matches.filter(m=>m.goals_for>m.goals_against).length;
+  const Dr=d.matches.filter(m=>m.goals_for===m.goals_against).length;
+  const L=d.matches.filter(m=>m.goals_for<m.goals_against).length;
+  mChart=new Chart(document.getElementById('matchChart'),{type:'doughnut',data:{labels:['Vittorie','Pareggi','Sconfitte'],datasets:[{data:[W,Dr,L],backgroundColor:['rgba(0,230,118,.8)','rgba(255,145,0,.8)','rgba(255,23,68,.8)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:10,padding:12}}}}});
+  const sess=[...d.sessions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8).reverse();
+  aChart=new Chart(document.getElementById('attendanceChart'),{type:'bar',data:{labels:sess.map(s=>s.date.slice(5)),datasets:[{label:'% Presenti',data:sess.map(s=>{const p=D.attendances.filter(a=>a.session_id===s.id&&a.present).length;const t=D.athletes.filter(a=>a.team_id===s.team_id).length;return t>0?Math.round(p/t*100):0;}),backgroundColor:'rgba(0,229,255,.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100,grid:{color:'rgba(255,255,255,.05)'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+}
+
+function renderMatches(){
+  const d=fd();const rec=d.matches.slice(0,8);
+  document.getElementById('recentMatches').innerHTML=rec.length?rec.map(m=>{
+    const team=D.teams.find(t=>t.id===m.team_id);
+    const res=m.goals_for>m.goals_against?'win':m.goals_for<m.goals_against?'loss':'draw';
+    const lbl=res==='win'?'V':res==='loss'?'S':'P';
+    return`<div class="match-row"><span class="match-date">${new Date(m.date).toLocaleDateString('it-IT',{day:'2-digit',month:'short'})}</span><span style="flex:1;font-size:.85rem">${team?.name||''} <span style="color:var(--text3)">vs</span> ${m.opponent}</span><span class="match-result ${res}">${m.goals_for} — ${m.goals_against}</span><span class="badge badge-${res}">${lbl}</span></div>`;
+  }).join(''):'<div class="empty">Nessuna partita ancora</div>';
+}
+
+function renderScorers(){
+  const gMap={};const aMap={};const pMap={};
+  D.scorers.forEach(s=>{gMap[s.athlete_id]=(gMap[s.athlete_id]||0)+(s.goals||0);});
+  D.assists.forEach(a=>{aMap[a.athlete_id]=(aMap[a.athlete_id]||0)+(a.assists||0);});
+  D.attendances.filter(a=>a.present).forEach(a=>{
+    const s=D.sessions.find(x=>x.id===a.session_id);
+    if(!s)return;if(selTeam&&s.team_id!==selTeam)return;
+    pMap[a.athlete_id]=(pMap[a.athlete_id]||0)+1;
+  });
+  const ath=selTeam?D.athletes.filter(a=>a.team_id===selTeam):D.athletes;
+  const sorted=[...ath].map(a=>({...a,goals:gMap[a.id]||0,assists:aMap[a.id]||0,pres:pMap[a.id]||0})).filter(a=>a.goals>0||a.assists>0||a.pres>0).sort((a,b)=>b.goals-a.goals||b.assists-a.assists);
+  const tbody=document.getElementById('topScorers');
+  tbody.innerHTML=sorted.length?sorted.slice(0,15).map(a=>{const t=D.teams.find(x=>x.id===a.team_id);return`<tr><td>${a.full_name}</td><td style="color:var(--text3)">${t?.name||''}</td><td style="color:var(--green);font-weight:700">${a.goals}</td><td style="color:var(--purple)">${a.assists}</td><td style="color:var(--neon)">${a.pres}</td></tr>`;}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Nessun dato ancora. Registra partite e allenamenti.</td></tr>';
+}
+
+init();
+<\/script>
+</body>
+</html>

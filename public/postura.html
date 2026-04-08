@@ -1,0 +1,3315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi Posturale — SPORTHUB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-0: #07090f;
+            --bg-1: #0d1117;
+            --bg-2: #131920;
+            --bg-3: #1a2230;
+            --bg-4: #1f2a3d;
+            --surface: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.07);
+            --border-h: rgba(255,255,255,0.14);
+            --text-1: #f0f4f8;
+            --text-2: #8899aa;
+            --text-3: #4d6070;
+            --neon: #00e5ff;
+            --neon-dim: rgba(0,229,255,0.12);
+            --neon-glow: 0 0 30px rgba(0,229,255,0.25);
+            --green: #00e676;
+            --green-dim: rgba(0,230,118,0.1);
+            --orange: #ff9100;
+            --orange-dim: rgba(255,145,0,0.1);
+            --red: #ff1744;
+            --red-dim: rgba(255,23,68,0.1);
+            --purple: #d500f9;
+            --yellow: #ffd600;
+            --r: 10px;
+            --r-lg: 16px;
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        [data-theme="light"] {
+            --bg-0: #eef2f7;
+            --bg-1: #f5f7fa;
+            --bg-2: #ffffff;
+            --bg-3: #e8edf5;
+            --bg-4: #dde4ef;
+            --border: rgba(0,0,0,0.08);
+            --border-h: rgba(0,0,0,0.15);
+            --text-1: #0d1117;
+            --text-2: #4d6070;
+            --text-3: #8899aa;
+            --neon: #0091ea;
+            --neon-dim: rgba(0,145,234,0.1);
+            --neon-glow: 0 0 30px rgba(0,145,234,0.2);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-0);
+            color: var(--text-1);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .ambient {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.08;
+            animation: drift 20s ease-in-out infinite;
+        }
+        .ambient-1 { width: 600px; height: 600px; background: var(--neon); top: -200px; left: -100px; }
+        .ambient-2 { width: 400px; height: 400px; background: var(--purple); bottom: 100px; right: -100px; animation-delay: -7s; }
+        @keyframes drift {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            33% { transform: translate(30px,-20px) scale(1.05); }
+            66% { transform: translate(-20px,30px) scale(0.95); }
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: clamp(16px, 2vw, 32px);
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: clamp(20px, 2vw, 32px);
+            flex-wrap: wrap;
+        }
+        .logo { display: flex; align-items: center; gap: 14px; }
+        .logo-mark {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, var(--neon), #0077ff);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: #07090f;
+            box-shadow: var(--neon-glow);
+        }
+        .logo-text .app-name {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #fff 30%, var(--neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-text .app-sub {
+            font-size: 0.68rem;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+        }
+        .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(0) scale(0.97); }
+        .btn-neon { background: linear-gradient(135deg, var(--neon), #0077ff); color: #07090f; box-shadow: 0 4px 20px rgba(0,229,255,0.3); }
+        .btn-ghost { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--border); }
+        .btn-ghost:hover { color: var(--text-1); border-color: var(--border-h); }
+        .btn-green { background: linear-gradient(135deg, var(--green), #00b248); color: #07090f; }
+
+        .icon-btn {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            color: var(--text-2);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .icon-btn:hover { background: var(--neon); color: #07090f; border-color: var(--neon); box-shadow: var(--neon-glow); transform: translateY(-2px); }
+
+        /* CARD */
+        .card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .card:hover { border-color: var(--border-h); }
+
+        /* SECTION */
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: clamp(16px, 2vw, 24px);
+            flex-wrap: wrap;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            letter-spacing: 2px;
+        }
+        .section-sub { font-size: 0.82rem; color: var(--text-3); margin-top: 4px; }
+
+        /* PLAYER SELECT AREA */
+        .player-select-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 16px 20px;
+        }
+        .player-select-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-3); font-weight: 700; white-space: nowrap; }
+
+        .form-select, .form-input {
+            padding: 10px 16px;
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            color: var(--text-1);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+        .form-select:focus, .form-input:focus { outline: none; border-color: var(--neon); box-shadow: 0 0 0 3px var(--neon-dim); }
+        .form-input { cursor: text; }
+
+        /* PLAYER BADGE */
+        .player-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px 6px 8px;
+            background: var(--neon-dim);
+            border: 1px solid rgba(0,229,255,0.3);
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--neon);
+        }
+        .player-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--neon); }
+
+        /* EMPTY STATE */
+        #postureEmptyState {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-3);
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+        }
+
+        /* ===== MODULO POSTURALE ===== */
+        .posture-cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        @media(max-width: 960px) { .posture-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media(max-width: 500px)  { .posture-cards-grid { grid-template-columns: 1fr; } }
+
+        .posture-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; display: flex; flex-direction: column; }
+        .posture-card-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-3); padding: 9px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .posture-card-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; transition: color .15s; }
+        .posture-card-btn:hover { color: var(--neon); }
+        .posture-card-btn.danger:hover { color: var(--red); }
+
+        .posture-canvas-outer { display: grid; grid-template-columns: 24px 1fr; grid-template-rows: 24px 1fr; flex: 1; min-height: 420px; position: relative; }
+        .posture-corner { background: var(--bg-3); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+        .posture-ruler-top {
+            background: var(--bg-3);
+            border-bottom: 2px solid var(--border);
+            cursor: crosshair;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+        .posture-ruler-top::after {
+            content: '── V';
+            position: absolute; right: 4px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.5rem; color: var(--text-3); pointer-events: none;
+            letter-spacing: -1px;
+        }
+        .posture-ruler-top:hover { background: rgba(0,220,100,0.15); border-bottom-color: var(--green); }
+
+        .posture-ruler-left {
+            background: var(--bg-3);
+            border-right: 2px solid var(--border);
+            cursor: crosshair;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .posture-ruler-left::after {
+            content: 'H';
+            font-size: 0.5rem; color: var(--text-3); writing-mode: vertical-lr; pointer-events: none;
+        }
+        .posture-ruler-left:hover { background: rgba(0,210,255,0.15); border-right-color: var(--neon); }
+
+        .posture-canvas-wrap { position: relative; overflow: hidden; background: var(--bg-4); }
+        .posture-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-3); font-size: 0.75rem; text-align: center; pointer-events: none; }
+        .posture-placeholder i { font-size: 1.8rem; opacity: 0.25; }
+        .posture-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+        .posture-guide-line { position: absolute; z-index: 5; }
+        .posture-guide-line.h { left: 0; right: 0; height: 1px; background: rgba(0,210,255,0.7); cursor: ns-resize; pointer-events: all; }
+        .posture-guide-line.v { top: 0; bottom: 0; width: 1px; background: rgba(0,220,100,0.7); cursor: ew-resize; pointer-events: all; }
+        .posture-guide-line:hover { background: rgba(255,220,0,0.9) !important; z-index: 10; }
+        .posture-guide-line.dragging { background: rgba(255,200,0,1) !important; z-index: 20; }
+
+        .posture-handle {
+            position: absolute;
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(0,0,0,0.25);
+            border-radius: 3px;
+            pointer-events: all;
+            cursor: inherit;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+            transition: transform .1s, background .1s;
+        }
+        /* H line: handle on LEFT side, smaller */
+        .posture-guide-line.h .posture-handle { width: 18px; height: 7px; left: 12px; top: -4px; transform: none; }
+        /* V line: handle on TOP side, smaller */
+        .posture-guide-line.v .posture-handle { width: 7px; height: 18px; top: 12px; left: -4px; transform: none; }
+        .posture-guide-line:hover .posture-handle,
+        .posture-guide-line.dragging .posture-handle { background: rgba(255,220,0,1); }
+
+        .posture-del {
+            position: absolute;
+            width: 14px; height: 14px;
+            background: var(--red);
+            border-radius: 50%;
+            font-size: 0.5rem; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity .15s;
+            cursor: pointer; pointer-events: all; z-index: 15;
+        }
+        /* H line: delete on RIGHT, opposite to handle on left */
+        .posture-guide-line.h .posture-del { right: 8px; top: -7px; }
+        /* V line: delete on BOTTOM, opposite to handle on top */
+        .posture-guide-line.v .posture-del { bottom: 8px; left: -7px; }
+        .posture-guide-line:hover .posture-del { opacity: 1; }
+
+        /* PAN & ZOOM */
+        .zoom-toggle-btn.zoom-on { color: var(--neon) !important; }
+
+        .posture-canvas-wrap.pan-zoom-active {
+            cursor: grab;
+            overflow: hidden;
+        }
+        .posture-canvas-wrap.pan-zoom-active.dragging {
+            cursor: grabbing;
+        }
+        /* Il layer interno che si trasforma */
+        .pz-layer {
+            position: absolute;
+            inset: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+        /* Badge zoom level */
+        .zoom-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(0,229,255,0.3);
+            color: var(--neon);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 40;
+            display: none;
+        }
+        .pan-zoom-active .zoom-badge { display: block; }
+        /* Hint */
+        .zoom-hint {
+            position: absolute;
+            bottom: 8px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-3);
+            font-size: 0.62rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            pointer-events: none;
+            z-index: 40;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .pan-zoom-active .zoom-hint { opacity: 1; }
+
+        /* lines-overlay: figlio diretto del posture-canvas-outer,
+           sovrapposto SOLO alla cella foto (offset 24px per i righelli).
+           Completamente fuori dal canvasWrap → mai influenzato dal pan/zoom. */
+        .lines-overlay {
+            position: absolute;
+            top: 24px;   /* altezza righello orizzontale */
+            left: 24px;  /* larghezza righello verticale */
+            right: 0;
+            bottom: 0;
+            z-index: 30;
+            pointer-events: none;
+        }
+        .lines-overlay .posture-guide-line { pointer-events: all; }
+
+        /* CHECKLIST SLIDER 1–10 */
+        .posture-check-item { display: flex; align-items: center; gap: 12px; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; }
+        .posture-check-label { flex: 0 0 120px; font-size: 0.85rem; font-weight: 600; color: var(--text-1); }
+        .posture-check-slider-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .posture-check-slider {
+            flex: 1; -webkit-appearance: none; appearance: none;
+            height: 4px; border-radius: 2px; outline: none; cursor: pointer;
+            background: var(--bg-4);
+        }
+        .posture-check-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--neon); cursor: pointer;
+            box-shadow: 0 0 6px rgba(0,229,255,0.5);
+            transition: transform .1s;
+        }
+        .posture-check-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+        .posture-check-val {
+            font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700;
+            min-width: 28px; text-align: center; padding: 2px 6px;
+            border-radius: 6px; border: 1px solid var(--border);
+            background: var(--bg-4);
+        }
+
+        /* CERCHI ANNOTAZIONE */
+        .posture-circle {
+            position: absolute;
+            border: 2px solid rgba(255,82,82,0.85);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,82,82,0.35), inset 0 0 10px rgba(255,82,82,0.08);
+            pointer-events: all;
+            cursor: move;
+            z-index: 25;
+            box-sizing: border-box;
+        }
+        .posture-circle:hover { border-color: rgba(255,150,50,1); box-shadow: 0 0 14px rgba(255,150,50,0.5); }
+        .posture-circle.dragging { border-color: rgba(255,220,0,1); box-shadow: 0 0 18px rgba(255,220,0,0.5); cursor: grabbing; }
+        .posture-circle-del {
+            position: absolute; top: -7px; right: -7px;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: var(--red); color: #fff;
+            font-size: 0.5rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; opacity: 0; transition: opacity .15s;
+            pointer-events: all; z-index: 5;
+        }
+        .posture-circle:hover .posture-circle-del { opacity: 1; }
+        .posture-circle-resize {
+            position: absolute; bottom: -5px; right: -5px;
+            width: 12px; height: 12px; border-radius: 3px;
+            background: rgba(255,82,82,0.9); border: 1px solid rgba(255,255,255,0.4);
+            cursor: nwse-resize; pointer-events: all; z-index: 5;
+            opacity: 0; transition: opacity .15s;
+        }
+        .posture-circle:hover .posture-circle-resize { opacity: 1; }
+
+        .posture-block-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--neon); margin-bottom: 16px; }
+        .posture-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+        .posture-textarea { width: 100%; min-height: 90px; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r); color: var(--text-1); font-size: 0.88rem; padding: 12px; resize: vertical; font-family: var(--font-body); box-sizing: border-box; }
+        .posture-textarea:focus { outline: none; border-color: var(--neon); }
+
+        /* ACTIONS BAR */
+        .actions-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+        .actions-bar .btn { flex: 1; justify-content: center; padding: 14px 20px; min-width: 140px; }
+
+        /* PLAYER MODAL */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(7,9,15,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-backdrop.active { display: flex; }
+        .modal-box {
+            background: var(--bg-1);
+            border: 1px solid var(--border-h);
+            border-radius: 20px;
+            padding: 28px;
+            width: 100%;
+            max-width: 460px;
+            animation: fadeUp 0.25s both;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 1px; margin-bottom: 20px; }
+        .modal-row { margin-bottom: 14px; }
+        .modal-row label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-3); font-weight: 700; margin-bottom: 6px; }
+        .close-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 1.2rem; float: right; transition: color .2s; }
+        .close-btn:hover { color: var(--text-1); }
+
+        /* LOADING OVERLAY */
+        #loadingOverlay {
+            position: fixed; inset: 0;
+            background: rgba(7,9,15,0.9);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #loadingOverlay.active { display: flex; }
+        .loading-spinner { width: 48px; height: 48px; border: 3px solid var(--bg-3); border-top-color: var(--neon); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-family: var(--font-mono); font-size: 0.8rem; color: var(--neon); letter-spacing: 3px; text-transform: uppercase; }
+
+        /* PAGES */
+        .page { display: none; animation: fadeUp 0.3s ease; }
+        .page.active { display: block; }
+
+        /* NAV PILLS */
+        .nav-pills { display: flex; gap: 6px; }
+        .nav-pill {
+            padding: 7px 16px; border-radius: 8px;
+            border: 1px solid var(--border-h);
+            background: transparent; color: var(--text-3);
+            font-size: 0.8rem; font-weight: 700; cursor: pointer;
+            font-family: var(--font-body); letter-spacing: .04em;
+            transition: all .15s; white-space: nowrap;
+        }
+        .nav-pill:hover { border-color: var(--neon); color: var(--neon); }
+        .nav-pill.active { border-color: var(--neon); background: var(--neon-dim); color: var(--neon); }
+        .nav-pill .pill-badge {
+            display: inline-block; background: var(--neon); color: #07090f;
+            border-radius: 10px; padding: 0 6px; font-size: 0.68rem;
+            margin-left: 5px; font-weight: 800;
+        }
+
+        /* ── PAGINA ATLETI ── */
+        .ath-page-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 24px; flex-wrap: wrap; gap: 14px;
+        }
+        .ath-page-title { font-family: var(--font-display); font-size: 2rem; letter-spacing: 2px; }
+        .ath-page-sub { font-size: 0.82rem; color: var(--text-3); margin-top: 4px; }
+        .ath-page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* Filtro/ricerca */
+        .ath-search-bar {
+            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .ath-search-input {
+            flex: 1; min-width: 200px;
+            background: var(--bg-2); border: 1px solid var(--border);
+            color: var(--text-1); border-radius: var(--r);
+            padding: 9px 14px; font-family: var(--font-body); font-size: 0.88rem;
+            outline: none; transition: border-color .2s;
+        }
+        .ath-search-input:focus { border-color: var(--neon); }
+        .ath-search-input::placeholder { color: var(--text-3); }
+
+        /* Griglia cards */
+        .ath-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .ath-card {
+            background: var(--bg-2); border: 1px solid var(--border);
+            border-radius: var(--r-lg); padding: 18px;
+            cursor: pointer; transition: border-color .2s, transform .15s;
+            position: relative;
+        }
+        .ath-card:hover { border-color: var(--neon); transform: translateY(-2px); }
+        .ath-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon), #0077ff);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-size: 1.1rem; color: #07090f;
+            font-weight: 900; flex-shrink: 0;
+        }
+        .ath-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .ath-card-actions { display: flex; gap: 5px; }
+        .ath-card-btn {
+            background: none; border: 1px solid var(--border); color: var(--text-3);
+            border-radius: 7px; padding: 4px 8px; font-size: 0.78rem; cursor: pointer;
+            transition: all .15s;
+        }
+        .ath-card-btn:hover { border-color: var(--neon); color: var(--neon); background: var(--neon-dim); }
+        .ath-card-btn.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+        .ath-name { font-weight: 700; font-size: 1rem; margin-bottom: 5px; }
+        .ath-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+        .ath-tag {
+            font-size: 0.7rem; color: var(--text-2);
+            background: var(--bg-3); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2px 9px;
+        }
+        .ath-meta { font-size: 0.75rem; color: var(--text-3); margin-top: 3px; }
+        .ath-stats-strip {
+            margin-top: 12px; padding: 9px 12px;
+            background: var(--bg-3); border-radius: 8px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+        }
+        .ast-val { font-size: 1rem; font-weight: 800; font-family: var(--font-mono); color: var(--neon); }
+        .ast-lbl { font-size: 0.68rem; color: var(--text-3); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg);
+        }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 14px; opacity: .3; }
+        .empty-state h3 { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 1px; margin-bottom: 8px; }
+        .empty-state p { font-size: 0.85rem; color: var(--text-3); margin-bottom: 20px; }
+
+        /* ── PAGINA FORM ATLETA ── */
+        .form-page-header {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+        }
+        .form-back-btn {
+            background: none; border: none; color: var(--text-3);
+            font-size: 1.4rem; cursor: pointer; padding: 4px; transition: color .2s;
+        }
+        .form-back-btn:hover { color: var(--text-1); }
+        .form-page-title { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 2px; }
+        .form-page-sub { font-size: 0.78rem; color: var(--text-3); margin-top: 2px; }
+        .form-max { max-width: 700px; margin: 0 auto; }
+
+        .form-section {
+            background: var(--bg-2); border: 1px solid var(--border);
+            border-radius: var(--r-lg); padding: 22px; margin-bottom: 14px;
+        }
+        .form-section-title {
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 18px;
+            font-family: var(--font-mono); display: flex; align-items: center; gap: 8px;
+        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-field { display: flex; flex-direction: column; gap: 7px; }
+        .form-field label { font-size: 0.7rem; color: var(--text-3); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+        .form-field input, .form-field select, .form-field textarea {
+            background: var(--bg-3); border: 1px solid var(--border);
+            color: var(--text-1); border-radius: var(--r);
+            padding: 10px 13px; font-family: var(--font-body); font-size: 0.88rem;
+            outline: none; transition: border-color .2s; width: 100%;
+        }
+        .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--neon); }
+        .form-field textarea { resize: vertical; min-height: 80px; }
+        .bmi-display {
+            padding: 10px 13px; background: var(--bg-3); border: 1px solid var(--border);
+            border-radius: var(--r); font-family: var(--font-mono); font-size: 1rem;
+            color: var(--text-3); font-weight: 700;
+        }
+        .form-error-msg {
+            padding: 10px 16px; background: var(--red-dim); border: 1px solid var(--red);
+            border-radius: var(--r); color: var(--red); font-size: 0.83rem; margin-bottom: 14px;
+            display: none;
+        }
+        .form-actions { display: flex; gap: 12px; }
+        .form-actions .btn { flex: 1; justify-content: center; padding: 13px 20px; font-size: 0.95rem; }
+
+        /* ── PAGINA DETTAGLIO ATLETA ── */
+        .detail-page-header {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 28px; flex-wrap: wrap;
+        }
+        .detail-avatar-lg {
+            width: 54px; height: 54px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon), #0077ff);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-size: 1.3rem; color: #07090f;
+            font-weight: 900; flex-shrink: 0;
+        }
+        .detail-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+        .detail-grid { display: grid; grid-template-columns: 280px 1fr; gap: 14px; }
+        .detail-card {
+            background: var(--bg-2); border: 1px solid var(--border);
+            border-radius: var(--r-lg); padding: 18px;
+        }
+        .detail-card-title {
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 14px; font-family: var(--font-mono);
+        }
+        .detail-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-key { color: var(--text-3); }
+        .detail-val { font-weight: 600; text-align: right; }
+        .detail-note {
+            margin-top: 10px; padding: 10px 13px; background: var(--bg-3);
+            border-radius: 8px; font-size: 0.82rem; color: var(--text-2); line-height: 1.5;
+        }
+        .schede-empty {
+            text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 0.85rem;
+        }
+        .schede-list { display: flex; flex-direction: column; gap: 8px; }
+        .scheda-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 14px; background: var(--bg-3); border: 1px solid var(--border);
+            border-radius: var(--r); font-size: 0.83rem; cursor: pointer; transition: border-color .15s;
+        }
+        .scheda-item:hover { border-color: var(--neon); }
+        .scheda-date { font-family: var(--font-mono); font-size: 0.75rem; color: var(--neon); }
+        .scheda-checks { font-size: 0.72rem; color: var(--text-3); margin-top: 2px; }
+
+        @media(max-width: 720px) {
+            .detail-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .ath-grid { grid-template-columns: 1fr; }
+        }
+        @media(max-width: 500px) {
+            .nav-pills .nav-pill { padding: 6px 10px; font-size: 0.75rem; }
+        }
+
+        /* TOAST */
+        #toast {
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: var(--bg-2); border: 1px solid var(--border-h);
+            border-radius: 50px; padding: 12px 24px;
+            font-size: 0.85rem; font-weight: 600;
+            z-index: 9000;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.success { border-color: var(--green); color: var(--green); }
+        #toast.error { border-color: var(--red); color: var(--red); }
+
+        /* STATS STRIP */
+        .stats-strip { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-pill {
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+            background: var(--bg-2); border: 1px solid var(--border); border-radius: 50px; font-size: 0.78rem;
+        }
+        .stat-pill-val { font-family: var(--font-mono); font-weight: 700; color: var(--neon); }
+        .stat-pill-lbl { color: var(--text-3); }
+
+        /* MODAL (rimane solo per confirm leggeri) */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(7,9,15,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-backdrop.active { display: flex; }
+        .modal-box { background: var(--bg-1); border: 1px solid var(--border-h); border-radius: 20px; padding: 28px; width: 100%; max-width: 460px; animation: fadeUp 0.25s both; }
+        .modal-title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 1px; margin-bottom: 20px; }
+        .modal-row { margin-bottom: 14px; }
+        .modal-row label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-3); font-weight: 700; margin-bottom: 6px; }
+        .close-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 1.2rem; transition: color .2s; }
+        .close-btn:hover { color: var(--text-1); }
+
+        @media(max-width: 600px) {
+            .actions-bar .btn { flex: 1 1 100%; }
+        }
+
+    </style>
+
+
+<!-- SUPABASE BRIDGE v3 — sincronizzato con SH2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const _sb = supabase.createClient('https://xjsoqcopalvoskbnarzn.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqc29xY29wYWx2b3NrYm5hcnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjE2ODAsImV4cCI6MjA5MDYzNzY4MH0.6AhQ5ogFLKRHkfsdMFDD2tB06vcXAf8mINJ3XUdcq_8');
+  window._sb = _sb;
+  window._sbState = { ready:false, session:null, coachId:null, teamId:null, allTeams:[], activeTeamName:'' };
+
+  function _hashUUID(u){ let h=0; for(let i=0;i<u.length;i++) h=(Math.imul(31,h)+u.charCodeAt(i))|0; return Math.abs(h)+800000; }
+
+  window._sbInit = async function(){
+    const {data:{session}} = await _sb.auth.getSession();
+    if (!session) return;
+    window._sbState.session = session;
+    window._sbState.coachId = session.user.id;
+    const {data:teams} = await _sb.rpc('get_coach_teams', {_coach_id: session.user.id});
+    if (!teams || !teams.length) return;
+    window._sbState.allTeams = teams;
+    const lastHash = localStorage.getItem('teamStats_lastTeam');
+    const active = lastHash
+      ? (teams.find(t => String(_hashUUID(t.team_id)) === String(lastHash)) || teams[0])
+      : teams[0];
+    window._sbState.teamId = active.team_id;
+    window._sbState.activeTeamName = active.team_name;
+    window._sbState.ready = true;
+  };
+
+  window._sbGetAthletes = async function(){
+    if (!window._sbState.teamId) return [];
+    const {data} = await _sb.from('athletes')
+      .select('id, full_name, position, jersey_number')
+      .eq('team_id', window._sbState.teamId)
+      .order('jersey_number');
+    return data || [];
+  };
+
+  window._sbSavePosture = async function(athleteId, checks, label){
+    if (!window._sbState.ready) return;
+    await _sb.from('posture_sessions').insert({
+      athlete_id: athleteId,
+      team_id: window._sbState.teamId,
+      coach_id: window._sbState.coachId,
+      label: label || null,
+      date: new Date().toISOString().split('T')[0],
+      checks: checks || {}
+    });
+  };
+
+  // Avvia e quando pronto inietta atleti nel sistema di postura
+  _sbInit().then(() => {
+    setTimeout(async () => {
+      if (!window._sbState.ready) return;
+      try {
+        const athletes = await window._sbGetAthletes();
+        if (!athletes.length) {
+          _sbShowBanner('⚠ Apri prima Dashboard e seleziona una squadra', true);
+          return;
+        }
+
+        // Inietta atleti nel formato atteso da postura {id, surname, name, ruolo, schede:[]}
+        if (typeof players !== 'undefined' && typeof savePlayers === 'function') {
+          athletes.forEach(a => {
+            const parts = a.full_name.trim().split(' ');
+            const surname = parts[0] || '';
+            const name = parts.slice(1).join(' ') || surname;
+            if (!players.find(p => p.id === a.id)) {
+              players.push({ id: a.id, _sbId: a.id, surname, name,
+                sport: a.position || '', ruolo: a.position || '',
+                schede: [], createdAt: new Date().toISOString() });
+            }
+          });
+          savePlayers(players);
+          if (typeof populatePosturePlayerSelect === 'function') populatePosturePlayerSelect();
+        }
+
+        _sbShowBanner('⚽ ' + window._sbState.activeTeamName + ' · ' + athletes.length + ' atleti', false);
+
+        // Se multi-squadra mostra bottone cambio
+        if (window._sbState.allTeams.length > 1) {
+          const banner = document.getElementById('_postura_banner');
+          if (banner) {
+            const btn = document.createElement('button');
+            btn.textContent = '⇄ Cambia';
+            btn.style.cssText = 'background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:#00e5ff;padding:2px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:monospace;margin-left:8px';
+            btn.onclick = _sbShowTeamPicker;
+            banner.appendChild(btn);
+          }
+        }
+      } catch(e) { console.error('[Postura bridge]', e); }
+    }, 200);
+  });
+
+  function _sbShowBanner(msg, warn){
+    let b = document.getElementById('_postura_banner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = '_postura_banner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;padding:4px 16px;display:flex;align-items:center;gap:8px;font-size:12px;font-family:monospace;height:26px;background:rgba(0,229,255,0.07);border-bottom:1px solid rgba(0,229,255,0.2)';
+      document.body && document.body.prepend(b) || document.addEventListener('DOMContentLoaded', () => document.body.prepend(b));
+    }
+    b.innerHTML = `<span style="color:${warn?'#ff9100':'#00e5ff'}">${msg}</span>`;
+  }
+
+  function _sbShowTeamPicker(){
+    const teams = window._sbState.allTeams;
+    if (!teams) return;
+    const old = document.getElementById('_postura_picker');
+    if (old) { old.remove(); return; }
+    const wrap = document.createElement('div');
+    wrap.id = '_postura_picker';
+    wrap.style.cssText = 'position:fixed;top:30px;left:50%;transform:translateX(-50%);z-index:99999;background:#0d1117;border:1px solid rgba(0,229,255,0.3);border-radius:12px;padding:14px;min-width:240px;box-shadow:0 20px 60px rgba(0,0,0,.7)';
+    wrap.innerHTML = '<div style="font-size:10px;color:#00e5ff;letter-spacing:2px;text-transform:uppercase;font-family:monospace;margin-bottom:8px">Seleziona Squadra</div>' +
+      teams.map(t => `<button onclick="_sbSwitchPosturaTeam('${t.team_id}')" style="display:block;width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;background:#131920;border:1px solid rgba(255,255,255,.07);border-radius:7px;color:#f0f4f8;font-size:13px;cursor:pointer"><span style="color:#00e5ff;font-weight:700">${t.team_name}</span></button>`).join('');
+    document.body.appendChild(wrap);
+    setTimeout(() => document.addEventListener('click', function h(e){ if(!wrap.contains(e.target)){ wrap.remove(); document.removeEventListener('click',h); } }, 100));
+  }
+
+  window._sbSwitchPosturaTeam = async function(teamId){
+    document.getElementById('_postura_picker')?.remove();
+    window._sbState.teamId = teamId;
+    const t = window._sbState.allTeams.find(x => x.team_id === teamId);
+    window._sbState.activeTeamName = t?.team_name || '';
+    localStorage.setItem('teamStats_lastTeam', String(_hashUUID(teamId)));
+    // Ricarica atleti
+    const athletes = await window._sbGetAthletes();
+    if (typeof players !== 'undefined' && typeof savePlayers === 'function') {
+      // Svuota e ricarica
+      players.length = 0;
+      athletes.forEach(a => {
+        const parts = a.full_name.trim().split(' ');
+        players.push({ id: a.id, _sbId: a.id,
+          surname: parts[0]||'', name: parts.slice(1).join(' ')||parts[0]||'',
+          sport: a.position||'', ruolo: a.position||'',
+          schede: [], createdAt: new Date().toISOString() });
+      });
+      savePlayers(players);
+      if (typeof populatePosturePlayerSelect === 'function') populatePosturePlayerSelect();
+    }
+    _sbShowBanner('⚽ ' + window._sbState.activeTeamName + ' · ' + athletes.length + ' atleti', false);
+  };
+})();
+</script>
+
+<body>
+    <div class="ambient ambient-1"></div>
+    <div class="ambient ambient-2"></div>
+
+    <div id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Elaborazione...</div>
+    </div>
+
+    <div id="toast"><i class="fas fa-check-circle"></i><span id="toastText">Salvato!</span></div>
+
+    <div class="app">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-mark"><i class="fas fa-child"></i></div>
+                <div class="logo-text">
+                    <div class="app-name">POSTURALE</div>
+                    <div class="app-sub">Analisi Posturale · SPORTHUB</div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="nav-pills">
+                    <button class="nav-pill active" id="navPostura" onclick="showPage('postura')">
+                        <i class="fas fa-child"></i> Posturale
+                    </button>
+                    <button class="nav-pill" id="navAtleti" onclick="showPage('atleti')">
+                        <i class="fas fa-users"></i> Atleti
+                        <span class="pill-badge" id="athBadge" style="display:none"></span>
+                    </button>
+                </div>
+                <button class="icon-btn" onclick="openBackupModal()" title="Backup &amp; Ripristino dati" id="backupBtn" style="position:relative">
+                    <i class="fas fa-database"></i>
+                    <span id="backupDot" style="display:none;position:absolute;top:5px;right:5px;width:7px;height:7px;background:#ff4444;border-radius:50%;border:1.5px solid var(--bg-1)"></span>
+                </button>
+                <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema" id="themeBtn">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ══ PAGE: POSTURA ══ -->
+        <div class="page active" id="page-postura">
+
+        <!-- PLAYER SELECT AREA -->
+        <div class="player-select-area">
+            <span class="player-select-label"><i class="fas fa-child" style="margin-right:6px;color:var(--neon)"></i>Atleta</span>
+            <select class="form-select" id="posturePlayerSelect" onchange="loadPosturePlayer()" style="flex:1;max-width:360px;">
+                <option value="">— Seleziona un atleta —</option>
+            </select>
+            <div id="playerBadge" style="display:none;" class="player-badge">
+                <div class="player-badge-dot"></div>
+                <span id="playerBadgeText"></span>
+            </div>
+            <div id="sessionControls" style="display:none;margin-left:auto;align-items:center;gap:8px">
+                <button class="btn btn-ghost" onclick="openStorico()" id="storicoBtn" title="Storico sessioni">
+                    <i class="fas fa-history"></i> <span id="storicoCount" style="font-size:0.72rem;opacity:0.7"></span>
+                </button>
+                <button class="btn btn-ghost" onclick="newSession()" title="Nuova sessione">
+                    <i class="fas fa-plus"></i> Nuova Sessione
+                </button>
+                <button class="btn btn-primary" onclick="savePostureData()" id="postureSaveBtn">
+                    <i class="fas fa-save"></i> Salva
+                </button>
+            </div>
+        </div>
+
+        <!-- STATS STRIP -->
+        <div class="stats-strip" id="statsStrip" style="display:none;">
+            <div class="stat-pill"><span class="stat-pill-val" id="statFotos">0/4</span><span class="stat-pill-lbl">Foto caricate</span></div>
+            <div class="stat-pill"><span class="stat-pill-val" id="statChecks">0/8</span><span class="stat-pill-lbl">Distretti valutati</span></div>
+            <div class="stat-pill"><span class="stat-pill-val" id="statOk" style="color:var(--green)">0</span><span class="stat-pill-lbl">OK</span></div>
+            <div class="stat-pill"><span class="stat-pill-val" id="statWarn" style="color:var(--orange)">0</span><span class="stat-pill-lbl">Da monitorare</span></div>
+            <div class="stat-pill"><span class="stat-pill-val" id="statBad" style="color:var(--red)">0</span><span class="stat-pill-lbl">Visita specialista</span></div>
+        </div>
+
+        <!-- SECTION HEADER -->
+        <div class="section-header" id="sectionHeader" style="display:none;">
+            <div>
+                <div class="section-title"><i class="fas fa-child" style="font-size:1.8rem;margin-right:12px;vertical-align:middle;color:var(--neon)"></i>Analisi Posturale</div>
+                <div class="section-sub">Screening visivo per atleta — non sostituisce la valutazione specialistica</div>
+            </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="postureEmptyState">
+            <i class="fas fa-child" style="font-size:3.5rem;display:block;margin-bottom:20px;opacity:0.15;"></i>
+            <div style="font-size:1.1rem;font-weight:700;margin-bottom:8px;font-family:var(--font-display);letter-spacing:1px;">Seleziona un Atleta</div>
+            <div style="font-size:0.85rem;margin-bottom:24px;">Scegli un atleta dal menu in alto per visualizzare o creare la sua scheda posturale</div>
+            <button class="btn btn-ghost" onclick="showPage_newAthlete()"><i class="fas fa-user-plus"></i> Aggiungi primo atleta</button>
+        </div>
+
+        <!-- POSTURE CONTENT -->
+        <div id="postureContent" style="display:none;">
+            <!-- 4 card foto + linee guida -->
+            <div class="posture-cards-grid">
+                <!-- FRONTALE -->
+                <div class="posture-card">
+                    <div class="posture-card-title">
+                        <span><i class="fas fa-user" style="margin-right:5px;color:var(--neon)"></i>Frontale</span>
+                        <div style="display:flex;gap:6px;">
+                            <button class="posture-card-btn zoom-toggle-btn" id="zoomBtn_front" onclick="toggleZoom('front')" title="Zoom"><i class="fas fa-search-plus"></i></button>
+                            <button class="posture-card-btn" onclick="addPostureCircle('front')" title="Aggiungi cerchio"><i class="fas fa-circle-notch"></i></button>
+                            <button class="posture-card-btn" onclick="triggerPosturePhoto('front')" title="Carica foto"><i class="fas fa-camera"></i></button>
+                            <button class="posture-card-btn danger" onclick="clearPosturePhoto('front')" title="Rimuovi"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="posture-canvas-outer">
+                        <div class="posture-corner"></div>
+                        <div class="posture-ruler-top" onclick="addPostureLine('front','v',event)" title="Aggiungi linea verticale"></div>
+                        <div class="posture-ruler-left" onclick="addPostureLine('front','h',event)" title="Aggiungi linea orizzontale"></div>
+                        <div class="posture-canvas-wrap" id="canvasWrap_front">
+                            <div class="pz-layer" id="pzLayer_front">
+                                <div class="posture-placeholder" id="placeholder_front"><i class="fas fa-camera"></i><span>Clicca 📷 per foto</span></div>
+                                <img class="posture-photo" id="photo_front" style="display:none" alt="">
+                            </div>
+                            <div class="zoom-badge" id="zoomBadge_front">1×</div>
+                            <div class="zoom-hint">Scroll per zoom · Trascina per spostarti</div>
+                        </div>
+                        <div class="lines-overlay" id="lines_front"></div>
+                    </div>
+                    <input type="file" id="fileInput_front" accept="image/*" style="display:none" onchange="loadPosturePhoto('front',event)">
+                </div>
+                <!-- POSTERIORE -->
+                <div class="posture-card">
+                    <div class="posture-card-title">
+                        <span><i class="fas fa-user" style="margin-right:5px;color:var(--purple)"></i>Posteriore</span>
+                        <div style="display:flex;gap:6px;">
+                            <button class="posture-card-btn zoom-toggle-btn" id="zoomBtn_back" onclick="toggleZoom('back')" title="Zoom"><i class="fas fa-search-plus"></i></button>
+                            <button class="posture-card-btn" onclick="addPostureCircle('back')" title="Aggiungi cerchio"><i class="fas fa-circle-notch"></i></button>
+                            <button class="posture-card-btn" onclick="triggerPosturePhoto('back')" title="Carica foto"><i class="fas fa-camera"></i></button>
+                            <button class="posture-card-btn danger" onclick="clearPosturePhoto('back')" title="Rimuovi"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="posture-canvas-outer">
+                        <div class="posture-corner"></div>
+                        <div class="posture-ruler-top" onclick="addPostureLine('back','v',event)" title="Aggiungi linea verticale"></div>
+                        <div class="posture-ruler-left" onclick="addPostureLine('back','h',event)" title="Aggiungi linea orizzontale"></div>
+                        <div class="posture-canvas-wrap" id="canvasWrap_back">
+                            <div class="pz-layer" id="pzLayer_back">
+                                <div class="posture-placeholder" id="placeholder_back"><i class="fas fa-camera"></i><span>Clicca 📷 per foto</span></div>
+                                <img class="posture-photo" id="photo_back" style="display:none" alt="">
+                            </div>
+                            <div class="zoom-badge" id="zoomBadge_back">1×</div>
+                            <div class="zoom-hint">Scroll per zoom · Trascina per spostarti</div>
+                        </div>
+                        <div class="lines-overlay" id="lines_back"></div>
+                    </div>
+                    <input type="file" id="fileInput_back" accept="image/*" style="display:none" onchange="loadPosturePhoto('back',event)">
+                </div>
+                <!-- LATERALE DX -->
+                <div class="posture-card">
+                    <div class="posture-card-title">
+                        <span><i class="fas fa-walking" style="margin-right:5px;color:var(--green)"></i>Laterale DX</span>
+                        <div style="display:flex;gap:6px;">
+                            <button class="posture-card-btn zoom-toggle-btn" id="zoomBtn_dx" onclick="toggleZoom('dx')" title="Zoom"><i class="fas fa-search-plus"></i></button>
+                            <button class="posture-card-btn" onclick="addPostureCircle('dx')" title="Aggiungi cerchio"><i class="fas fa-circle-notch"></i></button>
+                            <button class="posture-card-btn" onclick="triggerPosturePhoto('dx')" title="Carica foto"><i class="fas fa-camera"></i></button>
+                            <button class="posture-card-btn danger" onclick="clearPosturePhoto('dx')" title="Rimuovi"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="posture-canvas-outer">
+                        <div class="posture-corner"></div>
+                        <div class="posture-ruler-top" onclick="addPostureLine('dx','v',event)" title="Aggiungi linea verticale"></div>
+                        <div class="posture-ruler-left" onclick="addPostureLine('dx','h',event)" title="Aggiungi linea orizzontale"></div>
+                        <div class="posture-canvas-wrap" id="canvasWrap_dx">
+                            <div class="pz-layer" id="pzLayer_dx">
+                                <div class="posture-placeholder" id="placeholder_dx"><i class="fas fa-camera"></i><span>Clicca 📷 per foto</span></div>
+                                <img class="posture-photo" id="photo_dx" style="display:none" alt="">
+                            </div>
+                            <div class="zoom-badge" id="zoomBadge_dx">1×</div>
+                            <div class="zoom-hint">Scroll per zoom · Trascina per spostarti</div>
+                        </div>
+                        <div class="lines-overlay" id="lines_dx"></div>
+                    </div>
+                    <input type="file" id="fileInput_dx" accept="image/*" style="display:none" onchange="loadPosturePhoto('dx',event)">
+                </div>
+                <!-- LATERALE SX -->
+                <div class="posture-card">
+                    <div class="posture-card-title">
+                        <span><i class="fas fa-walking" style="margin-right:5px;color:var(--orange);display:inline-block;transform:scaleX(-1)"></i>Laterale SX</span>
+                        <div style="display:flex;gap:6px;">
+                            <button class="posture-card-btn zoom-toggle-btn" id="zoomBtn_sx" onclick="toggleZoom('sx')" title="Zoom"><i class="fas fa-search-plus"></i></button>
+                            <button class="posture-card-btn" onclick="addPostureCircle('sx')" title="Aggiungi cerchio"><i class="fas fa-circle-notch"></i></button>
+                            <button class="posture-card-btn" onclick="triggerPosturePhoto('sx')" title="Carica foto"><i class="fas fa-camera"></i></button>
+                            <button class="posture-card-btn danger" onclick="clearPosturePhoto('sx')" title="Rimuovi"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="posture-canvas-outer">
+                        <div class="posture-corner"></div>
+                        <div class="posture-ruler-top" onclick="addPostureLine('sx','v',event)" title="Aggiungi linea verticale"></div>
+                        <div class="posture-ruler-left" onclick="addPostureLine('sx','h',event)" title="Aggiungi linea orizzontale"></div>
+                        <div class="posture-canvas-wrap" id="canvasWrap_sx">
+                            <div class="pz-layer" id="pzLayer_sx">
+                                <div class="posture-placeholder" id="placeholder_sx"><i class="fas fa-camera"></i><span>Clicca 📷 per foto</span></div>
+                                <img class="posture-photo" id="photo_sx" style="display:none" alt="">
+                            </div>
+                            <div class="zoom-badge" id="zoomBadge_sx">1×</div>
+                            <div class="zoom-hint">Scroll per zoom · Trascina per spostarti</div>
+                        </div>
+                        <div class="lines-overlay" id="lines_sx"></div>
+                    </div>
+                    <input type="file" id="fileInput_sx" accept="image/*" style="display:none" onchange="loadPosturePhoto('sx',event)">
+                </div>
+            </div>
+
+            <!-- Checklist valutazione -->
+            <div class="posture-block">
+                <div class="posture-block-title"><i class="fas fa-clipboard-check" style="margin-right:6px"></i>Valutazione Rapida</div>
+                <div class="posture-check-grid" id="postureChecklistGrid"></div>
+            </div>
+
+            <!-- Note cliniche -->
+            <div class="posture-block">
+                <div class="posture-block-title"><i class="fas fa-sticky-note" style="margin-right:6px"></i>Note Cliniche</div>
+                <textarea id="postureNotesText" class="posture-textarea" placeholder="Annotazioni aggiuntive, osservazioni particolari, raccomandazioni..."></textarea>
+            </div>
+
+            <!-- Barra azioni -->
+            <div class="actions-bar">
+                <button class="btn btn-ghost" onclick="savePostureData()">
+                    <i class="fas fa-save"></i> Salva Scheda
+                </button>
+                <button class="btn btn-ghost" id="posturePdfBtn" onclick="exportPosturePDF()">
+                    <i class="fas fa-file-pdf"></i> Esporta PDF
+                </button>
+                <button class="btn btn-ghost" id="postureFileBtn" onclick="savePostureFile()">
+                    <i class="fas fa-folder-open"></i> Salva File
+                </button>
+            </div>
+        </div><!-- /postureContent -->
+        </div><!-- /page-postura -->
+
+    <!-- ══ PAGE: ATLETI ══ -->
+    <div class="page" id="page-atleti">
+        <div class="ath-page-header">
+            <div>
+                <div class="ath-page-title">ATLETI</div>
+                <div class="ath-page-sub" id="athSubtitle">0 atleti registrati</div>
+            </div>
+            <div class="ath-page-actions">
+                <button class="btn btn-ghost" onclick="dbImport()"><i class="fas fa-file-import"></i> Importa</button>
+                <button class="btn btn-ghost" onclick="dbExport()"><i class="fas fa-download"></i> Backup</button>
+                <button class="btn btn-ghost" onclick="universalImport()" title="Importa da qualsiasi app SPORTHUB" style="border-color:rgba(0,229,255,0.4);color:var(--neon);"><i class="fas fa-globe"></i> Universale ↓</button>
+                <button class="btn btn-ghost" onclick="universalExport()" title="Esporta per qualsiasi app SPORTHUB" style="border-color:rgba(0,229,255,0.4);color:var(--neon);"><i class="fas fa-globe"></i> Universale ↑</button>
+                <button class="btn btn-neon" onclick="showPage('form-atleta')"><i class="fas fa-user-plus"></i> Nuovo Atleta</button>
+            </div>
+        </div>
+        <div class="ath-search-bar">
+            <input class="ath-search-input" type="text" id="athSearch" placeholder="🔍  Cerca per nome, sport, ruolo..." oninput="renderAthletes()">
+        </div>
+        <div id="athGrid"></div>
+    </div>
+
+    <!-- ══ PAGE: FORM ATLETA (aggiungi / modifica) ══ -->
+    <div class="page" id="page-form-atleta">
+        <div class="form-max">
+            <div class="form-page-header">
+                <button class="form-back-btn" onclick="showPage('atleti')">&#8592;</button>
+                <div>
+                    <div class="form-page-title" id="formAtletaTitle">NUOVO ATLETA</div>
+                    <div class="form-page-sub">Nome e cognome sono obbligatori</div>
+                </div>
+            </div>
+            <div class="form-error-msg" id="formAtletaError"></div>
+            <input type="hidden" id="editAtletaId">
+
+            <!-- Sezione anagrafica -->
+            <div class="form-section">
+                <div class="form-section-title" style="color:var(--neon)"><i class="fas fa-id-card"></i> Anagrafica</div>
+                <div class="form-grid">
+                    <div class="form-field"><label>Nome *</label><input type="text" id="fNome" placeholder="Mario"></div>
+                    <div class="form-field"><label>Cognome *</label><input type="text" id="fCognome" placeholder="Rossi"></div>
+                    <div class="form-field"><label>Data di nascita</label><input type="date" id="fDob"></div>
+                    <div class="form-field">
+                        <label>Sesso</label>
+                        <select id="fSesso">
+                            <option value="">—</option>
+                            <option value="M">Maschio</option>
+                            <option value="F">Femmina</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione dati fisici -->
+            <div class="form-section">
+                <div class="form-section-title" style="color:var(--orange)"><i class="fas fa-weight"></i> Dati Fisici</div>
+                <div class="form-grid">
+                    <div class="form-field"><label>Peso (kg)</label><input type="number" id="fPeso" placeholder="70" min="20" max="200" oninput="updateBMI()"></div>
+                    <div class="form-field"><label>Altezza (cm)</label><input type="number" id="fAltezza" placeholder="175" min="100" max="230" oninput="updateBMI()"></div>
+                    <div class="form-field"><label>BMI calcolato</label><div class="bmi-display" id="bmiDisplay">—</div></div>
+                </div>
+            </div>
+
+            <!-- Sezione dati sportivi -->
+            <div class="form-section">
+                <div class="form-section-title" style="color:var(--green)"><i class="fas fa-medal"></i> Dati Sportivi</div>
+                <div class="form-grid">
+                    <div class="form-field"><label>Sport praticato</label><input type="text" id="fSport" placeholder="Calcio, Atletica..."></div>
+                    <div class="form-field"><label>Ruolo / Specialità</label><input type="text" id="fRuolo" placeholder="Portiere, 100m..."></div>
+                    <div class="form-field"><label>Categoria</label><input type="text" id="fCategoria" placeholder="Under 18, Senior..."></div>
+                    <div class="form-field"><label>Club / Società</label><input type="text" id="fClub" placeholder="A.C. Roma..."></div>
+                </div>
+                <div class="form-field" style="margin-top:12px;">
+                    <label>Note cliniche / Anamnesi</label>
+                    <textarea id="fNote" placeholder="Infortuni pregressi, obiettivi, patologie..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-ghost" onclick="showPage('atleti')">Annulla</button>
+                <button class="btn btn-neon" onclick="saveAthlete()"><i class="fas fa-check"></i> Salva Atleta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ PAGE: DETTAGLIO ATLETA ══ -->
+    <div class="page" id="page-detail-atleta">
+        <div class="detail-page-header">
+            <button class="form-back-btn" onclick="showPage('atleti')">&#8592;</button>
+            <div class="detail-avatar-lg" id="detailAvatar"></div>
+            <div>
+                <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:1px;" id="detailName"></div>
+                <div style="font-size:0.82rem;color:var(--text-3);margin-top:3px;" id="detailSub"></div>
+            </div>
+            <div class="detail-actions">
+                <button class="btn btn-ghost" onclick="editCurrentAthlete()"><i class="fas fa-edit"></i> Modifica</button>
+                <button class="btn btn-neon" onclick="loadAthleteInPostura()"><i class="fas fa-child"></i> Apri Posturale</button>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div class="detail-card" id="detailInfo"></div>
+                <div class="detail-card" id="detailSport"></div>
+            </div>
+            <div class="detail-card" style="padding:0;overflow:hidden;">
+                <div style="padding:14px 18px;border-bottom:1px solid var(--border);">
+                    <div class="detail-card-title" style="color:var(--neon);margin-bottom:0;" id="detailSchedeTitle">SCHEDE POSTURALI</div>
+                </div>
+                <div style="padding:16px;" id="detailSchede"></div>
+            </div>
+        </div>
+    </div><!-- /page-detail-atleta -->
+
+    <script>
+        // =========================================
+        // DATA LAYER — localStorage
+        // =========================================
+        function loadPlayers() {
+            try { return JSON.parse(localStorage.getItem('postura_players') || '[]'); } catch { return []; }
+        }
+        function savePlayers(arr) {
+            localStorage.setItem('postura_players', JSON.stringify(arr));
+        }
+        function loadPostureDB() {
+            try { return JSON.parse(localStorage.getItem('postura_data') || '{}'); } catch { return {}; }
+        }
+        function savePostureDB(db) {
+            localStorage.setItem('postura_data', JSON.stringify(db));
+        }
+        function loadPostureData(pid) {
+            const db = loadPostureDB();
+            return db[String(pid)] || _emptyPosture();
+        }
+        function _savePostureData(pid, data) {
+            const db = loadPostureDB();
+            db[String(pid)] = data;
+            savePostureDB(db);
+        }
+        function _emptyPosture() {
+            return { lines: {front:[],back:[],dx:[],sx:[]}, checks: {}, notes: '', photos: {front:null,back:null,dx:null,sx:null} };
+        }
+
+        let players = loadPlayers();
+        let currentPosturePlayerId = null;
+
+        // =========================================
+        // CONSTANTS
+        // =========================================
+        const POSTURE_VIEWS = ['front','back','dx','sx'];
+        const POSTURE_CHECKS = [
+            { id:'shoulders', label:'Spalle' },
+            { id:'hips',      label:'Anca' },
+            { id:'knee_dx',   label:'Ginocchio DX' },
+            { id:'knee_sx',   label:'Ginocchio SX' },
+            { id:'ankle_dx',  label:'Caviglia DX' },
+            { id:'ankle_sx',  label:'Caviglia SX' },
+            { id:'spine',     label:'Colonna Vertebrale' },
+            { id:'head',      label:'Posizione Testa' },
+        ];
+
+        // =========================================
+        // THEME
+        // =========================================
+        function toggleTheme() {
+            const light = document.documentElement.getAttribute('data-theme') === 'light';
+            document.documentElement.setAttribute('data-theme', light ? '' : 'light');
+            document.getElementById('themeIcon').className = light ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // =========================================
+        // TOAST
+        // =========================================
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const tx = document.getElementById('toastText');
+            const ic = t.querySelector('i');
+            ic.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            tx.textContent = msg;
+            t.className = `show ${type}`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+        }
+
+        // =========================================
+        // LOADING
+        // =========================================
+        function showLoading(text = 'Elaborazione...') {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // =========================================
+        // =========================================
+        // NAV / PAGES
+        // =========================================
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.getElementById('navPostura').classList.toggle('active', id === 'postura');
+            document.getElementById('navAtleti').classList.toggle('active', ['atleti','form-atleta','detail-atleta'].includes(id));
+            if (id === 'atleti') renderAthletes();
+            if (id === 'postura') populatePosturePlayerSelect();
+        }
+
+        // =========================================
+        // ATHLETES CRUD
+        // =========================================
+        function calcAge(dob) {
+            if (!dob) return null;
+            return Math.floor((Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24 * 365.25));
+        }
+
+        function updateBMI() {
+            const p = parseFloat(document.getElementById('fPeso').value);
+            const h = parseFloat(document.getElementById('fAltezza').value);
+            const el = document.getElementById('bmiDisplay');
+            if (p && h) {
+                const bmi = (p / Math.pow(h / 100, 2)).toFixed(1);
+                el.textContent = bmi;
+                el.style.color = bmi < 18.5 ? 'var(--neon)' : bmi < 25 ? 'var(--green)' : bmi < 30 ? 'var(--orange)' : 'var(--red)';
+            } else {
+                el.textContent = '—'; el.style.color = 'var(--text-3)';
+            }
+        }
+
+        function showPage_newAthlete() {
+            // Reset form
+            document.getElementById('editAtletaId').value = '';
+            document.getElementById('formAtletaTitle').textContent = 'NUOVO ATLETA';
+            ['fNome','fCognome','fPeso','fAltezza','fSport','fRuolo','fCategoria','fClub','fNote'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('fSesso').value = '';
+            document.getElementById('fDob').value = '';
+            document.getElementById('bmiDisplay').textContent = '—';
+            document.getElementById('bmiDisplay').style.color = 'var(--text-3)';
+            document.getElementById('formAtletaError').style.display = 'none';
+            showPage('form-atleta');
+        }
+
+        function editAthlete(id) {
+            const a = players.find(x => x.id == id);
+            if (!a) return;
+            document.getElementById('editAtletaId').value = id;
+            document.getElementById('formAtletaTitle').textContent = 'MODIFICA ATLETA';
+            document.getElementById('fNome').value      = a.name    || '';
+            document.getElementById('fCognome').value   = a.surname || '';
+            document.getElementById('fDob').value       = a.dob     || '';
+            document.getElementById('fSesso').value     = a.sesso   || '';
+            document.getElementById('fPeso').value      = a.peso    || '';
+            document.getElementById('fAltezza').value   = a.altezza || '';
+            document.getElementById('fSport').value     = a.sport   || '';
+            document.getElementById('fRuolo').value     = a.ruolo   || '';
+            document.getElementById('fCategoria').value = a.categoria || '';
+            document.getElementById('fClub').value      = a.club    || '';
+            document.getElementById('fNote').value      = a.note    || '';
+            document.getElementById('formAtletaError').style.display = 'none';
+            updateBMI();
+            showPage('form-atleta');
+        }
+
+        function saveAthlete() {
+            const name    = document.getElementById('fNome').value.trim();
+            const surname = document.getElementById('fCognome').value.trim();
+            const errEl   = document.getElementById('formAtletaError');
+            if (!name || !surname) {
+                errEl.textContent = '⚠️  Nome e cognome sono obbligatori.';
+                errEl.style.display = 'block'; return;
+            }
+            errEl.style.display = 'none';
+            const dob     = document.getElementById('fDob').value;
+            const peso    = document.getElementById('fPeso').value;
+            const altezza = document.getElementById('fAltezza').value;
+            const bmi     = (peso && altezza) ? parseFloat((parseFloat(peso) / Math.pow(parseFloat(altezza) / 100, 2)).toFixed(1)) : null;
+            const editId  = document.getElementById('editAtletaId').value;
+            const athlete = {
+                id:       editId || Date.now().toString(),
+                name, surname, dob,
+                sesso:    document.getElementById('fSesso').value,
+                peso:     peso    || null,
+                altezza:  altezza || null,
+                bmi,
+                age:      calcAge(dob),
+                sport:    document.getElementById('fSport').value.trim(),
+                ruolo:    document.getElementById('fRuolo').value.trim(),
+                categoria:document.getElementById('fCategoria').value.trim(),
+                club:     document.getElementById('fClub').value.trim(),
+                note:     document.getElementById('fNote').value.trim(),
+                createdAt: editId ? (players.find(x=>x.id==editId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+                schede:   editId ? (players.find(x=>x.id==editId)?.schede || []) : [],
+            };
+            if (editId) {
+                const idx = players.findIndex(p => p.id == editId);
+                if (idx !== -1) players[idx] = athlete;
+            } else {
+                players.push(athlete);
+            }
+            savePlayers(players);
+            updateAthBadge();
+            populatePosturePlayerSelect();
+            showToast(editId ? 'Atleta aggiornato ✓' : 'Atleta aggiunto ✓', 'success');
+            showPage('atleti');
+        }
+
+        function deleteAthlete(id) {
+            const a = players.find(x => x.id == id);
+            if (!a) return;
+            if (!confirm(`Eliminare ${a.name} ${a.surname} e tutti i suoi dati posturali?`)) return;
+            players = players.filter(x => x.id != id);
+            savePlayers(players);
+            const db = loadPostureDB(); delete db[String(id)]; savePostureDB(db);
+            if (currentPosturePlayerId == id) {
+                currentPosturePlayerId = null;
+                document.getElementById('posturePlayerSelect').value = '';
+                loadPosturePlayer();
+            }
+            updateAthBadge();
+            populatePosturePlayerSelect();
+            renderAthletes();
+            showToast('Atleta eliminato', 'error');
+        }
+
+        function editCurrentAthlete() {
+            const id = document.getElementById('detailAthleteId')?.value;
+            if (id) editAthlete(id);
+        }
+
+        function loadAthleteInPostura() {
+            const id = document.getElementById('detailAthleteId')?.value;
+            if (!id) return;
+            currentPosturePlayerId = id;
+            populatePosturePlayerSelect();
+            document.getElementById('posturePlayerSelect').value = id;
+            loadPosturePlayer();
+            showPage('postura');
+        }
+
+        function updateAthBadge() {
+            const b = document.getElementById('athBadge');
+            if (players.length) { b.style.display = 'inline'; b.textContent = players.length; }
+            else b.style.display = 'none';
+        }
+
+        // ─── Render griglia atleti ───
+        function renderAthletes() {
+            const grid = document.getElementById('athGrid');
+            const q = (document.getElementById('athSearch')?.value || '').toLowerCase();
+            const sub = document.getElementById('athSubtitle');
+            sub.textContent = players.length + (players.length === 1 ? ' atleta registrato' : ' atleti registrati') + ' · salvati automaticamente';
+            const list = players.filter(a => {
+                if (!q) return true;
+                return [a.name, a.surname, a.sport, a.ruolo, a.club, a.categoria].join(' ').toLowerCase().includes(q);
+            });
+            if (!players.length) {
+                grid.innerHTML = `<div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+                    <h3>Nessun atleta ancora</h3>
+                    <p>Registra il tuo primo atleta per iniziare</p>
+                    <button class="btn btn-neon" onclick="showPage('form-atleta');document.getElementById('editAtletaId').value='';document.getElementById('formAtletaTitle').textContent='NUOVO ATLETA';">
+                        <i class="fas fa-user-plus"></i> Registra atleta
+                    </button>
+                </div>`; return;
+            }
+            if (!list.length) {
+                grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Nessun risultato</h3><p>Prova con un altro termine</p></div>`;
+                return;
+            }
+            grid.innerHTML = `<div class="ath-grid">` + list.map(a => {
+                const initials = (a.name[0] || '') + (a.surname[0] || '');
+                const tags = [a.age ? `🎂 ${a.age} anni` : '', a.sport ? `🏅 ${a.sport}` : '', a.ruolo ? `⚡ ${a.ruolo}` : '', a.club ? `🏟 ${a.club}` : ''].filter(Boolean);
+                const db = loadPostureDB();
+                const schedeCount = (db[String(a.id)]?.schede || []).length;
+                return `<div class="ath-card" onclick="showAthleteDetail('${a.id}')">
+                    <div class="ath-card-top">
+                        <div class="ath-avatar">${initials}</div>
+                        <div class="ath-card-actions">
+                            <button class="ath-card-btn" onclick="event.stopPropagation();editAthlete('${a.id}')" title="Modifica"><i class="fas fa-edit"></i></button>
+                            <button class="ath-card-btn danger" onclick="event.stopPropagation();deleteAthlete('${a.id}')" title="Elimina"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="ath-name">${a.surname} ${a.name}</div>
+                    ${a.dob ? `<div class="ath-meta">${new Date(a.dob).toLocaleDateString('it-IT')}${a.age ? ' · ' + a.age + ' anni' : ''}</div>` : ''}
+                    <div class="ath-tags">${tags.map(t => `<span class="ath-tag">${t}</span>`).join('')}</div>
+                    <div class="ath-stats-strip">
+                        <div><div class="ast-val" style="color:var(--neon)">${a.peso ? a.peso + ' kg' : '—'}</div><div class="ast-lbl">peso</div></div>
+                        <div><div class="ast-val" style="color:var(--orange)">${a.altezza ? a.altezza + ' cm' : '—'}</div><div class="ast-lbl">altezza</div></div>
+                        <div><div class="ast-val" style="color:var(--green)">${schedeCount}</div><div class="ast-lbl">schede</div></div>
+                    </div>
+                </div>`;
+            }).join('') + `</div>`;
+        }
+
+        // ─── Dettaglio atleta ───
+        let _detailId = null;
+        function showAthleteDetail(id) {
+            const a = players.find(x => x.id == id);
+            if (!a) return;
+            _detailId = id;
+            // Crea un campo hidden per tenere l'id
+            let hid = document.getElementById('detailAthleteId');
+            if (!hid) { hid = document.createElement('input'); hid.type='hidden'; hid.id='detailAthleteId'; document.body.appendChild(hid); }
+            hid.value = id;
+
+            const initials = (a.name[0]||'') + (a.surname[0]||'');
+            document.getElementById('detailAvatar').textContent = initials;
+            document.getElementById('detailName').textContent = `${a.surname} ${a.name}`;
+            document.getElementById('detailSub').textContent = [a.sport, a.ruolo, a.club].filter(Boolean).join(' · ') || 'Nessun dato sportivo';
+
+            const row = (k, v) => v ? `<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val">${v}</span></div>` : '';
+            document.getElementById('detailInfo').innerHTML =
+                `<div class="detail-card-title" style="color:var(--neon)">ANAGRAFICA</div>` +
+                row('Nato il', a.dob ? new Date(a.dob).toLocaleDateString('it-IT') : null) +
+                row('Età', a.age ? a.age + ' anni' : null) +
+                row('Sesso', a.sesso === 'M' ? 'Maschio' : a.sesso === 'F' ? 'Femmina' : null) +
+                row('Peso', a.peso ? a.peso + ' kg' : null) +
+                row('Altezza', a.altezza ? a.altezza + ' cm' : null) +
+                row('BMI', a.bmi || null) +
+                ((!a.dob && !a.sesso && !a.peso && !a.altezza) ? '<div style="color:var(--text-3);font-size:0.82rem;padding:8px 0">Nessun dato inserito</div>' : '');
+
+            document.getElementById('detailSport').innerHTML =
+                `<div class="detail-card-title" style="color:var(--orange)">DATI SPORTIVI</div>` +
+                row('Sport', a.sport || null) +
+                row('Ruolo', a.ruolo || null) +
+                row('Categoria', a.categoria || null) +
+                row('Club', a.club || null) +
+                (a.note ? `<div class="detail-note">📝 ${a.note}</div>` : '') +
+                ((!a.sport && !a.ruolo && !a.club && !a.note) ? '<div style="color:var(--text-3);font-size:0.82rem;padding:8px 0">Nessun dato inserito</div>' : '');
+
+            // Legge sessioni dal nuovo formato
+            const atletaStorico = getAtletaData(String(id));
+            const schede = atletaStorico.sessioni || [];
+            document.getElementById('detailSchedeTitle').textContent = `SCHEDE POSTURALI (${schede.length})`;
+            const schedeEl = document.getElementById('detailSchede');
+            if (!schede.length) {
+                schedeEl.innerHTML = `<div class="schede-empty"><div style="font-size:2rem;margin-bottom:10px;opacity:.3">📋</div><p>Nessuna scheda posturale</p><button class="btn btn-neon" style="margin-top:14px;" onclick="loadAthleteInPostura()"><i class="fas fa-child"></i> Crea scheda</button></div>`;
+            } else {
+                const cCol = v => v<=3?'var(--green)':v<=6?'var(--orange)':'var(--red)';
+                schedeEl.innerHTML = `<div class="schede-list">` + schede.slice().reverse().map(s => {
+                    const vals  = Object.values(s.checks || {});
+                    const nOk   = vals.filter(v=>v<=3).length;
+                    const nWarn = vals.filter(v=>v>3&&v<=6).length;
+                    const nCrit = vals.filter(v=>v>6).length;
+                    const fotos = POSTURE_VIEWS.filter(v=>s.photos?.[v]).length;
+                    const dateStr = new Date(s.data).toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});
+                    const badgesHtml = vals.length
+                        ? `<span style="font-size:0.65rem;font-weight:700;color:var(--green)">${nOk} OK</span>
+                           <span style="font-size:0.65rem;font-weight:700;color:var(--orange)">${nWarn} ATT</span>
+                           <span style="font-size:0.65rem;font-weight:700;color:var(--red)">${nCrit} CRIT</span>`
+                        : `<span style="font-size:0.65rem;color:var(--text-3)">Nessuna valutazione</span>`;
+                    return `<div class="scheda-item" style="cursor:pointer" onclick="loadScheda('${id}','${s.id}')">
+                        <div style="flex:1">
+                            <div class="scheda-date">${s.label || dateStr}</div>
+                            <div class="scheda-checks" style="display:flex;gap:8px;margin-top:3px">
+                                <span style="font-size:0.65rem;color:var(--text-3)">${fotos}/4 foto</span>
+                                ${badgesHtml}
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <i class="fas fa-chevron-right" style="color:var(--text-3);font-size:0.8rem;"></i>
+                            <button onclick="event.stopPropagation();deleteSchedaFromDetail('${id}','${s.id}')"
+                                style="background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px 6px;border-radius:6px;transition:color .15s,background .15s"
+                                onmouseover="this.style.color='var(--red)';this.style.background='var(--red-dim)'"
+                                onmouseout="this.style.color='var(--text-3)';this.style.background='none'"
+                                title="Elimina sessione">
+                                <i class="fas fa-trash-alt" style="font-size:0.75rem;pointer-events:none"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('') + `</div>`;
+            }
+            showPage('detail-atleta');
+        }
+
+        // Elimina sessione dalla card atleta e ricarica la lista
+        function deleteSchedaFromDetail(athleteId, sessId) {
+            if (!confirm("Eliminare questa sessione? L\'operazione non è reversibile.")) return;
+            const data = getAtletaData(String(athleteId));
+            data.sessioni = data.sessioni.filter(s => s.id !== sessId);
+            saveAtletaData(String(athleteId), data);
+            // Se era la sessione corrente aperta, resetta
+            if (currentSessionId === sessId) currentSessionId = null;
+            showToast('Sessione eliminata', 'error');
+            // Ricarica la card atleta per aggiornare la lista
+            const p = players.find(x => String(x.id) === String(athleteId));
+            if (p) showAthleteDetail(p.id);
+        }
+
+        // Carica una sessione storica dalla card atleta
+        function loadScheda(athleteId, schedaId) {
+            currentPosturePlayerId = String(athleteId);
+            populatePosturePlayerSelect();
+            document.getElementById('posturePlayerSelect').value = String(athleteId);
+            showPage('postura');
+            // Dopo showPage il DOM è visibile, ora carica la sessione
+            requestAnimationFrame(() => loadPosturePlayer(schedaId));
+        }
+
+        // ─── populatePosturePlayerSelect — aggiornato ───
+        function populatePosturePlayerSelect() {
+            const sel = document.getElementById('posturePlayerSelect');
+            const sorted = [...players].sort((a, b) => (a.surname || '').localeCompare(b.surname || ''));
+            sel.innerHTML = '<option value="">— Seleziona un atleta —</option>' +
+                sorted.map(p => `<option value="${p.id}">${p.surname} ${p.name}${p.sport ? ' · ' + p.sport : ''}${p.ruolo ? ' — ' + p.ruolo : ''}</option>`).join('');
+            if (currentPosturePlayerId) sel.value = currentPosturePlayerId;
+            updateAthBadge();
+        }
+
+        // ─── Import / Export JSON ───
+        function dbExport() {
+            const data = { app: 'SPORTHUB-Posturale', version: '2.0', exportedAt: new Date().toISOString(), athletes: players, postureData: loadPostureDB() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'posturale_backup_' + new Date().toISOString().slice(0,10) + '.json';
+            a.click();
+            showToast('📥 Backup esportato', 'success');
+        }
+        function dbImport() {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        const imported = data.athletes || (Array.isArray(data) ? data : null);
+                        if (!imported) { showToast('❌ File non valido', 'error'); return; }
+                        let added = 0;
+                        imported.forEach(a => { if (!players.find(x => x.id === a.id)) { players.push(a); added++; } });
+                        savePlayers(players);
+                        if (data.postureData) {
+                            const db = loadPostureDB();
+                            Object.assign(db, data.postureData);
+                            savePostureDB(db);
+                        }
+                        updateAthBadge(); populatePosturePlayerSelect(); renderAthletes();
+                        showToast(`✅ ${added} atleti importati`, 'success');
+                    } catch (err) { showToast('❌ Errore lettura file', 'error'); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ─── Stubs vecchi (compatibilità) ───
+        function openPlayerModal() { showPage('atleti'); }
+        function closePlayerModal() {}
+        function openAddPlayerModal(editId) { if (editId) editAthlete(editId); else showPage_newAthlete(); }
+        function closeAddPlayerModal() { showPage('atleti'); }
+        function savePlayer() { saveAthlete(); }
+        function renderPlayersList() { renderAthletes(); }
+        function deletePlayer(id) { deleteAthlete(id); }
+        function editPlayer(id) { editAthlete(id); }
+
+        // ═══════════════════════════════════════════════════
+        // FORMATO UNIVERSALE — interoperabilità tra app
+        // ═══════════════════════════════════════════════════
+
+        function toUniversal(a) {
+            return {
+                id:        a.id,
+                name:      a.name      || '',
+                surname:   a.surname   || '',
+                birthDate: a.dob       || '',
+                gender:    a.sesso     || '',
+                weight:    a.peso      ?? null,
+                height:    a.altezza   ?? null,
+                sport:     a.sport     || '',
+                role:      a.ruolo     || '',
+                category:  a.categoria || '',
+                club:      a.club      || '',
+                notes:     a.note      || '',
+                createdAt: a.createdAt || new Date().toISOString()
+            };
+        }
+
+        function fromUniversal(u) {
+            const peso = u.weight ?? null;
+            const alt  = u.height ?? null;
+            return {
+                id:        u.id || Date.now().toString(),
+                name:      u.name      || '',
+                surname:   u.surname   || '',
+                dob:       u.birthDate || '',
+                sesso:     u.gender    || '',
+                peso,
+                altezza:   alt,
+                bmi:       (peso && alt) ? +(peso / ((alt/100)**2)).toFixed(1) : null,
+                age:       u.birthDate ? calcAge(u.birthDate) : null,
+                sport:     u.sport     || '',
+                ruolo:     u.role      || '',
+                categoria: u.category  || '',
+                club:      u.club      || '',
+                note:      u.notes     || '',
+                schede:    [],
+                createdAt: u.createdAt || new Date().toISOString()
+            };
+        }
+
+        function universalExport() {
+            const athletes = loadPlayers();
+            const data = {
+                _format:    'sporthub_universal',
+                version:    '1.0',
+                exportedAt: new Date().toISOString(),
+                exportedBy: 'SPORTHUB-Posturale',
+                athletes:   athletes.map(toUniversal)
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'atleti_universale_' + new Date().toISOString().slice(0,10) + '.json';
+            a.click();
+            showToast('🌐 Esportati ' + athletes.length + ' atleti (formato universale)', 'success');
+        }
+
+        function universalImport() {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        let source = [];
+                        if (data._format === 'sporthub_universal' && Array.isArray(data.athletes)) {
+                            source = data.athletes.map(fromUniversal);
+                        } else if (Array.isArray(data.athletes)) {
+                            source = data.athletes.map(a => fromUniversal({
+                                id:        a.id,
+                                name:      a.name    || a.nome    || '',
+                                surname:   a.surname || a.cognome || '',
+                                birthDate: a.birthDate || a.dob || a.dataNascita || '',
+                                gender:    a.gender  || a.sesso   || '',
+                                weight:    a.weight  ?? a.peso    ?? null,
+                                height:    a.height  ?? a.altezza ?? null,
+                                sport:     a.sport   || '',
+                                role:      a.role    || a.ruolo   || '',
+                                category:  a.category || a.categoria || '',
+                                club:      a.club    || '',
+                                notes:     a.notes   || a.note    || '',
+                                createdAt: a.createdAt || new Date().toISOString()
+                            }));
+                        } else {
+                            showToast('❌ Formato non riconosciuto', 'error'); return;
+                        }
+                        const current = loadPlayers();
+                        let added = 0;
+                        source.forEach(a => {
+                            if (!current.find(x => x.id === a.id)) { current.push(a); added++; }
+                        });
+                        savePlayers(current);
+                        updateAthBadge(); populatePosturePlayerSelect(); renderAthletes();
+                        showToast('🌐 ' + added + ' atleti importati (formato universale)', 'success');
+                    } catch(err) { showToast('❌ Errore lettura file', 'error'); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+
+
+        // =========================================
+        // POSTURE PLAYER LOAD
+        // =========================================
+        // sessId opzionale: se passato carica quella sessione, altrimenti l'ultima
+        function loadPosturePlayer(sessId) {
+            // Auto-salva la sessione corrente prima di cambiare atleta
+            if (currentPosturePlayerId) savePostureData(true);
+            const pid = document.getElementById('posturePlayerSelect').value;
+            currentPosturePlayerId = pid || null;
+            const contentEl = document.getElementById('postureContent');
+            const empty     = document.getElementById('postureEmptyState');
+            const hdr       = document.getElementById('sectionHeader');
+            const strip     = document.getElementById('statsStrip');
+            const sessCtrls = document.getElementById('sessionControls');
+            const badge     = document.getElementById('playerBadge');
+
+            if (!pid) {
+                contentEl.style.display  = 'none';
+                empty.style.display      = 'block';
+                hdr.style.display        = 'none';
+                strip.style.display      = 'none';
+                sessCtrls.style.display  = 'none';
+                badge.style.display      = 'none';
+                currentSessionId         = null;
+                return;
+            }
+
+            contentEl.style.display = 'block';
+            empty.style.display     = 'none';
+            hdr.style.display       = 'block';
+            strip.style.display     = 'flex';
+            sessCtrls.style.display = 'flex';
+
+            const p = players.find(x => x.id == pid);
+            if (p) {
+                document.getElementById('playerBadgeText').textContent =
+                    `${p.surname} ${p.name}${p.ruolo ? ' — ' + p.ruolo : ''}${p.sport ? ' · ' + p.sport : ''}`;
+                badge.style.display = 'inline-flex';
+            }
+
+            const atletaData = getAtletaData(String(pid));
+            let sess = null;
+
+            if (sessId) {
+                // Sessione specifica richiesta
+                sess = atletaData.sessioni.find(s => s.id === sessId) || null;
+            }
+            if (!sess) {
+                // Ultima sessione o nuova se non esiste nulla
+                if (atletaData.sessioni.length) {
+                    sess = atletaData.sessioni[atletaData.sessioni.length - 1];
+                } else {
+                    sess = _emptySession();
+                    atletaData.sessioni.push(sess);
+                    saveAtletaData(String(pid), atletaData);
+                }
+            }
+
+            currentSessionId = sess.id;
+            // Aspetta che il DOM sia visibile prima di applicare foto/linee/cerchi
+            requestAnimationFrame(() => {
+                _applySessioneToUI(sess);
+                updateStoricoCount(pid);
+            });
+        }
+
+        // =========================================
+        // STATS
+        // =========================================
+        function updateStats() {
+            const fotos  = POSTURE_VIEWS.filter(v => {
+                const img = document.getElementById('photo_'+v);
+                return img && img.src && img.src.startsWith('data:');
+            }).length;
+            const checks = collectPostureChecks();
+            const vals   = Object.values(checks);
+            const ok     = vals.filter(v => v <= 3).length;
+            const warn   = vals.filter(v => v >= 4 && v <= 6).length;
+            const bad    = vals.filter(v => v >= 7).length;
+            const total  = vals.length;
+            document.getElementById('statFotos').textContent  = `${fotos}/4`;
+            document.getElementById('statChecks').textContent = `${total}/8`;
+            document.getElementById('statOk').textContent     = ok;
+            document.getElementById('statWarn').textContent   = warn;
+            document.getElementById('statBad').textContent    = bad;
+        }
+
+        // =========================================
+        // FOTO
+        // =========================================
+        function triggerPosturePhoto(v) { document.getElementById('fileInput_'+v).click(); }
+        function loadPosturePhoto(v, e) {
+            const file = e.target.files[0]; if (!file) return;
+            const r = new FileReader();
+            r.onload = ev => { setPosturePhoto(v, ev.target.result); updateStats(); };
+            r.readAsDataURL(file);
+            e.target.value = '';
+        }
+        function setPosturePhoto(v, url) {
+            const img = document.getElementById('photo_'+v);
+            const ph  = document.getElementById('placeholder_'+v);
+            img.src = url; img.style.display = 'block'; ph.style.display = 'none';
+        }
+        function clearPosturePhoto(v) {
+            if (!confirm('Rimuovere la foto?')) return;
+            clearPosturePhotoUI(v);
+            updateStats();
+        }
+        function clearPosturePhotoUI(v) {
+            const img = document.getElementById('photo_'+v);
+            const ph  = document.getElementById('placeholder_'+v);
+            img.src = ''; img.style.display = 'none'; ph.style.display = 'flex';
+        }
+        function collectPosturePhotos() {
+            const r = {};
+            POSTURE_VIEWS.forEach(v => {
+                const img = document.getElementById('photo_'+v);
+                r[v] = (img && img.src && img.src.startsWith('data:')) ? img.src : null;
+            });
+            return r;
+        }
+
+        // =========================================
+        // LINEE GUIDA
+        // =========================================
+        function addPostureLine(view, type, event) {
+            // Le linee vanno nel lines-overlay che è sovrapposto al canvasWrap
+            // ma fisicamente è figlio del posture-canvas-outer.
+            // Usiamo il suo getBoundingClientRect come riferimento.
+            const overlay = document.getElementById('lines_' + view);
+            const rect    = overlay.getBoundingClientRect();
+            let pct;
+            if (type === 'h') pct = ((event.clientY - rect.top)  / rect.height) * 100;
+            else              pct = ((event.clientX - rect.left)  / rect.width)  * 100;
+            pct = Math.max(2, Math.min(98, pct));
+            _createLine(view, type, pct);
+        }
+        function _createLine(view, type, pct) {
+            const container = document.getElementById('lines_' + view);
+            // Il riferimento per il drag è il container stesso (lines-overlay),
+            // che è fisicamente separato dal pz-layer → le linee non si muovono mai con la foto
+            const ref = container;
+            const line = document.createElement('div');
+            line.className    = 'posture-guide-line ' + type;
+            line.dataset.pct  = pct;
+            line.dataset.type = type;
+            if (type === 'h') line.style.top  = pct + '%';
+            else              line.style.left = pct + '%';
+
+            const handle = document.createElement('div');
+            handle.className = 'posture-handle';
+            line.appendChild(handle);
+
+            const del = document.createElement('div');
+            del.className = 'posture-del';
+            del.textContent = '✕';
+            del.addEventListener('click',      e => { e.stopPropagation(); line.remove(); });
+            del.addEventListener('touchend',   e => { e.stopPropagation(); line.remove(); });
+            del.addEventListener('mousedown',  e => e.stopPropagation());
+            del.addEventListener('touchstart', e => e.stopPropagation());
+            line.appendChild(del);
+
+            // ── Mouse drag ──
+            let dragging = false;
+            function startDrag(e) {
+                if (e.target === del) return;
+                e.preventDefault();
+                e.stopPropagation();
+                dragging = true;
+                line.classList.add('dragging');
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup',  stopMouseDrag, { once: true });
+            }
+            function onMouseMove(e) {
+                if (!dragging) return;
+                const r  = ref.getBoundingClientRect();
+                let np = type === 'h'
+                    ? ((e.clientY - r.top)  / r.height) * 100
+                    : ((e.clientX - r.left) / r.width)  * 100;
+                np = Math.max(1, Math.min(99, np));
+                line.dataset.pct = np;
+                line.style[type === 'h' ? 'top' : 'left'] = np + '%';
+            }
+            function stopMouseDrag() {
+                dragging = false;
+                line.classList.remove('dragging');
+                document.removeEventListener('mousemove', onMouseMove);
+            }
+            line.addEventListener('mousedown', startDrag);
+
+            // ── Touch drag ──
+            let touchDragging = false;
+            line.addEventListener('touchstart', e => {
+                if (e.target === del) return;
+                e.preventDefault();
+                e.stopPropagation();
+                touchDragging = true;
+                line.classList.add('dragging');
+            }, { passive: false });
+            line.addEventListener('touchmove', e => {
+                if (!touchDragging) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const t = e.touches[0];
+                const r = ref.getBoundingClientRect();
+                let np = type === 'h'
+                    ? ((t.clientY - r.top)  / r.height) * 100
+                    : ((t.clientX - r.left) / r.width)  * 100;
+                np = Math.max(1, Math.min(99, np));
+                line.dataset.pct = np;
+                line.style[type === 'h' ? 'top' : 'left'] = np + '%';
+            }, { passive: false });
+            line.addEventListener('touchend', e => {
+                e.stopPropagation();
+                touchDragging = false;
+                line.classList.remove('dragging');
+            });
+
+            container.appendChild(line);
+        }
+        function renderPostureLines(view, lines) {
+            document.getElementById('lines_'+view).innerHTML = '';
+            (lines||[]).forEach(l => {
+                if (l.type === 'circle') _createCircle(view, l.cx, l.cy, l.size);
+                else _createLine(view, l.type, l.pct);
+            });
+        }
+        function collectPostureLines() {
+            const r = {};
+            POSTURE_VIEWS.forEach(v => {
+                const lines   = Array.from(document.getElementById('lines_'+v).querySelectorAll('.posture-guide-line'))
+                                     .map(el => ({ type: el.dataset.type || (el.classList.contains('h') ? 'h' : 'v'), pct: parseFloat(el.dataset.pct) }));
+                const circles = Array.from(document.getElementById('lines_'+v).querySelectorAll('.posture-circle'))
+                                     .map(el => ({ type: 'circle', cx: parseFloat(el.dataset.cx), cy: parseFloat(el.dataset.cy), size: parseInt(el.dataset.size) }));
+                r[v] = [...lines, ...circles];
+            });
+            return r;
+        }
+
+        // =========================================
+        // CHECKLIST 1–10
+        // =========================================
+        function _checkColor(v) {
+            if (v <= 3) return 'var(--green)';
+            if (v <= 6) return 'var(--orange)';
+            return 'var(--red)';
+        }
+        function _checkLabel(v) {
+            if (v <= 3) return '✓ Ok';
+            if (v <= 6) return '⚠ Attenzione';
+            return '✕ Critico';
+        }
+        function renderPostureChecklist(saved) {
+            document.getElementById('postureChecklistGrid').innerHTML = POSTURE_CHECKS.map(c => {
+                const val = saved?.[c.id] ?? 1;
+                const color = _checkColor(val);
+                return `<div class="posture-check-item">
+                    <div class="posture-check-label">${c.label}</div>
+                    <div class="posture-check-slider-wrap">
+                        <input type="range" min="1" max="10" step="1" value="${val}"
+                            class="posture-check-slider" id="chk_${c.id}"
+                            style="accent-color:${color}"
+                            oninput="updateCheckVal('${c.id}',this.value)">
+                        <div class="posture-check-val" id="chkval_${c.id}"
+                            style="color:${color};border-color:${color}40">${val}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        function updateCheckVal(id, v) {
+            v = parseInt(v);
+            const color = _checkColor(v);
+            const valEl = document.getElementById('chkval_' + id);
+            const slider = document.getElementById('chk_' + id);
+            valEl.textContent = v;
+            valEl.style.color = color;
+            valEl.style.borderColor = color + '40';
+            slider.style.accentColor = color;
+            updateStats();
+        }
+        function collectPostureChecks() {
+            const r = {};
+            POSTURE_CHECKS.forEach(c => {
+                const el = document.getElementById('chk_' + c.id);
+                r[c.id] = el ? parseInt(el.value) : 1;
+            });
+            return r;
+        }
+
+        // =========================================
+        // CERCHI ANNOTAZIONE
+        // =========================================
+        function addPostureCircle(view) {
+            const overlay = document.getElementById('lines_' + view);
+            const rect    = overlay.getBoundingClientRect();
+            // Cerchio di default: 20% del lato minore, centrato
+            const size = Math.round(Math.min(rect.width, rect.height) * 0.25);
+            const cx = 50, cy = 50; // percentuale
+            _createCircle(view, cx, cy, size);
+        }
+
+        function _createCircle(view, cxPct, cyPct, sizePx) {
+            const overlay  = document.getElementById('lines_' + view);
+            const circle   = document.createElement('div');
+            circle.className      = 'posture-circle';
+            circle.dataset.cx     = cxPct;
+            circle.dataset.cy     = cyPct;
+            circle.dataset.size   = sizePx;
+            circle.dataset.type   = 'circle';
+
+            function applyPos() {
+                const r = overlay.getBoundingClientRect();
+                const sz = parseInt(circle.dataset.size);
+                const cx = parseFloat(circle.dataset.cx);
+                const cy = parseFloat(circle.dataset.cy);
+                circle.style.width  = sz + 'px';
+                circle.style.height = sz + 'px';
+                circle.style.left   = (cx / 100 * r.width  - sz / 2) + 'px';
+                circle.style.top    = (cy / 100 * r.height - sz / 2) + 'px';
+            }
+            applyPos();
+            circle._applyPos = applyPos; // esposto per poter ricalcolare prima dello screenshot
+
+            // ── Delete button ──
+            const del = document.createElement('div');
+            del.className   = 'posture-circle-del';
+            del.textContent = '✕';
+            del.addEventListener('mousedown',  e => e.stopPropagation());
+            del.addEventListener('touchstart', e => e.stopPropagation());
+            del.addEventListener('click',      e => { e.stopPropagation(); circle.remove(); });
+            del.addEventListener('touchend',   e => { e.stopPropagation(); circle.remove(); });
+            circle.appendChild(del);
+
+            // ── Resize handle ──
+            const resizeH = document.createElement('div');
+            resizeH.className = 'posture-circle-resize';
+            resizeH.title     = 'Ridimensiona';
+            circle.appendChild(resizeH);
+
+            // ── DRAG per spostare ──
+            function startMove(clientX, clientY) {
+                const r      = overlay.getBoundingClientRect();
+                const startX = clientX, startY = clientY;
+                const startCx = parseFloat(circle.dataset.cx);
+                const startCy = parseFloat(circle.dataset.cy);
+                circle.classList.add('dragging');
+
+                function onMove(ex, ey) {
+                    const dx = ((ex - startX) / r.width)  * 100;
+                    const dy = ((ey - startY) / r.height) * 100;
+                    const sz = parseInt(circle.dataset.size);
+                    const minPct = (sz / 2 / r.width)  * 100;
+                    const minPctY= (sz / 2 / r.height) * 100;
+                    circle.dataset.cx = Math.max(minPct,  Math.min(100 - minPct,  startCx + dx));
+                    circle.dataset.cy = Math.max(minPctY, Math.min(100 - minPctY, startCy + dy));
+                    applyPos();
+                }
+                function onUp() {
+                    circle.classList.remove('dragging');
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup',   onMouseUp);
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend',  onTouchEnd);
+                }
+                function onMouseMove(e) { onMove(e.clientX, e.clientY); }
+                function onMouseUp()    { onUp(); }
+                function onTouchMove(e) { e.preventDefault(); onMove(e.touches[0].clientX, e.touches[0].clientY); }
+                function onTouchEnd()   { onUp(); }
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup',   onMouseUp);
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend',  onTouchEnd);
+            }
+
+            circle.addEventListener('mousedown', e => {
+                if (e.target === del || e.target === resizeH) return;
+                e.preventDefault(); e.stopPropagation();
+                startMove(e.clientX, e.clientY);
+            });
+            circle.addEventListener('touchstart', e => {
+                if (e.target === del || e.target === resizeH) return;
+                e.preventDefault(); e.stopPropagation();
+                startMove(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: false });
+
+            // ── DRAG resize handle ──
+            resizeH.addEventListener('mousedown', e => {
+                e.preventDefault(); e.stopPropagation();
+                const r = overlay.getBoundingClientRect();
+                const startX = e.clientX, startY = e.clientY;
+                const startSz = parseInt(circle.dataset.size);
+                function onMove(e2) {
+                    const dx = e2.clientX - startX, dy = e2.clientY - startY;
+                    const delta = Math.sqrt(dx*dx + dy*dy) * (dx + dy > 0 ? 1 : -1);
+                    const minSz = 30, maxSz = Math.min(r.width, r.height) * 0.9;
+                    circle.dataset.size = Math.max(minSz, Math.min(maxSz, startSz + delta * 1.5));
+                    applyPos();
+                }
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup',   onUp);
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup',   onUp);
+            });
+            resizeH.addEventListener('touchstart', e => {
+                e.preventDefault(); e.stopPropagation();
+                const r = overlay.getBoundingClientRect();
+                const startX = e.touches[0].clientX, startY = e.touches[0].clientY;
+                const startSz = parseInt(circle.dataset.size);
+                function onMove(e2) {
+                    const dx = e2.touches[0].clientX - startX, dy = e2.touches[0].clientY - startY;
+                    const delta = Math.sqrt(dx*dx + dy*dy) * (dx + dy > 0 ? 1 : -1);
+                    const minSz = 30, maxSz = Math.min(r.width, r.height) * 0.9;
+                    circle.dataset.size = Math.max(minSz, Math.min(maxSz, startSz + delta * 1.5));
+                    applyPos();
+                }
+                function onUp() {
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend',  onUp);
+                }
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend',  onUp);
+            }, { passive: false });
+
+            // Riposiziona se la finestra cambia dimensione
+            window.addEventListener('resize', applyPos);
+
+            overlay.appendChild(circle);
+        }
+
+        function renderPostureCircles(view, circles) {
+            (circles || []).forEach(c => _createCircle(view, c.cx, c.cy, c.size));
+        }
+
+        function collectPostureCircles() {
+            const r = {};
+            POSTURE_VIEWS.forEach(v => {
+                r[v] = Array.from(document.getElementById('lines_' + v).querySelectorAll('.posture-circle'))
+                    .map(el => ({ cx: parseFloat(el.dataset.cx), cy: parseFloat(el.dataset.cy), size: parseInt(el.dataset.size) }));
+            });
+            return r;
+        }
+
+
+
+        // =========================================
+        // SAVE
+        // =========================================
+        function savePostureData(silent = false) {
+            if (!currentPosturePlayerId) return;
+            const atletaData = getAtletaData(String(currentPosturePlayerId));
+            const idx = atletaData.sessioni.findIndex(s => s.id === currentSessionId);
+            const sessData = {
+                id:     currentSessionId || ('sess_' + Date.now()),
+                data:   idx >= 0 ? atletaData.sessioni[idx].data : new Date().toISOString(),
+                label:  idx >= 0 ? atletaData.sessioni[idx].label
+                                 : new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}),
+                lines:  collectPostureLines(),
+                checks: collectPostureChecks(),
+                notes:  document.getElementById('postureNotesText').value,
+                photos: collectPosturePhotos()
+            };
+            if (idx >= 0) {
+                atletaData.sessioni[idx] = sessData;
+            } else {
+                atletaData.sessioni.push(sessData);
+                currentSessionId = sessData.id;
+            }
+            saveAtletaData(String(currentPosturePlayerId), atletaData);
+            // ── SUPABASE SYNC ──
+            if (window._sbSavePosture && window._sbState && window._sbState.ready) {
+              const ath = players.find(p => String(p.id) === String(currentPosturePlayerId));
+              if (ath && ath._sbId) {
+                window._sbSavePosture(ath._sbId, sessData.checks, sessData.label || null);
+              }
+            }
+            if (!silent) {
+                showToast('Sessione salvata!');
+                const btn = document.getElementById('postureSaveBtn');
+                btn.innerHTML = '<i class="fas fa-check"></i> Salvato!';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-save"></i> Salva', 2000);
+            }
+            updateStoricoCount(currentPosturePlayerId);
+        }
+
+        // =========================================
+        // CAPTURE + PDF
+        // =========================================
+
+        // Dimensioni canvas = card reale nel DOM (consistenti tra tutte le viste).
+        // Foto disegnata con object-fit:contain, poi canvas ritagliato per eliminare bande nere.
+        // Linee e cerchi con coordinate % pure.
+        async function capturePostureCard(view) {
+            const photoEl = document.getElementById('photo_' + view);
+            const overlay = document.getElementById('lines_' + view);
+            const wrapEl  = document.getElementById('canvasWrap_' + view);
+            if (!wrapEl) return null;
+
+            // Dimensioni FISSE indipendenti dallo schermo — ratio 3:4 ideale per persone in piedi
+            // Uguale per tutte le card, uguale tra sessioni diverse
+            const CW = 900, CH = 1200;
+
+            const out = document.createElement('canvas');
+            out.width = CW; out.height = CH;
+            const ctx = out.getContext('2d');
+            ctx.fillStyle = '#0d0f14';
+            ctx.fillRect(0, 0, CW, CH);
+
+            const hasPhoto = photoEl && photoEl.src && photoEl.src.startsWith('data:');
+            if (hasPhoto) {
+                const imgObj = await new Promise(res => {
+                    const i = new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=photoEl.src;
+                });
+                if (imgObj) {
+                    // object-fit:contain — dimensioni card fisse come in app
+                    // le bande nere sono coerenti col background #0d0f14 dell'app
+                    const iw=imgObj.naturalWidth, ih=imgObj.naturalHeight;
+                    const sf=Math.min(CW/iw, CH/ih);
+                    const dw=iw*sf, dh=ih*sf;
+                    ctx.drawImage(imgObj, (CW-dw)/2, (CH-dh)/2, dw, dh);
+                }
+            }
+
+            // Linee guida — % puri rispetto CW/CH fissi
+            overlay.querySelectorAll('.posture-guide-line').forEach(el => {
+                const pct=parseFloat(el.dataset.pct), isH=el.classList.contains('h');
+                ctx.save();
+                ctx.strokeStyle = isH ? 'rgba(0,210,255,0.9)' : 'rgba(0,220,100,0.9)';
+                ctx.lineWidth   = 2.5;
+                ctx.beginPath();
+                if(isH){ ctx.moveTo(0, pct/100*CH); ctx.lineTo(CW, pct/100*CH); }
+                else   { ctx.moveTo(pct/100*CW, 0); ctx.lineTo(pct/100*CW, CH); }
+                ctx.stroke(); ctx.restore();
+            });
+
+            // Cerchi — % puri; size salvato in px DOM relativo all'overlay
+            // Lo scaliamo usando il rapporto overlay-DOM / CW fisso
+            const oDomW = overlay.getBoundingClientRect().width || 400;
+            const sizeScale = CW / oDomW;
+            overlay.querySelectorAll('.posture-circle').forEach(el => {
+                const cx = parseFloat(el.dataset.cx) / 100 * CW;
+                const cy = parseFloat(el.dataset.cy) / 100 * CH;
+                const r  = parseFloat(el.dataset.size) / 2 * sizeScale;
+                ctx.save();
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+                ctx.strokeStyle = 'rgba(255,82,82,0.95)';
+                ctx.lineWidth   = 4;
+                ctx.shadowColor = 'rgba(255,82,82,0.6)'; ctx.shadowBlur = 20;
+                ctx.stroke(); ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,82,82,0.07)'; ctx.fill();
+                ctx.restore();
+            });
+
+            return out.toDataURL('image/jpeg', 0.93);
+        }
+
+
+
+
+
+
+
+        // ── Helper PDF — light theme, stesso stile del dashboard ──
+        const PDF = {
+            white:  [255,255,255],
+            bg:     [245,247,250],
+            bg2:    [235,239,244],
+            border: [210,218,228],
+            text1:  [13,17,23],
+            text2:  [45,60,75],
+            text3:  [100,120,140],
+            cyan:   [0,184,212],
+            green:  [0,190,100],
+            orange: [255,145,0],
+            red:    [220,50,70],
+            header(doc, title, subtitle) {
+                const W = 210, m = 14;
+                doc.setFillColor(...PDF.bg);
+                doc.rect(0, 0, W, 22, 'F');
+                doc.setFillColor(...PDF.cyan);
+                doc.rect(0, 0, W, 2, 'F');
+                doc.rect(0, 0, 4, 22, 'F');
+                doc.setDrawColor(...PDF.border); doc.setLineWidth(0.3);
+                doc.line(0, 22, W, 22);
+                doc.setTextColor(...PDF.cyan);
+                doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+                doc.text('SPORTHUB', m + 4, 13);
+                doc.setTextColor(...PDF.text3);
+                doc.setFontSize(7.5); doc.setFont('helvetica', 'normal');
+                doc.text('ANALISI POSTURALE', m + 4, 19);
+                doc.setTextColor(...PDF.text3);
+                doc.setFontSize(7.5); doc.setFont('helvetica', 'normal');
+                doc.text(subtitle, W - m, 19, { align: 'right' });
+            },
+            footer(doc) {
+                const W = 210, m = 14, n = doc.getNumberOfPages();
+                for (let i = 1; i <= n; i++) {
+                    doc.setPage(i);
+                    doc.setDrawColor(...PDF.border); doc.setLineWidth(0.3);
+                    doc.line(m, 286, W - m, 286);
+                    doc.setTextColor(...PDF.text3); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+                    doc.text('SPORTHUB — Analisi Posturale', m, 292);
+                    doc.text(`Pag. ${i} / ${n}`, W - m, 292, { align: 'right' });
+                }
+            },
+            sectionTitle(doc, text, y, rgb) {
+                const m = 14;
+                doc.setFillColor(...PDF.bg);
+                doc.setDrawColor(...PDF.border); doc.setLineWidth(0.3);
+                doc.roundedRect(m, y, 182, 8, 1.5, 1.5, 'FD');
+                doc.setFillColor(...rgb);
+                doc.rect(m, y, 3, 8, 'F');
+                doc.setTextColor(...PDF.text1);
+                doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+                doc.text(text, m + 6, y + 5.5);
+                return y + 12;
+            },
+            tableStyle(headRgb) {
+                return {
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 3, textColor: PDF.text2, lineColor: PDF.border, lineWidth: 0.2, overflow: 'linebreak' },
+                    headStyles: { fillColor: headRgb, textColor: PDF.white, fontStyle: 'bold', fontSize: 8, lineColor: headRgb },
+                    alternateRowStyles: { fillColor: PDF.bg2 },
+                    bodyStyles: { fillColor: PDF.white },
+                    margin: { left: 14, right: 14 }
+                };
+            }
+        };
+
+        async function buildPosturePDF() {
+            const pid  = currentPosturePlayerId;
+            const p    = players.find(x => x.id == pid);
+            const data = loadPostureData(pid);
+            const { jsPDF } = window.jspdf;
+            const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const vl   = { front: 'Frontale', back: 'Posteriore', dx: 'Laterale DX', sx: 'Laterale SX' };
+
+            // Header con nome atleta
+            const athTitle   = p ? `${p.surname || ''} ${p.name || ''}`.trim() : 'Atleta sconosciuto';
+            const athSubtitle = [p?.sport, p?.ruolo, p?.club].filter(Boolean).join('  ·  ')
+                              || new Date().toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+            PDF.header(doc, athTitle, new Date().toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' }));
+            let y = 28;
+
+            // ══════════════════════════════════════════
+            // PAGINA 1 — Anagrafica + Checklist
+            // ══════════════════════════════════════════
+
+            // ── Anagrafica ──
+            if (p) {
+                const m=14, uw=182;
+                const age    = p.dob ? Math.floor((Date.now()-new Date(p.dob))/(1000*60*60*24*365.25)) : null;
+                const dobStr = p.dob ? new Date(p.dob).toLocaleDateString('it-IT') : null;
+
+                // Card contenitore
+                const cH = 26;
+                doc.setFillColor(248,251,255);
+                doc.setDrawColor(210,225,242); doc.setLineWidth(0.25);
+                doc.roundedRect(m, y, uw, cH, 3, 3, 'FD');
+                // Accent bar sinistra
+                doc.setFillColor(0,184,212);
+                doc.roundedRect(m, y, 3, cH, 1.5, 1.5, 'F');
+                doc.rect(m+1.5, y, 1.5, cH, 'F');
+
+                // Avatar
+                const avX=m+13, avY=y+cH/2;
+                doc.setFillColor(0,184,212);
+                doc.circle(avX, avY, 6, 'F');
+                doc.setTextColor(255,255,255); doc.setFontSize(7); doc.setFont('helvetica','bold');
+                doc.text(((p.surname||'?')[0]+(p.name||'?')[0]).toUpperCase(), avX, avY+2.5, {align:'center'});
+
+                // Nome + sottotitolo (area centro, max 65mm per non toccare le pillole)
+                doc.setTextColor(13,31,53); doc.setFontSize(9.5); doc.setFont('helvetica','bold');
+                const fullName = `${(p.surname||'').toUpperCase()} ${p.name||''}`;
+                doc.text(fullName, m+23, y+9, {maxWidth:65});
+                const sub=[p.sport,p.ruolo,p.categoria,p.club].filter(Boolean).join('  ·  ');
+                if(sub){ doc.setTextColor(100,125,160); doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.text(sub, m+23, y+16, {maxWidth:65}); }
+
+                // Separatore verticale
+                doc.setDrawColor(210,225,242); doc.setLineWidth(0.2);
+                doc.line(m+92, y+3, m+92, y+cH-3);
+
+                // Griglia dati fisici (2 colonne × 3 righe nella metà destra)
+                const fields=[];
+                if(dobStr)    fields.push({l:'Data nascita', v:dobStr+(age?'  ('+age+' anni)':'')});
+                if(p.sesso)   fields.push({l:'Sesso',        v:p.sesso==='M'?'Maschio':p.sesso==='F'?'Femmina':p.sesso});
+                if(p.peso)    fields.push({l:'Peso',         v:p.peso+' kg'});
+                if(p.altezza) fields.push({l:'Altezza',      v:p.altezza+' cm'});
+                if(p.bmi)     fields.push({l:'BMI',          v:String(p.bmi)});
+
+                const fColW=44, fGap=2;
+                const fStartX=m+95, fStartY=y+5;
+                fields.forEach((f,i)=>{
+                    const col=i%2, row=Math.floor(i/2);
+                    const fx=fStartX+col*(fColW+fGap), fy=fStartY+row*8;
+                    doc.setTextColor(120,145,170); doc.setFontSize(5.5); doc.setFont('helvetica','bold');
+                    doc.text(f.l.toUpperCase(), fx, fy);
+                    doc.setTextColor(13,31,53); doc.setFontSize(7); doc.setFont('helvetica','bold');
+                    doc.text(f.v, fx, fy+4.5);
+                });
+
+                y += cH + 6;
+            }
+
+            // ── Checklist ──
+            {
+                const m=14, uw=182;
+                const liveChecks = collectPostureChecks();
+                const cCol = v => v<=3?[10,124,64]:v<=6?[179,92,0]:[192,21,43];
+                const cBg  = v => v<=3?[237,250,243]:v<=6?[255,244,229]:[254,240,240];
+                const cLbl = v => v<=3?'Ottimo':v<=6?'Attenzione':'Critico';
+
+                // Header sezione
+                doc.setFillColor(26,46,74);
+                doc.roundedRect(m, y, uw, 9, 2, 2, 'F');
+                doc.setFillColor(0,184,212);
+                doc.rect(m, y, 2.5, 9, 'F');
+                doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+                doc.text('VALUTAZIONE RAPIDA', m+7, y+6);
+
+                // Score summary a destra
+                const vals = POSTURE_CHECKS.map(c=>liveChecks[c.id]??1);
+                const nOk=vals.filter(v=>v<=3).length, nWarn=vals.filter(v=>v>3&&v<=6).length, nCrit=vals.filter(v=>v>6).length;
+                const summary = `${nOk} Ottimo  ·  ${nWarn} Attenzione  ·  ${nCrit} Critico`;
+                doc.setTextColor(180,200,220); doc.setFontSize(6); doc.setFont('helvetica','normal');
+                doc.text(summary, m+uw-3, y+6, {align:'right'});
+
+                y += 9;
+
+                // Righe checklist — 2 colonne affiancate
+                const rowH=9, half=uw/2, checks=POSTURE_CHECKS;
+                for(let i=0; i<checks.length; i+=2){
+                    const rowBg = (i/2)%2===0 ? [255,255,255] : [247,250,253];
+                    // Sfondo riga intera
+                    doc.setFillColor(...rowBg); doc.setDrawColor(228,235,244); doc.setLineWidth(0.15);
+                    doc.rect(m, y, uw, rowH, 'FD');
+                    // Divisore colonne
+                    doc.setDrawColor(228,235,244); doc.line(m+half, y, m+half, y+rowH);
+
+                    [0,1].forEach(col=>{
+                        const c=checks[i+col]; if(!c) return;
+                        const v=liveChecks[c.id]??1;
+                        const x=m+col*half;
+                        // Label
+                        doc.setTextColor(45,62,85); doc.setFontSize(7); doc.setFont('helvetica','normal');
+                        doc.text(c.label, x+3, y+6);
+                        // Valore numerico
+                        doc.setTextColor(...cCol(v)); doc.setFontSize(8); doc.setFont('helvetica','bold');
+                        doc.text(String(v), x+half-30, y+6.5);
+                        doc.setTextColor(150,165,180); doc.setFontSize(6); doc.setFont('helvetica','normal');
+                        doc.text('/10', x+half-26, y+6.5);
+                        // Badge
+                        const bW=18, bH=5, bX=x+half-22, bY=y+2.5;
+                        doc.setFillColor(...cBg(v)); doc.setDrawColor(...cCol(v)); doc.setLineWidth(0.2);
+                        doc.roundedRect(bX, bY, bW, bH, 1.5,1.5,'FD');
+                        doc.setTextColor(...cCol(v)); doc.setFontSize(5.5); doc.setFont('helvetica','bold');
+                        doc.text(cLbl(v), bX+bW/2, bY+3.5, {align:'center'});
+                    });
+                    y += rowH;
+                }
+                // Bordo inferiore sezione
+                doc.setDrawColor(210,225,242); doc.setLineWidth(0.25);
+                doc.line(m, y, m+uw, y);
+                y += 6;
+
+            // ── Note cliniche (pagina 1, sotto checklist) ──
+            {
+                const notesVal = document.getElementById('postureNotesText').value.trim();
+                if (notesVal) {
+                    const mn=14, uwn=182;
+                    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+                    const noteLines = doc.splitTextToSize(notesVal, uwn-10);
+                    const noteH = noteLines.length * 4.5 + 16;
+                    doc.setFillColor(245,249,255);
+                    doc.setDrawColor(210,225,242); doc.setLineWidth(0.25);
+                    doc.roundedRect(mn, y, uwn, noteH, 3, 3, 'FD');
+                    doc.setFillColor(0,184,212); doc.rect(mn, y, 2.5, noteH, 'F');
+                    doc.setTextColor(0,119,180); doc.setFontSize(7); doc.setFont('helvetica','bold');
+                    doc.text('NOTE CLINICHE', mn+8, y+6);
+                    doc.setDrawColor(210,225,242); doc.setLineWidth(0.2);
+                    doc.line(mn+3, y+9, mn+uwn-3, y+9);
+                    doc.setTextColor(45,62,85); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+                    doc.text(noteLines, mn+8, y+14);
+                    y += noteH + 4;
+                }
+            }
+
+            }
+
+            // ══════════════════════════════════════════
+            // PAGINA 2 — Foto 2×2 + Note cliniche
+            // ══════════════════════════════════════════
+            doc.addPage();
+            // Mini header pagina 2
+            doc.setFillColor(26,46,74);
+            doc.rect(0, 0, 210, 12, 'F');
+            doc.setFillColor(0,184,212); doc.rect(0,0,3,12,'F');
+            doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+            doc.text('SPORTHUB', 7, 8);
+            doc.setTextColor(150,190,220); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+            doc.text('ANALISI FOTOGRAFICA POSTURALE', 36, 8);
+            const athName2 = p ? `${p.surname||''} ${p.name||''}`.trim() : '';
+            doc.setTextColor(200,220,240); doc.setFontSize(6.5);
+            doc.text(athName2, 207, 8, {align:'right'});
+            let y2 = 17;
+
+            showLoading('ACQUISIZIONE IMMAGINI...');
+            const captures = {};
+            for (const v of POSTURE_VIEWS) { captures[v] = await capturePostureCard(v); }
+            showLoading('GENERAZIONE PDF...');
+
+            async function getImgSize(src) {
+                if (!src) return { w:1, h:1 };
+                return new Promise(res => {
+                    const i = new Image();
+                    i.onload = () => res({ w:i.naturalWidth, h:i.naturalHeight });
+                    i.onerror = () => res({ w:1, h:1 });
+                    i.src = src;
+                });
+            }
+
+            // Calcola altezza card per far stare 2 righe in ~170mm (lascia spazio note)
+            const PAGE2_H   = 170; // mm riservati alle foto
+            const m2=14, uw2=182, GAP_MM=3;
+            const CARD_W_MM = (uw2 - GAP_MM) / 2;
+            // Ratio da prima immagine disponibile
+            const firstSrc = POSTURE_VIEWS.map(v=>captures[v]).find(Boolean);
+            const imgSz    = await getImgSize(firstSrc);
+            const ratio    = imgSz.h / imgSz.w;
+            const TITLE_H  = 7; // mm header card
+            const IMG_H_MM = Math.min((PAGE2_H/2) - TITLE_H - GAP_MM, CARD_W_MM * ratio);
+            const CARD_H_MM= IMG_H_MM + TITLE_H;
+
+            const vlN = {front:'Frontale', back:'Posteriore', dx:'Laterale DX', sx:'Laterale SX'};
+            const vlC = {front:[0,119,204], back:[108,63,197], dx:[0,149,74], sx:[196,92,0]};
+
+            // Ghost con solo le 4 foto — sfondo bianco, bordi leggeri
+            const GW = 794, GMARG = 20, GINNER = GW-GMARG*2, GGAP = 10;
+            const GCW = Math.floor((GINNER-GGAP)/2);
+            const GCH = Math.round(GCW * ratio);
+            const GTH = 28; // px header card
+
+            function photoCardGhost(v) {
+                const col = `rgb(${vlC[v].join(',')})`;
+                const img = captures[v]
+                    ? `<img src="${captures[v]}" style="width:100%;height:${GCH}px;object-fit:contain;background:#0d0f14;display:block">`
+                    : `<div style="width:100%;height:${GCH}px;background:#1a2230;display:flex;align-items:center;justify-content:center;color:#4a5a6a;font-size:11px;letter-spacing:2px;text-transform:uppercase">Nessuna foto</div>`;
+                return `<div style="width:${GCW}px;border-radius:6px;overflow:hidden;border:1px solid #d8e3ef;box-shadow:0 1px 6px rgba(0,30,80,0.08)">
+                    <div style="height:${GTH}px;background:#f4f7fb;border-bottom:1px solid #d8e3ef;display:flex;align-items:center;padding:0 12px;gap:8px">
+                        <span style="width:8px;height:8px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>
+                        <span style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#2d3e55">${vlN[v]}</span>
+                    </div>
+                    ${img}
+                </div>`;
+            }
+
+            const ghost2 = document.createElement('div');
+            ghost2.style.cssText = `position:fixed;left:-9999px;top:0;width:${GW}px;background:#ffffff;padding:${GMARG}px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif`;
+            ghost2.innerHTML = `
+                <div style="display:flex;gap:${GGAP}px;margin-bottom:${GGAP}px">
+                    ${photoCardGhost('front')}${photoCardGhost('back')}
+                </div>
+                <div style="display:flex;gap:${GGAP}px">
+                    ${photoCardGhost('dx')}${photoCardGhost('sx')}
+                </div>`;
+            document.body.appendChild(ghost2);
+            await new Promise(r => requestAnimationFrame(()=>requestAnimationFrame(r)));
+
+            let ghostImg2 = null;
+            try {
+                const cv2 = await html2canvas(ghost2, {
+                    useCORS:true, allowTaint:true, backgroundColor:'#ffffff',
+                    scale:2, logging:false, imageTimeout:0,
+                    width:GW, windowWidth:GW
+                });
+                ghostImg2 = cv2.toDataURL('image/jpeg', 0.94);
+            } catch(e) { console.warn('ghost2',e); }
+            document.body.removeChild(ghost2);
+
+            if (ghostImg2) {
+                const sz2 = await getImgSize(ghostImg2);
+                const mmW2 = uw2;
+                const mmH2 = Math.round(mmW2 * sz2.h / sz2.w);
+                doc.addImage(ghostImg2, 'JPEG', m2, y2, mmW2, mmH2, undefined, 'FAST');
+                y2 += mmH2 + 5;
+            }
+
+
+            // ── Disclaimer ──
+            doc.setFontSize(7); doc.setTextColor(...PDF.text3); doc.setFont('helvetica','normal');
+            doc.text('Screening visivo preliminare. Non sostituisce la valutazione di un professionista specializzato.',
+                14, doc.internal.pageSize.height - 10, { maxWidth: 182 });
+
+            // ── Disclaimer ──
+            // ── Disclaimer ──
+            doc.setFontSize(7); doc.setTextColor(...PDF.text3); doc.setFont('helvetica', 'normal');
+            doc.text('Screening visivo preliminare. Non sostituisce la valutazione di un professionista specializzato.',
+                14, doc.internal.pageSize.height - 10, { maxWidth: 182 });
+
+            PDF.footer(doc);
+            return { doc, p };
+        }
+
+        async function exportPosturePDF() {
+            if (!currentPosturePlayerId) return;
+            try {
+                const { doc, p } = await buildPosturePDF();
+                doc.save(`SPORTHUB_Posturale_${p.surname}_${p.name}_${new Date().toISOString().split('T')[0]}.pdf`);
+                showToast('PDF esportato!');
+            } catch (e) { showToast('Errore PDF: ' + e.message, 'error'); console.error(e); }
+            setTimeout(() => { try { hideLoading(); } catch {} }, 400);
+        }
+
+        async function savePostureFile() {
+            if (!currentPosturePlayerId) return;
+            const p = players.find(x => x.id == currentPosturePlayerId);
+            if (!p) return;
+            const fname = `SPORTHUB_Posturale_${p.surname}_${p.name}_${new Date().toISOString().split('T')[0]}`;
+            try {
+                const { doc } = await buildPosturePDF();
+                const pdfBlob = doc.output('blob');
+                if ('showSaveFilePicker' in window) {
+                    try {
+                        const fileHandle = await window.showSaveFilePicker({
+                            suggestedName: fname + '.pdf',
+                            types: [{ description: 'PDF Scheda Posturale', accept: { 'application/pdf': ['.pdf'] } }]
+                        });
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(pdfBlob);
+                        await writable.close();
+                        const btn = document.getElementById('postureFileBtn');
+                        btn.innerHTML = '<i class="fas fa-check"></i> Salvato!';
+                        setTimeout(() => btn.innerHTML = '<i class="fas fa-folder-open"></i> Salva File', 2000);
+                        hideLoading(); showToast('File salvato!'); return;
+                    } catch (fsErr) {
+                        if (fsErr.name === 'AbortError') { hideLoading(); return; }
+                        console.warn('FileSystem API error, fallback:', fsErr);
+                    }
+                }
+                const url  = URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = url; link.download = fname + '.pdf'; link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 5000);
+                showToast('File scaricato!');
+            } catch (e) { showToast('Errore: ' + e.message, 'error'); console.error(e); }
+            setTimeout(() => { try { hideLoading(); } catch {} }, 400);
+        }
+
+        // =========================================
+        // =========================================
+        // PAN & ZOOM
+        // =========================================
+        const pzMap = {}; // view → { scale, tx, ty, active }
+        const PZ_MIN = 1, PZ_MAX = 6, PZ_STEP = 0.25;
+
+        function toggleZoom(view) {
+            const state = pzMap[view];
+            if (state && state.active) {
+                pzDisable(view);
+            } else {
+                pzEnable(view);
+            }
+        }
+
+        function pzEnable(view) {
+            const wrap  = document.getElementById('canvasWrap_' + view);
+            const layer = document.getElementById('pzLayer_' + view);
+            const btn   = document.getElementById('zoomBtn_' + view);
+
+            if (!pzMap[view]) pzMap[view] = { scale: 1, tx: 0, ty: 0, active: false };
+            const state = pzMap[view];
+            state.active = true;
+
+            btn.classList.add('zoom-on');
+            wrap.classList.add('pan-zoom-active');
+            pzApply(view);
+
+            // ── Wheel zoom, centrato sul puntatore ──
+            function onWheel(e) {
+                e.preventDefault();
+                const rect  = wrap.getBoundingClientRect();
+                const mx    = e.clientX - rect.left;
+                const my    = e.clientY - rect.top;
+                const delta = e.deltaY < 0 ? PZ_STEP : -PZ_STEP;
+                const newScale = Math.min(PZ_MAX, Math.max(PZ_MIN, state.scale + delta));
+                if (newScale === state.scale) return;
+                // Aggiusta tx/ty per mantenere il punto sotto il cursore fisso
+                const ratio = newScale / state.scale;
+                state.tx = mx - ratio * (mx - state.tx);
+                state.ty = my - ratio * (my - state.ty);
+                state.scale = newScale;
+                pzApply(view);
+                pzClamp(view);
+            }
+
+            // ── Drag (pan) ──
+            let dragging = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
+
+            function onMouseDown(e) {
+                if (e.button !== 0) return;
+                // Non iniziare drag se si clicca su una linea guida o sui suoi controlli
+                if (e.target.closest('.posture-guide-line')) return;
+                dragging = true;
+                startX = e.clientX; startY = e.clientY;
+                startTx = state.tx; startTy = state.ty;
+                wrap.classList.add('dragging');
+                e.preventDefault();
+            }
+            function onMouseMove(e) {
+                if (!dragging) return;
+                state.tx = startTx + (e.clientX - startX);
+                state.ty = startTy + (e.clientY - startY);
+                pzApply(view);
+            }
+            function onMouseUp() {
+                if (!dragging) return;
+                dragging = false;
+                wrap.classList.remove('dragging');
+                pzClamp(view);
+            }
+
+            // ── Touch pan (pinch futuro) ──
+            let t0x = 0, t0y = 0, t0tx = 0, t0ty = 0;
+            function onTouchStart(e) {
+                if (e.touches.length !== 1) return;
+                if (e.target.closest('.posture-guide-line')) return;
+                t0x = e.touches[0].clientX; t0y = e.touches[0].clientY;
+                t0tx = state.tx; t0ty = state.ty;
+            }
+            function onTouchMove(e) {
+                if (e.touches.length !== 1 || state.scale <= 1) return;
+                e.preventDefault();
+                state.tx = t0tx + (e.touches[0].clientX - t0x);
+                state.ty = t0ty + (e.touches[0].clientY - t0y);
+                pzApply(view);
+            }
+            function onTouchEnd() { pzClamp(view); }
+
+            // ── Reset doppio click ──
+            function onDblClick(e) {
+                if (e.target.closest('.posture-guide-line')) return;
+                state.scale = 1; state.tx = 0; state.ty = 0;
+                pzApply(view);
+            }
+
+            wrap._pz = { onWheel, onMouseDown, onMouseMove, onMouseUp, onTouchStart, onTouchMove, onTouchEnd, onDblClick };
+            wrap.addEventListener('wheel',      onWheel,      { passive: false });
+            wrap.addEventListener('mousedown',  onMouseDown);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup',  onMouseUp);
+            wrap.addEventListener('touchstart', onTouchStart, { passive: true });
+            wrap.addEventListener('touchmove',  onTouchMove,  { passive: false });
+            wrap.addEventListener('touchend',   onTouchEnd);
+            wrap.addEventListener('dblclick',   onDblClick);
+        }
+
+        function pzDisable(view) {
+            const wrap  = document.getElementById('canvasWrap_' + view);
+            const btn   = document.getElementById('zoomBtn_' + view);
+            const state = pzMap[view];
+            if (!state) return;
+            state.active = false;
+            // Reset view
+            state.scale = 1; state.tx = 0; state.ty = 0;
+            pzApply(view);
+            btn.classList.remove('zoom-on');
+            wrap.classList.remove('pan-zoom-active', 'dragging');
+            const h = wrap._pz;
+            if (h) {
+                wrap.removeEventListener('wheel',      h.onWheel);
+                wrap.removeEventListener('mousedown',  h.onMouseDown);
+                window.removeEventListener('mousemove', h.onMouseMove);
+                window.removeEventListener('mouseup',  h.onMouseUp);
+                wrap.removeEventListener('touchstart', h.onTouchStart);
+                wrap.removeEventListener('touchmove',  h.onTouchMove);
+                wrap.removeEventListener('touchend',   h.onTouchEnd);
+                wrap.removeEventListener('dblclick',   h.onDblClick);
+            }
+            wrap._pz = null;
+        }
+
+        function pzApply(view) {
+            const layer = document.getElementById('pzLayer_' + view);
+            const badge = document.getElementById('zoomBadge_' + view);
+            const state = pzMap[view];
+            if (!state || !layer) return;
+            layer.style.transform = `translate(${state.tx}px, ${state.ty}px) scale(${state.scale})`;
+            if (badge) badge.textContent = state.scale.toFixed(1).replace('.0','') + '×';
+        }
+
+        function pzClamp(view) {
+            const wrap  = document.getElementById('canvasWrap_' + view);
+            const state = pzMap[view];
+            if (!state || state.scale <= 1) { state.tx = 0; state.ty = 0; pzApply(view); return; }
+            const ww = wrap.offsetWidth, wh = wrap.offsetHeight;
+            const scaledW = ww * state.scale, scaledH = wh * state.scale;
+            // Limita il pan: non lasciare spazio vuoto ai bordi
+            const maxTx = 0, minTx = ww - scaledW;
+            const maxTy = 0, minTy = wh - scaledH;
+            state.tx = Math.min(maxTx, Math.max(minTx, state.tx));
+            state.ty = Math.min(maxTy, Math.max(minTy, state.ty));
+            pzApply(view);
+        }
+
+
+
+        // =========================================
+        // STORICO SESSIONI
+        // =========================================
+
+        let currentSessionId = null; // ID sessione attiva
+
+        // ── Migrazione dati vecchio formato → nuovo ──
+        function migratePostureData(pid) {
+            const db  = loadPostureDB();
+            const raw = db[String(pid)];
+            if (!raw) return { sessioni: [] };
+            // Se già nel nuovo formato
+            if (raw.sessioni) return raw;
+            // Vecchio formato: { lines, checks, notes, photos } → wrap in sessione
+            const sess = {
+                id:      'sess_' + Date.now(),
+                data:    new Date().toISOString(),
+                label:   'Sessione importata',
+                lines:   raw.lines  || {front:[],back:[],dx:[],sx:[]},
+                checks:  raw.checks || {},
+                notes:   raw.notes  || '',
+                photos:  raw.photos || {front:null,back:null,dx:null,sx:null}
+            };
+            const newData = { sessioni: [sess] };
+            db[String(pid)] = newData;
+            savePostureDB(db);
+            return newData;
+        }
+
+        function getAtletaData(pid) {
+            const db  = loadPostureDB();
+            const raw = db[String(pid)];
+            if (!raw) return { sessioni: [] };
+            if (raw.sessioni) return raw;
+            return migratePostureData(pid);
+        }
+
+        function saveAtletaData(pid, data) {
+            const db = loadPostureDB();
+            db[String(pid)] = data;
+            savePostureDB(db);
+        }
+
+        function getSessione(pid, sessId) {
+            const data = getAtletaData(pid);
+            return data.sessioni.find(s => s.id === sessId) || null;
+        }
+
+        function getCurrentSessione(pid) {
+            const data = getAtletaData(pid);
+            if (!data.sessioni.length) return null;
+            return data.sessioni[data.sessioni.length - 1]; // ultima = corrente
+        }
+
+        function _emptySession() {
+            return {
+                id:     'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+                data:   new Date().toISOString(),
+                label:  new Date().toLocaleDateString('it-IT', {day:'2-digit',month:'long',year:'numeric'}),
+                lines:  {front:[],back:[],dx:[],sx:[]},
+                checks: {},
+                notes:  '',
+                photos: {front:null,back:null,dx:null,sx:null}
+            };
+        }
+
+        function updateStoricoCount(pid) {
+            const data  = getAtletaData(pid);
+            const count = data.sessioni.length;
+            const el    = document.getElementById('storicoCount');
+            if (el) el.textContent = count > 0 ? `${count} sessioni` : '';
+        }
+
+        // ── Nuova sessione ──
+        function newSession() {
+            if (!currentPosturePlayerId) return;
+            if (!confirm('Vuoi creare una nuova sessione? La sessione corrente verrà salvata nello storico.')) return;
+            savePostureData(true); // auto-salva quella corrente
+            const data = getAtletaData(String(currentPosturePlayerId));
+            const sess = _emptySession();
+            data.sessioni.push(sess);
+            saveAtletaData(String(currentPosturePlayerId), data);
+            currentSessionId = sess.id;
+            POSTURE_VIEWS.forEach(v => clearPosturePhotoUI(v));
+            renderPostureChecklist({});
+            document.getElementById('postureNotesText').value = '';
+            POSTURE_VIEWS.forEach(v => renderPostureLines(v, []));
+            updateStats();
+            updateStoricoCount(currentPosturePlayerId);
+            showToast('Nuova sessione creata ✓');
+        }
+
+        // ── Storico modal ──
+        function openStorico() {
+            if (!currentPosturePlayerId) return;
+            const p    = players.find(x => x.id == currentPosturePlayerId);
+            const data = getAtletaData(currentPosturePlayerId);
+            document.getElementById('storicoAtletaName').textContent =
+                p ? `${p.surname} ${p.name}` : 'Atleta';
+            const list  = document.getElementById('storicoList');
+            const cCol  = v => v<=3?'var(--green)':v<=6?'var(--orange)':'var(--red)';
+            const cLbl  = v => v<=3?'OK':v<=6?'ATT':'CRIT';
+
+            if (!data.sessioni.length) {
+                list.innerHTML = '<div style="text-align:center;color:var(--text-3);padding:30px;font-size:0.85rem">Nessuna sessione salvata</div>';
+            } else {
+                // Mostra dalla più recente
+                list.innerHTML = [...data.sessioni].reverse().map((s, i) => {
+                    const isCurrent = s.id === currentSessionId;
+                    const vals  = Object.values(s.checks || {});
+                    const nOk   = vals.filter(v=>v<=3).length;
+                    const nWarn = vals.filter(v=>v>3&&v<=6).length;
+                    const nCrit = vals.filter(v=>v>6).length;
+                    const fotos = POSTURE_VIEWS.filter(v=>s.photos?.[v]).length;
+                    const dateStr = new Date(s.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+                    const badges = vals.length ? `
+                        <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--bg-3);color:var(--green)">${nOk} OK</span>
+                        <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--bg-3);color:var(--orange)">${nWarn} ATT</span>
+                        <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--bg-3);color:var(--red)">${nCrit} CRIT</span>
+                    ` : '<span style="font-size:0.7rem;color:var(--text-3)">Nessuna valutazione</span>';
+                    return `
+                    <div style="background:var(--bg-2);border:1px solid ${isCurrent?'var(--neon)':'var(--border)'};border-radius:10px;padding:12px 14px;${isCurrent?'box-shadow:0 0 0 2px rgba(0,210,255,0.15)':''}">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                            <div style="flex:1">
+                                <div style="font-size:0.82rem;font-weight:700;color:var(--text-1)">${s.label}${isCurrent?' <span style="font-size:0.65rem;color:var(--neon);font-weight:600">● corrente</span>':''}</div>
+                                <div style="font-size:0.7rem;color:var(--text-3);margin-top:1px">${dateStr} · ${fotos}/4 foto</div>
+                            </div>
+                            ${!isCurrent ? `
+                            <button class="btn btn-ghost" style="padding:4px 10px;font-size:0.72rem" onclick="loadSessione('${s.id}')">
+                                <i class="fas fa-eye"></i> Carica
+                            </button>
+                            <button class="btn btn-ghost" style="padding:4px 8px;font-size:0.72rem;color:var(--red)" onclick="deleteSessione('${s.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>` : ''}
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap">${badges}</div>
+                    </div>`;
+                }).join('');
+            }
+            const sm = document.getElementById('storicoModal'); if(sm) sm.classList.add('active');
+        }
+
+        function closeStorico() {
+            const sm2 = document.getElementById('storicoModal'); if(sm2) sm2.classList.remove('active');
+        }
+
+        function loadSessione(sessId) {
+            if (!currentPosturePlayerId) return;
+            if (!confirm('Vuoi caricare questa sessione? La sessione corrente verra salvata prima.')) return;
+            savePostureData(true);
+            const sess = getSessione(String(currentPosturePlayerId), sessId);
+            if (!sess) { showToast('Sessione non trovata', 'error'); return; }
+            currentSessionId = sessId;
+            requestAnimationFrame(() => {
+                _applySessioneToUI(sess);
+            });
+            closeStorico();
+            showToast('Sessione caricata ✓');
+        }
+
+        function deleteSessione(sessId) {
+            if (!currentPosturePlayerId) return;
+            if (!confirm("Eliminare questa sessione? L'operazione è irreversibile.")) return;
+            const data = getAtletaData(currentPosturePlayerId);
+            data.sessioni = data.sessioni.filter(s => s.id !== sessId);
+            saveAtletaData(currentPosturePlayerId, data);
+            updateStoricoCount(currentPosturePlayerId);
+            openStorico(); // refresh
+            showToast('Sessione eliminata', 'error');
+        }
+
+        function _applySessioneToUI(sess) {
+            renderPostureChecklist(sess.checks || {});
+            document.getElementById('postureNotesText').value = sess.notes || '';
+            POSTURE_VIEWS.forEach(v => {
+                sess.photos?.[v] ? setPosturePhoto(v, sess.photos[v]) : clearPosturePhotoUI(v);
+                renderPostureLines(v, sess.lines?.[v] || []);
+            });
+            updateStats();
+        }
+
+        // =========================================
+        // BACKUP & RESTORE
+        // =========================================
+
+        const BACKUP_KEY    = 'postura_last_backup';
+        const FIRST_RUN_KEY = 'postura_first_run_done';
+
+        function getBackupStats() {
+            const p = loadPlayers(), db = loadPostureDB();
+            return { atleti: p.length, schede: Object.keys(db).length };
+        }
+
+        function formatBackupDate(iso) {
+            if (!iso) return 'Mai effettuato';
+            const d = new Date(iso);
+            const diff = Math.floor((Date.now() - d) / (1000*60*60*24));
+            const dateStr = d.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+            const timeStr = d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+            if (diff === 0) return `Oggi alle ${timeStr}`;
+            if (diff === 1) return `Ieri alle ${timeStr}`;
+            return `${dateStr} alle ${timeStr}`;
+        }
+
+        function updateBackupDot() {
+            const dot = document.getElementById('backupDot');
+            if (!dot) return;
+            const last = localStorage.getItem(BACKUP_KEY);
+            if (!last) { dot.style.display='block'; return; }
+            dot.style.display = ((Date.now()-new Date(last))/(1000*60*60*24)) > 7 ? 'block' : 'none';
+        }
+
+        function openBackupModal() {
+            const last  = localStorage.getItem(BACKUP_KEY);
+            const stats = getBackupStats();
+            document.getElementById('backupStatsLine').textContent =
+                `${stats.atleti} atleti  ·  ${stats.schede} schede posturali`;
+            document.getElementById('lastBackupTime').textContent = formatBackupDate(last);
+            const badge = document.getElementById('backupStatusBadge');
+            if (!last) {
+                badge.textContent='Nessun backup'; badge.style.background='#fef3c7'; badge.style.color='#92400e';
+            } else {
+                const days = Math.floor((Date.now()-new Date(last))/(1000*60*60*24));
+                if (days===0)    { badge.textContent='Aggiornato';          badge.style.background='#d1fae5'; badge.style.color='#065f46'; }
+                else if (days<=7){ badge.textContent=`${days}g fa`;         badge.style.background='#dbeafe'; badge.style.color='#1e40af'; }
+                else             { badge.textContent=`${days}g fa — Aggiorna!`; badge.style.background='#fee2e2'; badge.style.color='#991b1b'; }
+            }
+            const bm = document.getElementById('backupModal'); if(bm) bm.classList.add('active');
+        }
+
+        function closeBackupModal() {
+            const bm2 = document.getElementById('backupModal'); if(bm2) bm2.classList.remove('active');
+        }
+
+        function exportBackup() {
+            const payload = {
+                version: 1, exported: new Date().toISOString(),
+                app: 'SPORTHUB Posturale',
+                athletes: loadPlayers(), postureData: loadPostureDB()
+            };
+            const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href=url; a.download=`SPORTHUB_backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
+            setTimeout(()=>URL.revokeObjectURL(url),5000);
+            localStorage.setItem(BACKUP_KEY, new Date().toISOString());
+            updateBackupDot();
+            showToast('Backup esportato con successo ✓');
+            document.getElementById('lastBackupTime').textContent = formatBackupDate(new Date().toISOString());
+            const badge = document.getElementById('backupStatusBadge');
+            badge.textContent='Aggiornato'; badge.style.background='#d1fae5'; badge.style.color='#065f46';
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    // Accetta sia "athletes" (formato dbExport) che "players" (formato vecchio)
+                    const atletiData = data.athletes || data.players;
+                    if (!atletiData || !Array.isArray(atletiData)) throw new Error('Formato non valido');
+                    const exportDate = data.exportedAt || data.exported;
+                    if (!confirm(`Stai per ripristinare ${atletiData.length} atleti dal backup del ${formatBackupDate(exportDate)}.\n\nI dati attuali verranno sostituiti. Continuare?`)) return;
+                    savePlayers(atletiData);
+                    if (data.postureData) savePostureDB(data.postureData);
+                    players = loadPlayers();
+                    renderAthletes(); populatePosturePlayerSelect(); updateAthBadge();
+                    localStorage.setItem(BACKUP_KEY, new Date().toISOString());
+                    updateBackupDot(); closeBackupModal();
+                    showToast(`Ripristinati ${atletiData.length} atleti ✓`);
+                } catch(err) {
+                    showToast('File non valido o corrotto','error'); console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function closeWelcomeModal(doExport) {
+            const wm2 = document.getElementById('welcomeModal'); if(wm2) wm2.classList.remove('active');
+            localStorage.setItem(FIRST_RUN_KEY,'1');
+            if (doExport) setTimeout(openBackupModal, 300);
+        }
+
+        function checkFirstRun() {
+            const wm = document.getElementById('welcomeModal');
+            if (wm && !localStorage.getItem(FIRST_RUN_KEY)) {
+                wm.classList.add('active');
+            }
+            updateBackupDot();
+        }
+
+        // =========================================
+        // INIT
+        // =========================================
+        players = loadPlayers();
+        populatePosturePlayerSelect();
+        updateAthBadge();
+        checkFirstRun();
+    </script>
+
+    <!-- ══ MODAL BENVENUTO (primo avvio) ══ -->
+    <div class="modal-backdrop" id="welcomeModal" style="z-index:2000">
+        <div class="modal-box" style="max-width:500px;text-align:center">
+            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--neon),#0055aa);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+                <i class="fas fa-database" style="font-size:1.6rem;color:#fff"></i>
+            </div>
+            <div class="modal-title" style="font-size:1.3rem;margin-bottom:10px">Benvenuto in SPORTHUB</div>
+            <p style="color:var(--text-2);font-size:0.85rem;line-height:1.7;margin-bottom:8px">
+                I tuoi dati (atleti e schede posturali) vengono salvati <strong style="color:var(--text-1)">solo su questo dispositivo</strong>, nel browser.
+            </p>
+            <p style="color:var(--text-3);font-size:0.8rem;line-height:1.6;margin-bottom:22px">
+                <i class="fas fa-exclamation-triangle" style="color:#f59e0b;margin-right:5px"></i>
+                Se cambi browser, cancelli la cache o usi un altro dispositivo, <strong>perdi tutti i dati</strong>.<br>
+                Ti consigliamo di esportare un backup regolarmente — basta un click.
+            </p>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="closeWelcomeModal(true)" style="gap:8px">
+                    <i class="fas fa-download"></i> Capito, esporto subito un backup
+                </button>
+                <button class="btn btn-ghost" onclick="closeWelcomeModal(false)">
+                    Continua senza backup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL BACKUP ══ -->
+    <div class="modal-backdrop" id="backupModal" style="z-index:2000">
+        <div class="modal-box" style="max-width:480px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--neon),#0055aa);display:flex;align-items:center;justify-content:center">
+                        <i class="fas fa-database" style="color:#fff;font-size:0.9rem"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:1rem;color:var(--text-1)">Backup & Ripristino</div>
+                        <div style="font-size:0.72rem;color:var(--text-3)" id="backupStatsLine">—</div>
+                    </div>
+                </div>
+                <button class="btn btn-ghost" style="padding:6px 10px" onclick="closeBackupModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Ultimo backup -->
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+                <i class="fas fa-clock" style="color:var(--text-3);font-size:0.9rem"></i>
+                <div>
+                    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-3);font-weight:700">Ultimo backup</div>
+                    <div style="font-size:0.85rem;color:var(--text-1);font-weight:600" id="lastBackupTime">Mai effettuato</div>
+                </div>
+                <span id="backupStatusBadge" style="margin-left:auto;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:20px;background:#fef3c7;color:#92400e">Nessun backup</span>
+            </div>
+
+            <!-- Esporta -->
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+                <div style="font-size:0.78rem;font-weight:700;color:var(--text-1);margin-bottom:4px"><i class="fas fa-download" style="color:var(--neon);margin-right:6px"></i>Esporta backup</div>
+                <div style="font-size:0.75rem;color:var(--text-3);margin-bottom:12px">Scarica un file JSON con tutti gli atleti e le schede posturali. Salvalo su Google Drive, iCloud o un'altra cartella sicura.</div>
+                <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="exportBackup()">
+                    <i class="fas fa-download"></i> Scarica backup completo
+                </button>
+            </div>
+
+            <!-- Importa -->
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:14px">
+                <div style="font-size:0.78rem;font-weight:700;color:var(--text-1);margin-bottom:4px"><i class="fas fa-upload" style="color:#f59e0b;margin-right:6px"></i>Ripristina backup</div>
+                <div style="font-size:0.75rem;color:var(--text-3);margin-bottom:12px">Carica un file di backup precedentemente esportato. I dati esistenti verranno <strong style="color:#f87171">sostituiti</strong>.</div>
+                <label style="display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:var(--bg-3);border:1.5px dashed var(--border-h);border-radius:8px;padding:12px;font-size:0.8rem;color:var(--text-2);transition:all .2s" 
+                       onmouseover="this.style.borderColor='var(--neon)'" onmouseout="this.style.borderColor='var(--border-h)'">
+                    <i class="fas fa-upload" style="color:#f59e0b"></i>
+                    Seleziona file .json
+                    <input type="file" accept=".json" style="display:none" onchange="importBackup(event)">
+                </label>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══ MODAL STORICO SESSIONI ══ -->
+    <div class="modal-backdrop" id="storicoModal" style="z-index:2000">
+        <div class="modal-box" style="max-width:560px;max-height:80vh;display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--neon),#0055aa);display:flex;align-items:center;justify-content:center">
+                        <i class="fas fa-history" style="color:#fff;font-size:0.9rem"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:1rem;color:var(--text-1)">Storico Sessioni</div>
+                        <div style="font-size:0.72rem;color:var(--text-3)" id="storicoAtletaName">—</div>
+                    </div>
+                </div>
+                <button class="btn btn-ghost" style="padding:6px 10px" onclick="closeStorico()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="storicoList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;padding-right:4px"></div>
+        </div>
+    </div>
+
+    </div><!-- /app -->
+</body>
+</html>

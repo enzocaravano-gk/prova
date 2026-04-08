@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis — SPORTHUB+</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --bg:     #07090f;
+    --bg2:    #0d1117;
+    --bg3:    #131920;
+    --bg4:    #1a2230;
+    --border: rgba(255,255,255,0.07);
+    --neon:   #00e5ff;
+    --green:  #00e676;
+    --red:    #ff1744;
+    --orange: #ff9100;
+    --purple: #d500f9;
+    --gold:   #ffd600;
+    --text1:  #f0f4f8;
+    --text2:  #8899aa;
+    --text3:  #4d6070;
+    --mono:   'JetBrains Mono', monospace;
+    --r:      8px;
+    --r-lg:   12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  .j-header {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .j-logo { display: flex; align-items: center; gap: 10px; }
+  .j-logo-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--neon), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 900; color: #07090f;
+  }
+  .j-logo-txt { font-size: 14px; font-weight: 700; letter-spacing: 1px; color: var(--text1); }
+  .j-squad-badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px;
+    background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.25);
+    color: var(--neon); font-family: var(--mono); cursor: pointer;
+  }
+  .j-status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text3); transition: background 0.3s;
+  }
+  .j-status-dot.ready   { background: var(--green); }
+  .j-status-dot.listen  { background: var(--red); animation: pulse 1s infinite; }
+  .j-status-dot.think   { background: var(--neon); animation: pulse 0.6s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── Main layout ── */
+  .j-main { flex: 1; display: flex; flex-direction: column; max-width: 760px; width: 100%; margin: 0 auto; padding: 16px; gap: 12px; overflow: hidden; }
+
+  /* ── Contesto squadra ── */
+  .j-ctx {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .j-ctx-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .j-ctx-val { font-family: var(--mono); font-weight: 700; color: var(--neon); font-size: 13px; }
+
+  /* ── Chat ── */
+  .j-chat {
+    flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+    gap: 10px; padding: 4px 2px;
+    min-height: 0;
+  }
+  .j-msg { display: flex; gap: 8px; align-items: flex-end; }
+  .j-msg.user { flex-direction: row-reverse; }
+  .j-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; border: 1px solid var(--border);
+  }
+  .j-avatar.j { background: rgba(0,229,255,0.1); color: var(--neon); }
+  .j-avatar.u { background: rgba(213,0,249,0.1); color: var(--purple); }
+  .j-bubble {
+    max-width: 78%; padding: 10px 14px; border-radius: 16px;
+    font-size: 14px; line-height: 1.5; border: 1px solid var(--border);
+  }
+  .j-msg.jarvis .j-bubble {
+    background: var(--bg2); border-radius: 4px 16px 16px 16px;
+    color: var(--text1);
+  }
+  .j-msg.user .j-bubble {
+    background: rgba(213,0,249,0.08); border-color: rgba(213,0,249,0.2);
+    border-radius: 16px 4px 16px 16px; color: var(--text1);
+  }
+  .j-bubble.thinking {
+    display: flex; gap: 4px; align-items: center; padding: 12px 16px;
+  }
+  .j-dot-anim { width: 7px; height: 7px; border-radius: 50%; background: var(--neon); animation: dots 1.2s infinite; }
+  .j-dot-anim:nth-child(2) { animation-delay: 0.2s; }
+  .j-dot-anim:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dots { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+
+  /* Chip salvataggio */
+  .j-save-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; padding: 3px 8px; border-radius: 8px;
+    background: rgba(0,230,118,0.12); border: 1px solid rgba(0,230,118,0.3);
+    color: var(--green); font-weight: 600; margin-bottom: 6px;
+  }
+  .j-save-card {
+    background: var(--bg3); border-radius: var(--r); padding: 10px 12px;
+    margin-top: 6px; font-size: 13px;
+  }
+  .j-save-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 3px 0; border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .j-save-row:last-child { border: none; }
+  .j-save-row span:last-child { color: var(--text1); font-weight: 500; }
+
+  /* Bottoni conferma */
+  .j-confirm-row { display: flex; gap: 8px; margin-top: 10px; }
+  .j-btn {
+    padding: 7px 16px; border-radius: var(--r); border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+  }
+  .j-btn:hover { opacity: 0.8; }
+  .j-btn.ok { background: rgba(0,230,118,0.15); border: 1px solid rgba(0,230,118,0.3); color: var(--green); }
+  .j-btn.no { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); }
+
+  /* ── Suggerimenti rapidi ── */
+  .j-suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .j-sug {
+    font-size: 12px; padding: 5px 11px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--bg2);
+    color: var(--text2); cursor: pointer; transition: all 0.15s;
+  }
+  .j-sug:hover { border-color: var(--neon); color: var(--neon); }
+
+  /* ── Input bar ── */
+  .j-input-bar {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 28px; padding: 6px 8px 6px 16px;
+    transition: border-color 0.2s;
+  }
+  .j-input-bar:focus-within { border-color: rgba(0,229,255,0.4); }
+  .j-input-bar.listening { border-color: rgba(255,23,68,0.5); }
+  .j-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text1); font-size: 14px; font-family: inherit;
+  }
+  .j-input::placeholder { color: var(--text3); }
+  .j-mic-btn {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    border: 1px solid var(--border); background: var(--bg3);
+    color: var(--text2); font-size: 15px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .j-mic-btn.listening {
+    background: rgba(255,23,68,0.12); border-color: rgba(255,23,68,0.4);
+    color: var(--red); animation: mic-pulse 1s infinite;
+  }
+  @keyframes mic-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+  .j-send-btn {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    border: none; background: var(--neon); color: #07090f;
+    font-size: 15px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: opacity 0.15s;
+  }
+  .j-send-btn:hover { opacity: 0.85; }
+
+  /* ── Team picker ── */
+  .j-picker {
+    position: absolute; top: 58px; right: 16px; z-index: 999;
+    background: var(--bg2); border: 1px solid rgba(0,229,255,0.2);
+    border-radius: var(--r-lg); padding: 12px; min-width: 200px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  }
+  .j-picker-title { font-size: 10px; color: var(--neon); letter-spacing: 2px; text-transform: uppercase; font-family: var(--mono); margin-bottom: 8px; }
+  .j-picker-btn {
+    display: block; width: 100%; text-align: left; padding: 8px 10px;
+    margin-bottom: 4px; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--r); color: var(--text1); font-size: 13px; cursor: pointer;
+  }
+  .j-picker-btn:hover { border-color: var(--neon); color: var(--neon); }
+  .j-picker-btn:last-child { margin-bottom: 0; }
+
+  /* ── Toast notifica ── */
+  .j-toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    z-index: 9999; animation: toast-in 0.3s ease;
+    pointer-events: none;
+  }
+  .j-toast.ok { background: rgba(0,230,118,0.15); border: 1px solid rgba(0,230,118,0.4); color: var(--green); }
+  .j-toast.err { background: rgba(255,23,68,0.15); border: 1px solid rgba(255,23,68,0.4); color: var(--red); }
+  @keyframes toast-in { from{opacity:0;transform:translate(-50%,10px)} to{opacity:1;transform:translate(-50%,0)} }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="j-header" style="position:relative">
+  <div class="j-logo">
+    <div class="j-logo-icon">J</div>
+    <span class="j-logo-txt">JARVIS</span>
+    <span style="font-size:10px;color:var(--text3);font-family:var(--mono);">AI ASSISTANT</span>
+  </div>
+  <div class="j-squad-badge" id="squadBadge" onclick="togglePicker()">
+    <i class="fas fa-shield-alt" style="margin-right:4px;font-size:10px"></i>
+    <span id="squadName">Caricamento...</span>
+    <i class="fas fa-chevron-down" style="margin-left:4px;font-size:9px"></i>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="j-status-dot" id="statusDot"></div>
+    <span id="statusTxt" style="font-size:11px;color:var(--text3);font-family:var(--mono)">Inizializzazione...</span>
+  </div>
+</header>
+
+<!-- Main -->
+<div class="j-main">
+
+  <!-- Contesto squadra -->
+  <div class="j-ctx" id="ctxBar" style="display:none">
+    <div class="j-ctx-item"><i class="fas fa-users" style="color:var(--neon)"></i><span>Atleti</span><span class="j-ctx-val" id="ctxAtleti">—</span></div>
+    <div class="j-ctx-item"><i class="fas fa-trophy" style="color:var(--gold)"></i><span>Partite</span><span class="j-ctx-val" id="ctxPartite">—</span></div>
+    <div class="j-ctx-item"><i class="fas fa-calendar" style="color:var(--purple)"></i><span>Allenamenti</span><span class="j-ctx-val" id="ctxAllenamenti">—</span></div>
+    <div class="j-ctx-item" id="ctxLastTrain" style="display:none"><i class="fas fa-clock" style="color:var(--text3)"></i><span>Ultimo</span><span class="j-ctx-val" id="ctxLastDate" style="color:var(--text2)">—</span></div>
+  </div>
+
+  <!-- Chat -->
+  <div class="j-chat" id="jChat"></div>
+
+  <!-- Suggerimenti -->
+  <div class="j-suggestions" id="jSuggestions"></div>
+
+  <!-- Input -->
+  <div class="j-input-bar" id="jInputBar">
+    <button class="j-mic-btn" id="jMic" onclick="toggleMic()" title="Parla con Jarvis">
+      <i class="fas fa-microphone"></i>
+    </button>
+    <input class="j-input" id="jInput"
+      placeholder="Dimmi cosa è successo in allenamento o in partita..."
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"/>
+    <button class="j-send-btn" onclick="sendMsg()">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ═══════════════════════════════════════════════════
+// SUPABASE BRIDGE
+// ═══════════════════════════════════════════════════
+const SB_URL = 'https://xjsoqcopalvoskbnarzn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqc29xY29wYWx2b3NrYm5hcnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjE2ODAsImV4cCI6MjA5MDYzNzY4MH0.6AhQ5ogFLKRHkfsdMFDD2tB06vcXAf8mINJ3XUdcq_8';
+const _sb = supabase.createClient(SB_URL, SB_KEY);
+
+function hashUUID(u) { let h=0; for(let i=0;i<u.length;i++) h=(Math.imul(31,h)+u.charCodeAt(i))|0; return Math.abs(h)+800000; }
+
+// ═══════════════════════════════════════════════════
+// STATO GLOBALE
+// ═══════════════════════════════════════════════════
+const state = {
+  ready: false,
+  session: null,
+  coachId: null,
+  teamId: null,
+  teamName: '',
+  allTeams: [],
+  athletes: [],
+  matches: [],
+  trainings: [],
+  pendingSave: null   // dati in attesa di conferma
+};
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+async function init() {
+  setStatus('', 'Connessione...');
+  try {
+    const { data: { session } } = await _sb.auth.getSession();
+    if (!session) {
+      setStatus('', 'Non autenticato');
+      addMsg('jarvis', 'Non sei autenticato. Accedi prima dall\'app principale, poi torna qui.');
+      return;
+    }
+    state.session = session;
+    state.coachId = session.user.id;
+
+    const { data: teams } = await _sb.rpc('get_coach_teams', { _coach_id: session.user.id });
+    if (!teams || !teams.length) {
+      addMsg('jarvis', 'Nessuna squadra trovata. Crea prima una squadra dalla dashboard.');
+      return;
+    }
+    state.allTeams = teams;
+
+    // Seleziona squadra attiva (ultima usata o prima)
+    const lastHash = localStorage.getItem('teamStats_lastTeam');
+    const active = (lastHash && teams.find(t => String(hashUUID(t.team_id)) === String(lastHash))) || teams[0];
+    await loadTeam(active);
+
+    // Postmessage listener (sessione da React parent)
+    window.addEventListener('message', e => {
+      if (e.data?.type === 'SB_SESSION') init();
+    });
+
+  } catch(err) {
+    setStatus('', 'Errore connessione');
+    addMsg('jarvis', 'Errore di connessione. Ricarica la pagina.');
+  }
+}
+
+async function loadTeam(teamRow) {
+  setStatus('think', 'Carico dati...');
+  state.teamId = teamRow.team_id;
+  state.teamName = teamRow.team_name;
+
+  document.getElementById('squadName').textContent = teamRow.team_name;
+
+  const [{ data: ath }, { data: mat }, { data: tra }] = await Promise.all([
+    _sb.from('athletes').select('id,full_name,position,jersey_number,goals_scored,goals_conceded,assists,matches_played,attendance,fitness').eq('team_id', state.teamId).order('jersey_number'),
+    _sb.from('matches').select('id,date,opponent,type,venue,goals_for,goals_against,notes').eq('team_id', state.teamId).order('date', { ascending: false }),
+    _sb.from('training_sessions').select('id,date,session_type,duration_min,notes,training_attendances(athlete_id,present)').eq('team_id', state.teamId).order('date', { ascending: false })
+  ]);
+
+  state.athletes  = ath  || [];
+  state.matches   = mat  || [];
+  state.trainings = tra  || [];
+  state.ready     = true;
+
+  // Aggiorna contesto UI
+  document.getElementById('ctxAtleti').textContent    = state.athletes.length;
+  document.getElementById('ctxPartite').textContent   = state.matches.length;
+  document.getElementById('ctxAllenamenti').textContent = state.trainings.length;
+  if (state.trainings.length > 0) {
+    const last = new Date(state.trainings[0].date);
+    document.getElementById('ctxLastDate').textContent = last.toLocaleDateString('it-IT', { day:'2-digit', month:'short' });
+    document.getElementById('ctxLastTrain').style.display = 'flex';
+  }
+  document.getElementById('ctxBar').style.display = 'flex';
+
+  setStatus('ready', 'Pronto');
+  addMsg('jarvis', buildWelcome());
+  showSuggestions();
+}
+
+function buildWelcome() {
+  const nome = state.teamName;
+  const n = state.athletes.length;
+  const ultP = state.matches[0] ? `Ultima partita: vs ${state.matches[0].opponent} ${state.matches[0].goals_for}-${state.matches[0].goals_against}.` : '';
+  return `Ciao coach! Sono Jarvis, il tuo assistente per la squadra <strong>${nome}</strong> (${n} atleti). ${ultP}<br><br>Dimmi cosa è successo — posso registrare allenamenti, partite e consultare statistiche. Parla liberamente!`;
+}
+
+// ═══════════════════════════════════════════════════
+// CLAUDE API
+// ═══════════════════════════════════════════════════
+const chatHistory = [];
+
+function buildSystemPrompt() {
+  const nomi = state.athletes.map(a => a.full_name).join(', ') || 'nessuno';
+  const ultimi3Match = state.matches.slice(0,3).map(m =>
+    `${m.date} vs ${m.opponent} ${m.goals_for}-${m.goals_against}`
+  ).join(' | ') || 'nessuna';
+  const ultimi3Train = state.trainings.slice(0,3).map(t =>
+    `${t.date} ${t.session_type} ${t.duration_min}min`
+  ).join(' | ') || 'nessuno';
+
+  return `Sei Jarvis, assistente vocale intelligente integrato in SPORTHUB+, app gestionale per squadre di calcio.
+Stai assistendo il coach della squadra "${state.teamName}".
+
+DATI SQUADRA AGGIORNATI:
+- Atleti (${state.athletes.length}): ${nomi}
+- Ultime partite: ${ultimi3Match}
+- Ultimi allenamenti: ${ultimi3Train}
+- ID Coach: ${state.coachId}
+
+TIPI ALLENAMENTO VALIDI: Tecnico, Tattico, Fisico, Portieri, Partitella, Defaticante, Altro
+TIPI PARTITA VALIDI: Campionato, Coppa, Amichevole, Torneo
+
+COMPORTAMENTO:
+1. Rispondi SEMPRE in italiano, breve e diretto (max 4 righe vocali)
+2. Se il coach vuole SALVARE dati (allenamento/partita/statistiche), rispondi con un JSON strutturato nel seguente formato ESATTO:
+   [JARVIS_SAVE]{"tipo":"allenamento","data":"YYYY-MM-DD","session_type":"Tecnico","duration_minutes":90,"presenti":["Nome Cognome"],"assenti":["Nome Cognome"],"notes":""}[/JARVIS_SAVE]
+   oppure per partita:
+   [JARVIS_SAVE]{"tipo":"partita","data":"YYYY-MM-DD","opponent":"Nome","type":"Campionato","venue":"Casa","goals_for":0,"goals_against":0,"notes":""}[/JARVIS_SAVE]
+   Prima del JSON scrivi un messaggio di conferma naturale.
+3. Se mancano informazioni essenziali (es. la data), chiedi SOLO quella
+4. Se il coach consulta dati, rispondete con i dati reali della squadra
+5. Per i nomi degli atleti usa ESATTAMENTE i nomi dalla lista sopra
+6. La data di oggi è ${new Date().toISOString().split('T')[0]}
+7. Quando non capisci, chiedi di ripetere in modo più specifico
+8. Tono: professionale, diretto, come un assistente sportivo esperto`;
+}
+
+async function callClaude(userMsg) {
+  chatHistory.push({ role: 'user', content: userMsg });
+
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        system: buildSystemPrompt(),
+        messages: chatHistory
+      })
+    });
+    const data = await resp.json();
+    // Se Anthropic restituisce un errore mostralo
+    if (data.error) return 'Errore API: ' + (data.error.message || JSON.stringify(data.error));
+    if (!data.content || !data.content[0]) return 'Risposta vuota dal server. Controlla la API key su Vercel.';
+    const reply = data.content[0].text || 'Errore nella risposta.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    return reply;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// PARSING RISPOSTA + SALVATAGGIO
+// ═══════════════════════════════════════════════════
+function parseReply(reply) {
+  const match = reply.match(/\[JARVIS_SAVE\]([\s\S]*?)\[\/JARVIS_SAVE\]/);
+  if (!match) return { text: reply, saveData: null };
+  try {
+    const saveData = JSON.parse(match[1]);
+    const text = reply.replace(/\[JARVIS_SAVE\][\s\S]*?\[\/JARVIS_SAVE\]/, '').trim();
+    return { text, saveData };
+  } catch(e) {
+    return { text: reply, saveData: null };
+  }
+}
+
+async function saveData(data) {
+  if (data.tipo === 'allenamento') {
+    const { data: sess, error } = await _sb.from('training_sessions').insert({
+      team_id: state.teamId,
+      coach_id: state.coachId,
+      date: data.data,
+      session_type: data.session_type || 'Tecnico',
+      duration_min: data.duration_minutes || data.duration_min || 90,
+      notes: data.notes || null
+    }).select('id').single();
+    if (error) throw error;
+
+    // Presenze
+    if (sess?.id && (data.presenti?.length || data.assenti?.length)) {
+      const rows = state.athletes.map(a => ({
+        session_id: sess.id,
+        athlete_id: a.id,
+        present: (data.presenti || []).some(n => a.full_name.toLowerCase().includes(n.toLowerCase()))
+      }));
+      if (rows.length > 0) await _sb.from('training_attendances').insert(rows);
+    }
+
+    // Ricarica training aggiornati da Supabase (include presenze)
+    const { data: freshTra } = await _sb.from('training_sessions')
+      .select('id,date,session_type,duration_min,notes,training_attendances(athlete_id,present)')
+      .eq('team_id', state.teamId).order('date', { ascending: false });
+    state.trainings = freshTra || [];
+    document.getElementById('ctxAllenamenti').textContent = state.trainings.length;
+    return '✓ Allenamento salvato su Supabase';
+  }
+
+  if (data.tipo === 'partita') {
+    const { error } = await _sb.from('matches').insert({
+      team_id: state.teamId,
+      coach_id: state.coachId,
+      date: data.data,
+      opponent: data.opponent,
+      type: data.type || 'Campionato',
+      venue: data.venue || 'Casa',
+      goals_for: data.goals_for || 0,
+      goals_against: data.goals_against || 0,
+      notes: data.notes || null
+    });
+    if (error) throw error;
+    state.matches.unshift({ date: data.data, opponent: data.opponent, goals_for: data.goals_for, goals_against: data.goals_against });
+    document.getElementById('ctxPartite').textContent = state.matches.length;
+    return '✓ Partita salvata su Supabase';
+  }
+}
+
+function renderSaveCard(data) {
+  if (data.tipo === 'allenamento') {
+    const presenti = data.presenti?.join(', ') || 'da specificare';
+    const assenti  = data.assenti?.join(', ')  || 'nessuno';
+    return `
+      <div class="j-save-chip"><i class="fas fa-save"></i> Da salvare</div>
+      <div class="j-save-card">
+        <div class="j-save-row"><span>Tipo</span><span>${data.session_type || '—'}</span></div>
+        <div class="j-save-row"><span>Data</span><span>${new Date(data.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long'})}</span></div>
+        <div class="j-save-row"><span>Durata</span><span>${data.duration_minutes || '—'} min</span></div>
+        <div class="j-save-row"><span>Presenti</span><span style="color:var(--green)">${presenti}</span></div>
+        <div class="j-save-row"><span>Assenti</span><span style="color:var(--text3)">${assenti}</span></div>
+      </div>
+      <div class="j-confirm-row">
+        <button class="j-btn ok" onclick="confirmSave()"><i class="fas fa-check"></i> Conferma e Salva</button>
+        <button class="j-btn no" onclick="cancelSave()">Annulla</button>
+      </div>`;
+  }
+  if (data.tipo === 'partita') {
+    const res = data.goals_for > data.goals_against ? '🟢 Vittoria' : data.goals_for < data.goals_against ? '🔴 Sconfitta' : '🟡 Pareggio';
+    return `
+      <div class="j-save-chip"><i class="fas fa-save"></i> Da salvare</div>
+      <div class="j-save-card">
+        <div class="j-save-row"><span>Avversario</span><span>${data.opponent}</span></div>
+        <div class="j-save-row"><span>Data</span><span>${new Date(data.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long'})}</span></div>
+        <div class="j-save-row"><span>Risultato</span><span>${data.goals_for} — ${data.goals_against}</span></div>
+        <div class="j-save-row"><span>Esito</span><span>${res}</span></div>
+        <div class="j-save-row"><span>Tipo</span><span>${data.type || 'Campionato'} · ${data.venue || 'Casa'}</span></div>
+      </div>
+      <div class="j-confirm-row">
+        <button class="j-btn ok" onclick="confirmSave()"><i class="fas fa-check"></i> Conferma e Salva</button>
+        <button class="j-btn no" onclick="cancelSave()">Annulla</button>
+      </div>`;
+  }
+  return '';
+}
+
+async function confirmSave() {
+  if (!state.pendingSave) return;
+  setStatus('think', 'Salvo...');
+  try {
+    const msg = await saveData(state.pendingSave);
+    state.pendingSave = null;
+    // Rimuovi bottoni conferma
+    document.querySelectorAll('.j-confirm-row').forEach(el => el.remove());
+    addMsg('jarvis', `<span style="color:var(--green)"><i class="fas fa-check-circle"></i> ${msg}</span> — visibile subito nella dashboard.`);
+    speak('Salvato con successo. Visibile nella dashboard.');
+    showSuggestions();
+    setStatus('ready', 'Pronto');
+  } catch(e) {
+    addMsg('jarvis', `Errore durante il salvataggio: ${e.message}`);
+    setStatus('ready', 'Pronto');
+  }
+}
+
+function cancelSave() {
+  state.pendingSave = null;
+  document.querySelectorAll('.j-confirm-row').forEach(el => el.remove());
+  addMsg('jarvis', 'Salvataggio annullato. Dimmi pure cos\'altro posso fare.');
+  setStatus('ready', 'Pronto');
+}
+
+// ═══════════════════════════════════════════════════
+// MESSAGGI
+// ═══════════════════════════════════════════════════
+function addMsg(role, html, isHtml = true) {
+  const chat = document.getElementById('jChat');
+  const d = document.createElement('div');
+  d.className = `j-msg ${role}`;
+  const ico = role === 'user' ? 'C' : 'J';
+  d.innerHTML = `<div class="j-avatar ${role === 'user' ? 'u' : 'j'}">${ico}</div><div class="j-bubble">${isHtml ? html : escHtml(html)}</div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+
+function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function addThinking() {
+  const chat = document.getElementById('jChat');
+  const d = document.createElement('div');
+  d.className = 'j-msg jarvis';
+  d.id = 'j-thinking';
+  d.innerHTML = `<div class="j-avatar j">J</div><div class="j-bubble thinking"><div class="j-dot-anim"></div><div class="j-dot-anim"></div><div class="j-dot-anim"></div></div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeThinking() {
+  document.getElementById('j-thinking')?.remove();
+}
+
+async function sendMsg() {
+  const inp = document.getElementById('jInput');
+  const txt = inp.value.trim();
+  if (!txt || !state.ready) return;
+  inp.value = '';
+  document.getElementById('jSuggestions').innerHTML = '';
+  addMsg('user', escHtml(txt), true);
+  addThinking();
+  setStatus('think', 'Elaboro...');
+
+  const reply = await callClaude(txt);
+  removeThinking();
+
+  if (!reply) {
+    addMsg('jarvis', 'Errore di connessione. Riprova.');
+    setStatus('ready', 'Pronto');
+    return;
+  }
+
+  const { text, saveData: sd } = parseReply(reply);
+
+  if (sd) {
+    state.pendingSave = sd;
+    const card = renderSaveCard(sd);
+    addMsg('jarvis', (text ? `<p style="margin-bottom:8px">${text}</p>` : '') + card);
+  } else {
+    addMsg('jarvis', text.replace(/\n/g, '<br>'));
+  }
+
+  speak(text.replace(/<[^>]+>/g, ''));
+  setStatus('ready', 'Pronto');
+  showSuggestions();
+}
+
+// ═══════════════════════════════════════════════════
+// SUGGERIMENTI CONTESTUALI
+// ═══════════════════════════════════════════════════
+function showSuggestions() {
+  const sug = document.getElementById('jSuggestions');
+  const oggi = new Date().toLocaleDateString('it-IT', { weekday:'long' });
+  const items = [
+    `Allenamento oggi ${oggi}`,
+    'Riassumi la stagione',
+    'Chi manca di più?',
+    'Statistiche portieri',
+    `Abbiamo vinto oggi`,
+    'Prossima partita in casa'
+  ];
+  sug.innerHTML = items.map(s =>
+    `<button class="j-sug" onclick="useSuggestion(this)">${s}</button>`
+  ).join('');
+}
+
+function useSuggestion(btn) {
+  document.getElementById('jInput').value = btn.textContent;
+  sendMsg();
+}
+
+// ═══════════════════════════════════════════════════
+// VOCE
+// ═══════════════════════════════════════════════════
+let isListening = false;
+let recognition = null;
+
+function toggleMic() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    showToast('Microfono non disponibile. Usa Chrome.', 'err');
+    return;
+  }
+  if (isListening) { recognition?.stop(); return; }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'it-IT';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('jMic').classList.add('listening');
+    document.getElementById('jInputBar').classList.add('listening');
+    setStatus('listen', 'Ascolto...');
+  };
+  recognition.onresult = e => {
+    const txt = e.results[0][0].transcript;
+    document.getElementById('jInput').value = txt;
+    isListening = false;
+    document.getElementById('jMic').classList.remove('listening');
+    document.getElementById('jInputBar').classList.remove('listening');
+    sendMsg();
+  };
+  recognition.onerror = recognition.onend = () => {
+    isListening = false;
+    document.getElementById('jMic').classList.remove('listening');
+    document.getElementById('jInputBar').classList.remove('listening');
+    if (state.ready) setStatus('ready', 'Pronto');
+  };
+  recognition.start();
+}
+
+function speak(text) {
+  if (!window.speechSynthesis || !text) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.slice(0, 200));
+  u.lang = 'it-IT'; u.rate = 1.05; u.pitch = 1;
+  // Cerca voce italiana
+  const voices = speechSynthesis.getVoices();
+  const itVoice = voices.find(v => v.lang.startsWith('it'));
+  if (itVoice) u.voice = itVoice;
+  speechSynthesis.speak(u);
+}
+
+// ═══════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════
+function setStatus(cls, txt) {
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('statusTxt');
+  dot.className = 'j-status-dot ' + (cls || '');
+  label.textContent = txt;
+}
+
+function showToast(msg, type = 'ok') {
+  const t = document.createElement('div');
+  t.className = `j-toast ${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// Team picker
+let pickerOpen = false;
+function togglePicker() {
+  if (pickerOpen) {
+    document.getElementById('jPicker')?.remove();
+    pickerOpen = false; return;
+  }
+  if (state.allTeams.length <= 1) return;
+  const p = document.createElement('div');
+  p.className = 'j-picker'; p.id = 'jPicker';
+  p.innerHTML = `<div class="j-picker-title">Cambia squadra</div>` +
+    state.allTeams.map(t =>
+      `<button class="j-picker-btn" onclick="switchTeam('${t.team_id}','${t.team_name}')">${t.team_name}</button>`
+    ).join('');
+  document.querySelector('.j-header').appendChild(p);
+  pickerOpen = true;
+  setTimeout(() => document.addEventListener('click', function h(e) {
+    if (!p.contains(e.target)) { p.remove(); pickerOpen = false; document.removeEventListener('click', h); }
+  }), 100);
+}
+
+async function switchTeam(teamId, teamName) {
+  document.getElementById('jPicker')?.remove();
+  pickerOpen = false;
+  chatHistory.length = 0;
+  document.getElementById('jChat').innerHTML = '';
+  document.getElementById('jSuggestions').innerHTML = '';
+  localStorage.setItem('teamStats_lastTeam', String(hashUUID(teamId)));
+  await loadTeam({ team_id: teamId, team_name: teamName });
+}
+
+// ═══════════════════════════════════════════════════
+// AVVIO
+// ═══════════════════════════════════════════════════
+speechSynthesis.onvoiceschanged = () => {};
+init();
+</script>
+</body>
+</html>

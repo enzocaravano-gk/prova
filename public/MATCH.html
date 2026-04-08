@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Match — by SPORTHUB</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff1744">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Match">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RESET & FONTS */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Barlow+Condensed:wght@700;900&display=swap');
+
+        :root {
+            --bg-1: #0d1117;
+            --bg-2: #131920;
+            --bg-3: #1a2230;
+            --bg-4: #1f2a3d;
+            --border: rgba(255,255,255,0.07);
+            --border-h: rgba(255,255,255,0.15);
+            --text-1: #f0f4f8;
+            --text-2: #8899aa;
+            --text-3: #4d6070;
+            --neon: #ff1744;
+            --neon-dim: rgba(255,23,68,0.12);
+            --neon-glow: 0 0 20px rgba(255,23,68,0.3);
+            --red: #ff1744;
+            --red-dim: rgba(255,23,68,0.12);
+            --green: #00e676;
+            --green-dim: rgba(0,230,118,0.12);
+            --orange: #ff9100;
+            --orange-dim: rgba(255,145,0,0.12);
+            --purple: #d500f9;
+            --purple-dim: rgba(213,0,249,0.12);
+            --blue: #2979ff;
+            --surface-h: rgba(255,255,255,0.04);
+            --r: 8px;
+            --r-lg: 14px;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Barlow Condensed', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg-1: #f5f7fa;
+            --bg-2: #ffffff;
+            --bg-3: #e8edf5;
+            --bg-4: #dde4ef;
+            --border: rgba(0,0,0,0.08);
+            --border-h: rgba(0,0,0,0.18);
+            --text-1: #0d1117;
+            --text-2: #4d6070;
+            --text-3: #8899aa;
+            --neon: #d50000;
+            --neon-dim: rgba(213,0,0,0.1);
+            --neon-glow: 0 0 20px rgba(213,0,0,0.2);
+            --surface-h: rgba(0,0,0,0.04);
+        }
+
+        html, body {
+            font-family: var(--font-body);
+            background: var(--bg-1);
+            color: var(--text-1);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* HEADER */
+        .app-header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg-1);
+            border-bottom: 1px solid var(--border);
+            padding: 0 clamp(16px,3vw,40px);
+            display: flex; align-items: center; justify-content: space-between;
+            height: 60px;
+        }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-mark {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--neon), #ff6d00);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; color: #fff;
+            box-shadow: var(--neon-glow);
+        }
+        .logo-text { line-height: 1.1; }
+        .app-name {
+            font-family: var(--font-display);
+            font-size: 1.4rem; font-weight: 900;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, var(--neon), #ff6d00);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .app-sub {
+            font-size: 0.62rem; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--text-3);
+        }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .btn-icon {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--bg-2);
+            color: var(--text-2); cursor: pointer; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-icon:hover { border-color: var(--neon); color: var(--neon); }
+
+        .app-main {
+            max-width: 1400px; margin: 0 auto;
+            padding: clamp(16px,2vw,28px) clamp(16px,3vw,40px);
+        }
+
+        /* MATCH INFO BAR */
+        .match-info-bar {
+            background: var(--bg-2); border: 1px solid var(--border);
+            border-radius: var(--r-lg); padding: 16px 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto auto;
+            gap: 12px; align-items: center;
+        }
+        @media(max-width: 700px) {
+            .match-info-bar {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+            }
+            .match-info-bar .match-vs { display: none; }
+            .match-info-bar .match-date { grid-column: 1; }
+            .match-info-bar .match-result { grid-column: 2; }
+        }
+        .match-team-input {
+            background: var(--bg-3); border: 1px solid var(--border);
+            border-radius: var(--r); padding: 10px 14px;
+            color: var(--text-1); font-family: var(--font-display);
+            font-size: 1.1rem; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; width: 100%;
+            transition: border-color 0.2s;
+        }
+        .match-team-input:focus { outline: none; border-color: var(--neon); }
+        .match-team-input::placeholder { color: var(--text-3); font-size: 0.85rem; text-transform: none; letter-spacing: 0; }
+        .match-vs {
+            font-family: var(--font-display); font-size: 1.2rem;
+            font-weight: 900; color: var(--text-3); letter-spacing: 2px;
+        }
+        .match-date, .match-result {
+            background: var(--bg-3); border: 1px solid var(--border);
+            border-radius: var(--r); padding: 10px 14px;
+            color: var(--text-1); font-family: var(--font-mono);
+            font-size: 0.88rem; width: 100%;
+            transition: border-color 0.2s;
+        }
+        .match-date:focus, .match-result:focus { outline: none; border-color: var(--neon); }
+        .match-result { max-width: 100px; text-align: center; font-weight: 700; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 10px 16px; border-radius: var(--r);
+            border: 1px solid transparent; cursor: pointer;
+            font-family: var(--font-body); font-size: 0.82rem;
+            font-weight: 600; transition: all 0.2s; white-space: nowrap;
+        }
+        .btn-ghost { background: var(--bg-2); border-color: var(--border); color: var(--text-2); }
+        .btn-ghost:hover { border-color: var(--border-h); color: var(--text-1); }
+        .btn-neon { background: var(--neon); color: #fff; border-color: var(--neon); }
+        .btn-neon:hover { opacity: 0.88; }
+
+        /* MODALITÀ BUTTONS */
+        .analisi-mode-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .analisi-mode-btn {
+            flex: 1; padding: 12px; border-radius: var(--r-lg);
+            border: 2px solid var(--border); background: var(--bg-2);
+            color: var(--text-2); font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .analisi-mode-btn:hover { border-color: var(--border-h); color: var(--text-1); }
+        .analisi-mode-btn.active { border-color: var(--neon); color: var(--neon); background: var(--neon-dim); }
+
+        /* SESSION BAR */
+        .analisi-session-bar {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            background: var(--bg-2); border: 1px solid var(--border);
+            border-radius: var(--r-lg); padding: 12px 16px; margin-bottom: 16px;
+        }
+        .analisi-session-name { font-weight: 700; font-size: 0.9rem; color: var(--text-1); flex: 1; min-width: 120px; }
+        .analisi-badge {
+            background: var(--neon-dim); border: 1px solid var(--neon);
+            color: var(--neon); font-size: 0.72rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px; letter-spacing: 1px;
+        }
+
+        /* VIDEO MODE LAYOUT (originale) */
+        .analisi-video-layout {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+        }
+        @media(max-width: 900px) { .analisi-video-layout { grid-template-columns: 1fr; } }
+
+        /* CAMPO TATTICO */
+        .campo-wrap {
+            background: var(--bg-2); border: 1px solid var(--border);
+            border-radius: var(--r-lg); overflow: hidden;
+        }
+        .campo-header {
+            padding: 10px 16px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--text-3); gap: 8px;
+            flex-wrap: wrap;
+        }
+        .campo-field {
+            position: relative; background: #1a4a2e;
+            aspect-ratio: 105/68; width: 100%; overflow: hidden;
+            background-image:
+                linear-gradient(var(--campo-line) 2px, transparent 2px),
+                linear-gradient(90deg, var(--campo-line) 2px, transparent 2px),
+                linear-gradient(90deg, transparent calc(50% - 1px), var(--campo-line) calc(50% - 1px), var(--campo-line) calc(50% + 1px), transparent calc(50% + 1px));
+            --campo-line: rgba(255,255,255,0.45);
+        }
+        .campo-field::before {
+            content: ''; position: absolute; inset: 0;
+            background: repeating-linear-gradient(90deg, transparent 0px, transparent calc(100%/8 - 1px), rgba(0,0,0,0.12) calc(100%/8 - 1px), rgba(0,0,0,0.12) calc(100%/8));
+            pointer-events: none;
+        }
+        .campo-center-circle {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 18%; aspect-ratio: 1;
+            border: 2px solid rgba(255,255,255,0.45);
+            border-radius: 50%; pointer-events: none;
+        }
+        .campo-area { position: absolute; top: 50%; transform: translateY(-50%); border: 2px solid rgba(255,255,255,0.45); pointer-events: none; }
+        .campo-area.sx  { left: 0; width: 16%; height: 57%; border-left: none; }
+        .campo-area.dx  { right: 0; width: 16%; height: 57%; border-right: none; }
+        .campo-porta.sx { left: 0; width: 5%; height: 30%; border-left: none; top: 50%; transform: translateY(-50%); position: absolute; border: 2px solid rgba(255,255,255,0.45); pointer-events: none; }
+        .campo-porta.dx { right: 0; width: 5%; height: 30%; border-right: none; top: 50%; transform: translateY(-50%); position: absolute; border: 2px solid rgba(255,255,255,0.45); pointer-events: none; }
+        .campo-zones { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .campo-zone { border: 1px solid rgba(255,255,255,0.12); cursor: pointer; position: relative; transition: background 0.15s; display: flex; align-items: center; justify-content: center; }
+        .campo-zone:hover { background: rgba(255,255,255,0.18) !important; }
+        .campo-zone:active { background: rgba(255,255,255,0.3) !important; }
+        .campo-zone-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.6); pointer-events: none; text-align: center; line-height: 1.2; }
+        .campo-zone-count { position: absolute; top: 3px; right: 4px; font-size: 0.75rem; font-weight: 900; color: #fff; text-shadow: 0 0 6px rgba(0,0,0,0.8); pointer-events: none; }
+        .campo-labels { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 0.65rem; font-weight: 700; letter-spacing: 2px; color: var(--text-3); }
+
+        /* CONTROLLI VIDEO */
+        .posture-card-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: var(--r);
+            border: 1px solid var(--border); background: var(--bg-3);
+            color: var(--text-2); font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .posture-card-btn:hover { border-color: var(--neon); color: var(--neon); }
+        .posture-card-btn.danger { border-color: var(--red); color: var(--red); }
+        .posture-card-btn.danger:hover { background: var(--red); color: #fff; }
+        .video-ctrl-btn {
+            width: 32px; height: 32px; border-radius: 6px;
+            border: 1px solid var(--border); background: var(--bg-3);
+            color: var(--text-2); cursor: pointer; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .video-ctrl-btn:hover { border-color: var(--neon); color: var(--neon); }
+        .video-play-btn { background: var(--neon) !important; color: #fff !important; border-color: var(--neon) !important; }
+        .video-speed-select {
+            background: var(--bg-3); border: 1px solid var(--border);
+            color: var(--text-1); border-radius: var(--r); padding: 4px 8px;
+            font-size: 0.8rem; cursor: pointer;
+        }
+        .video-progress-container {
+            position: relative;
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .video-progress-fill {
+            position: absolute;
+            height: 100%;
+            background: var(--neon);
+            border-radius: 3px;
+            width: 0%;
+            pointer-events: none;
+        }
+        .video-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .video-marker {
+            position: absolute;
+            width: 4px;
+            height: 12px;
+            background: #ffcc00;
+            top: -3px;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .eventi-list {
+            margin-top: 12px;
+            max-height: 180px;
+            overflow-y: auto;
+            background: var(--bg-3);
+            border-radius: var(--r);
+            padding: 8px;
+            font-size: 0.75rem;
+        }
+        .evento-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .evento-list-item:hover {
+            background: var(--surface-h);
+        }
+        .evento-list-time {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--neon);
+            min-width: 48px;
+        }
+        .evento-list-icon {
+            width: 24px;
+            text-align: center;
+        }
+        .evento-list-desc {
+            flex: 1;
+            color: var(--text-2);
+        }
+        .evento-list-zona {
+            font-size: 0.7rem;
+            background: var(--bg-4);
+            padding: 2px 6px;
+            border-radius: 20px;
+            color: var(--text-1);
+        }
+
+        /* MODALITÀ LIVE */
+        .live-timer { display: flex; align-items: center; gap: 10px; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r); padding: 8px 14px; flex-wrap: wrap; }
+        .live-timer-display { font-size: 1.4rem; font-weight: 900; color: var(--neon); font-variant-numeric: tabular-nums; letter-spacing: 1px; min-width: 52px; }
+        .live-timer-display.second-half { color: var(--orange); }
+        .live-timer-btn { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+        .live-timer-btn.play  { background: var(--neon); color: #fff; }
+        .live-timer-btn.stop  { background: #333; color: #fff; }
+        .live-timer-btn.reset { background: var(--bg-4); color: var(--text-2); border: 1px solid var(--border); }
+        .live-half-btn { font-size: 0.72rem; font-weight: 700; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-2); cursor: pointer; transition: all 0.15s; }
+        .live-half-btn.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+
+        .live-campo-container { max-width: var(--live-campo-width, 55%); margin: 0 auto; transition: max-width 0.2s; }
+        @media(max-width: 1024px) { .live-campo-container { max-width: var(--live-campo-width, 75%); } }
+        @media(max-width: 600px)  { .live-campo-container { max-width: 100% !important; } }
+        .live-campo-slider-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 8px 14px; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r); font-size: 0.75rem; color: var(--text-3); flex-wrap: wrap; }
+        .live-campo-slider-wrap input[type=range] { flex: 1; accent-color: var(--neon); cursor: pointer; }
+        .live-campo-size-label { min-width: 36px; text-align: right; font-weight: 700; color: var(--neon); font-size: 0.8rem; }
+        .live-full-campo .campo-field { aspect-ratio: 105/68; }
+        .live-full-campo .campo-zone { min-height: 70px; }
+        .live-full-campo .campo-zone-label { font-size: 0.75rem; }
+        @media(max-width: 600px) { .live-full-campo .campo-zone { min-height: 52px; } }
+
+        .live-timer-bar-fixed {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+            background: var(--bg-1); border-bottom: 2px solid var(--neon);
+            padding: 10px 20px; display: none; align-items: center;
+            gap: 10px; flex-wrap: wrap; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .live-timer-bar-fixed.visible { display: flex; }
+
+        /* EVENTO MODAL */
+        .evento-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 16px; }
+        .evento-modal-box { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px; width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .evento-modal-title { font-size: 1rem; font-weight: 800; color: var(--text-1); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+        .evento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .evento-btn { padding: 14px 10px; border-radius: var(--r); border: none; cursor: pointer; font-size: 0.82rem; font-weight: 700; color: #fff; text-align: center; transition: transform 0.1s; letter-spacing: 0.5px; }
+        .evento-btn:active { transform: scale(0.95); }
+        @media(max-width: 600px) { .evento-btn { padding: 18px 10px; font-size: 0.9rem; } }
+
+        /* MODAL BACKDROP */
+        .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 8000; align-items: center; justify-content: center; padding: 16px; }
+        .modal-backdrop.active { display: flex; }
+        .modal-box { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 28px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .modal-title { font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .close-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 1.1rem; }
+        .form-input { width: 100%; padding: 12px 14px; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r); color: var(--text-1); font-family: var(--font-body); font-size: 0.9rem; }
+
+        /* REPORT */
+        .analisi-report-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        @media(max-width: 700px) { .analisi-report-grid { grid-template-columns: 1fr 1fr; } }
+        .analisi-stat-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+        .analisi-stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .analisi-stat-val { font-size: 1.8rem; font-weight: 900; color: var(--text-1); line-height: 1; }
+        .analisi-stat-lbl { font-size: 0.72rem; color: var(--text-3); letter-spacing: 1px; margin-top: 3px; }
+        .evento-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .evento-bar-label { width: 120px; font-size: 0.82rem; color: var(--text-2); flex-shrink: 0; }
+        .evento-bar-track { flex: 1; height: 8px; background: var(--bg-3); border-radius: 4px; overflow: hidden; }
+        .evento-bar-fill  { height: 100%; border-radius: 4px; transition: width 0.4s; }
+        .evento-bar-count { width: 28px; text-align: right; font-size: 0.82rem; font-weight: 700; color: var(--text-1); }
+        .sessione-item { display: flex; align-items: center; gap: 12px; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 16px; cursor: pointer; transition: border-color 0.15s; }
+        .sessione-item:hover { border-color: var(--neon); }
+        .sessione-item-name { font-weight: 700; font-size: 0.88rem; color: var(--text-1); }
+        .sessione-item-meta { font-size: 0.75rem; color: var(--text-3); margin-top: 2px; }
+
+        /* ANALISI VIDEO (REVIEW) */
+        .review-pick-screen { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px 24px; margin-bottom: 16px; }
+        .review-pick-screen .title { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; color: var(--neon); margin-bottom: 14px; }
+        .review-pick-buttons { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .review-player-screen { display: none; }
+        .review-match-header {
+            background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg);
+            padding: 12px 18px; margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+        }
+        .review-match-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 900; letter-spacing: 1px; color: var(--text-1); }
+        .review-match-meta { font-size: 0.75rem; color: var(--text-3); margin-top: 3px; }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 16px;
+            align-items: start;
+        }
+        @media(max-width: 900px) {
+            .review-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .review-video-container {
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--r);
+            margin-bottom: 12px;
+        }
+        .review-video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            color: var(--text-3);
+            text-align: center;
+            padding: 40px;
+        }
+        #reviewVideo {
+            width: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+        .review-laser-orb {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255,30,50,0.38);
+            box-shadow: 0 0 28px 12px rgba(255,30,50,0.32), 0 0 6px 2px rgba(255,80,80,0.7);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        .review-tool-badge {
+            display: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.75);
+            border: 1px solid var(--neon);
+            color: var(--neon);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Filtri e lista eventi */
+        .review-eventi-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-height: calc(100vh - 200px);
+        }
+        .review-card-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+            color: var(--text-2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .review-tipo-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1.5px solid transparent;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: var(--bg-4);
+            color: var(--text-2);
+        }
+        .review-tipo-chip.active {
+            color: #fff;
+            border-color: transparent;
+        }
+        .review-half-pill {
+            flex: 1;
+            padding: 5px 8px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--bg-4);
+            color: var(--text-2);
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .review-half-pill.active {
+            border-color: var(--orange);
+            background: var(--orange-dim);
+            color: var(--orange);
+        }
+        .review-eventi-list {
+            overflow-y: auto;
+            flex: 1;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .review-evento-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--r);
+            border: 1px solid var(--border);
+            background: var(--bg-3);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .review-evento-item:hover {
+            border-color: var(--neon);
+        }
+        .review-evento-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .review-evento-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .review-evento-tipo {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .review-evento-meta {
+            font-size: 0.72rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+        .review-evento-time {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-right: 6px;
+        }
+        .clip-evt-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--purple);
+            background: var(--purple-dim);
+            color: var(--purple);
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .clip-evt-btn:hover {
+            background: var(--purple);
+            color: #fff;
+        }
+        .reset-filters-btn {
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        .reset-filters-btn:hover {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+
+        /* MODALE CLIP */
+        .clip-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.82);
+            z-index: 9500;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .clip-modal-box {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .clip-modal-header {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .clip-modal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .clip-modal-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--purple-dim);
+            border: 1px solid var(--purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--purple);
+            font-size: 1rem;
+        }
+        .clip-modal-sub {
+            font-size: 0.72rem;
+            color: var(--text-3);
+            margin-top: 1px;
+        }
+        .clip-range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .clip-range-card {
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 12px 14px;
+        }
+        .clip-range-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-3);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .clip-range-value {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: var(--purple);
+        }
+        .clip-timeline {
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 10px 14px;
+            margin-bottom: 14px;
+        }
+        .clip-timeline-bar {
+            position: relative;
+            height: 34px;
+            background: var(--bg-4);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .clip-range-indicator {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: rgba(213,0,249,0.22);
+            border-left: 3px solid var(--purple);
+            border-right: 3px solid var(--purple);
+        }
+        .clip-cursor {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--neon);
+        }
+        .clip-progress-wrap {
+            display: none;
+            margin-top: 10px;
+        }
+        .clip-progress-bar {
+            height: 6px;
+            background: var(--bg-4);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .clip-progress-fill {
+            height: 100%;
+            background: var(--purple);
+            width: 0%;
+            transition: width 0.25s;
+            border-radius: 4px;
+        }
+        .clip-progress-label {
+            font-size: 0.7rem;
+            color: var(--text-3);
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        @keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+
+<!-- SUPABASE BRIDGE v3 — sincronizzato con SH2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const _sb = supabase.createClient('https://xjsoqcopalvoskbnarzn.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqc29xY29wYWx2b3NrYm5hcnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjE2ODAsImV4cCI6MjA5MDYzNzY4MH0.6AhQ5ogFLKRHkfsdMFDD2tB06vcXAf8mINJ3XUdcq_8');
+  window._sb = _sb;
+  window._sbState = { ready:false, session:null, coachId:null, teamId:null, allTeams:[], activeTeamName:'' };
+
+  function _hashUUID(u){ let h=0; for(let i=0;i<u.length;i++) h=(Math.imul(31,h)+u.charCodeAt(i))|0; return Math.abs(h)+800000; }
+
+  window._sbInit = async function(){
+    const {data:{session}} = await _sb.auth.getSession();
+    if (!session) return;
+    window._sbState.session = session;
+    window._sbState.coachId = session.user.id;
+    const {data:teams} = await _sb.rpc('get_coach_teams', {_coach_id: session.user.id});
+    if (!teams || !teams.length) return;
+    window._sbState.allTeams = teams;
+    const lastHash = localStorage.getItem('teamStats_lastTeam');
+    const active = lastHash
+      ? (teams.find(t => String(_hashUUID(t.team_id)) === String(lastHash)) || teams[0])
+      : teams[0];
+    window._sbState.teamId = active.team_id;
+    window._sbState.activeTeamName = active.team_name;
+    window._sbState.ready = true;
+    _sbShowBanner('⚽ ' + active.team_name);
+    if (teams.length > 1) _sbAddSwitchBtn();
+  };
+
+  window._sbSaveMatchSession = async function(matchInfo, eventi, logs) {
+    if (!window._sbState.ready) return;
+    await _sb.from('matches').insert({
+      team_id: window._sbState.teamId,
+      coach_id: window._sbState.coachId,
+      date: matchInfo.date || new Date().toISOString().split('T')[0],
+      opponent: matchInfo.away || matchInfo.home || 'Avversario',
+      type: 'Campionato', venue: 'Casa',
+      goals_for: parseInt((matchInfo.result||'0-0').split('-')[0]) || 0,
+      goals_against: parseInt((matchInfo.result||'0-0').split('-')[1]) || 0,
+      notes: JSON.stringify({ eventi, logs: (logs||[]).slice(0,100) })
+    });
+    console.log('[SB] Match salvata per:', window._sbState.activeTeamName);
+  };
+
+  window._sbGetAthletes = async function() {
+    if (!window._sbState.teamId) return [];
+    const {data} = await _sb.from('athletes').select('id, full_name, position, jersey_number')
+      .eq('team_id', window._sbState.teamId).order('jersey_number');
+    return data || [];
+  };
+
+  function _sbShowBanner(msg) {
+    setTimeout(() => {
+      let b = document.getElementById('_match_banner');
+      if (!b) {
+        b = document.createElement('div');
+        b.id = '_match_banner';
+        b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;padding:4px 16px;display:flex;align-items:center;gap:8px;font-size:12px;font-family:monospace;height:26px;background:rgba(180,0,0,0.15);border-bottom:1px solid rgba(200,0,0,0.3)';
+        document.body.prepend(b);
+        document.body.style.paddingTop = '26px';
+      }
+      b.innerHTML = `<span style="color:#ff5555">${msg}</span>`;
+    }, 300);
+  }
+
+  function _sbAddSwitchBtn() {
+    setTimeout(() => {
+      const b = document.getElementById('_match_banner');
+      if (!b || document.getElementById('_match_switch')) return;
+      const btn = document.createElement('button');
+      btn.id = '_match_switch';
+      btn.textContent = '⇄ Cambia squadra';
+      btn.style.cssText = 'margin-left:auto;background:rgba(200,0,0,0.15);border:1px solid rgba(200,0,0,0.4);color:#ff5555;padding:2px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:monospace';
+      btn.onclick = _sbShowPicker;
+      b.appendChild(btn);
+    }, 400);
+  }
+
+  function _sbShowPicker() {
+    const old = document.getElementById('_match_picker');
+    if (old) { old.remove(); return; }
+    const wrap = document.createElement('div');
+    wrap.id = '_match_picker';
+    wrap.style.cssText = 'position:fixed;top:30px;left:50%;transform:translateX(-50%);z-index:99999;background:#1a0000;border:1px solid rgba(200,0,0,0.4);border-radius:12px;padding:14px;min-width:240px;box-shadow:0 20px 60px rgba(0,0,0,.8)';
+    wrap.innerHTML = '<div style="font-size:10px;color:#ff5555;letter-spacing:2px;text-transform:uppercase;font-family:monospace;margin-bottom:8px">Seleziona Squadra</div>' +
+      window._sbState.allTeams.map(t =>
+        `<button onclick="_sbSwitchTeam('${t.team_id}')" style="display:block;width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;background:#2a0000;border:1px solid rgba(200,0,0,0.2);border-radius:7px;color:#f0f4f8;font-size:13px;cursor:pointer">
+          <span style="color:#ff5555;font-weight:700">${t.team_name}</span>
+        </button>`).join('');
+    document.body.appendChild(wrap);
+    setTimeout(() => document.addEventListener('click', function h(e) {
+      if (!wrap.contains(e.target)) { wrap.remove(); document.removeEventListener('click', h); }
+    }), 100);
+  }
+
+  window._sbSwitchTeam = function(teamId) {
+    document.getElementById('_match_picker')?.remove();
+    window._sbState.teamId = teamId;
+    const t = window._sbState.allTeams.find(x => x.team_id === teamId);
+    window._sbState.activeTeamName = t?.team_name || '';
+    localStorage.setItem('teamStats_lastTeam', String(_hashUUID(teamId)));
+    const b = document.getElementById('_match_banner');
+    if (b) b.querySelector('span').textContent = '⚽ ' + window._sbState.activeTeamName;
+  };
+
+  _sbInit();
+})();
+</script>
+
+<body>
+
+<header class="app-header">
+    <div class="logo">
+        <div class="logo-mark"><i class="fas fa-chart-area"></i></div>
+        <div class="logo-text">
+            <div class="app-name">Match</div>
+            <div class="app-sub">by SPORTHUB</div>
+        </div>
+    </div>
+    <div class="header-actions">
+        <button class="btn-icon" onclick="toggleTheme()" id="themeBtn"><i class="fas fa-moon" id="themeIcon"></i></button>
+    </div>
+</header>
+
+<main class="app-main">
+    <div class="match-info-bar">
+        <input type="text" class="match-team-input" id="matchTeamHome" placeholder="Squadra Casa" oninput="matchInfoChanged()">
+        <span class="match-vs">VS</span>
+        <input type="text" class="match-team-input" id="matchTeamAway" placeholder="Squadra Ospite" oninput="matchInfoChanged()">
+        <input type="date" class="match-date" id="matchDate" oninput="matchInfoChanged()">
+        <input type="text" class="match-result" id="matchResult" placeholder="0 - 0" oninput="matchInfoChanged()">
+    </div>
+
+    <div class="analisi-mode-bar">
+        <button class="analisi-mode-btn active" id="analisiModeVideo" onclick="setAnalisiMode('video')"><i class="fas fa-film"></i> MODALITÀ VIDEO</button>
+        <button class="analisi-mode-btn" id="analisiModeLive" onclick="setAnalisiMode('live')"><i class="fas fa-circle" style="color:var(--red);animation:pulse-live 1.2s infinite"></i> LIVE IN TRIBUNA</button>
+        <button class="analisi-mode-btn" id="analisiModeReview" onclick="setAnalisiMode('review')"><i class="fas fa-search-plus"></i> ANALISI VIDEO</button>
+        <button class="analisi-mode-btn" id="analisiModeStorico" onclick="setAnalisiMode('storico')"><i class="fas fa-chart-line"></i> STORICO</button>
+    </div>
+
+    <div class="analisi-session-bar">
+        <div class="analisi-session-name" id="analisiSessionName">Nuova Sessione</div>
+        <span class="analisi-badge" id="analisiEventiBadge" style="display:none;">0 eventi</span>
+        <button class="btn btn-ghost" onclick="analisiNuovaSessione()"><i class="fas fa-plus"></i> Nuova</button>
+        <button class="btn btn-ghost" onclick="analisiSalvaSessione()"><i class="fas fa-save"></i> Salva</button>
+        <button class="btn btn-ghost" onclick="analisiApriCarica()"><i class="fas fa-folder-open"></i> Carica</button>
+        <button class="btn btn-ghost" onclick="analisiApriReport()"><i class="fas fa-chart-bar"></i> Report</button>
+        <button class="btn btn-ghost" onclick="analisiExportJSON()"><i class="fas fa-file-export"></i> Esporta</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('analisiImportInput').click()"><i class="fas fa-file-import"></i> Importa</button>
+        <input type="file" id="analisiImportInput" accept=".json" style="display:none" onchange="analisiImportJSON(event)">
+    </div>
+
+    <!-- MODALITÀ VIDEO (originale) -->
+    <div id="analisiVideoMode">
+        <div class="analisi-video-layout" style="align-items:start;">
+            <div>
+                <div class="campo-wrap">
+                    <div class="campo-header">
+                        <span><i class="fas fa-film" style="margin-right:5px;color:var(--neon)"></i>VIDEO</span>
+                        <div style="display:flex;gap:6px;">
+                            <button class="posture-card-btn" onclick="document.getElementById('analisiVideoInput').click()"><i class="fas fa-folder-open"></i> Carica</button>
+                            <button class="posture-card-btn danger" id="analisiVideoCloseBtn" style="display:none;" onclick="closeAnalisiVideo()"><i class="fas fa-times"></i> Chiudi</button>
+                        </div>
+                        <input type="file" id="analisiVideoInput" accept="video/*" style="display:none" onchange="analisiLoadVideo(event)">
+                    </div>
+                    <div style="background:#000;position:relative;height:clamp(180px,28vh,260px);display:flex;align-items:center;justify-content:center;width:100%;overflow:hidden;" id="analisiVideoWrap">
+                        <div id="analisiVideoPlaceholder" style="color:var(--text-3);text-align:center;padding:40px;">
+                            <i class="fas fa-film" style="font-size:2.5rem;opacity:0.2;display:block;margin-bottom:12px;"></i>
+                            <div style="font-size:0.85rem;">Carica un video per iniziare</div>
+                        </div>
+                        <video id="analisiVideo" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;" onclick="analisiTogglePlay()"></video>
+                    </div>
+                    <div id="analisiVideoControls" style="display:none;padding:10px 14px;background:rgba(0,0,0,0.6);">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                            <span style="font-size:0.72rem;color:#aaa;min-width:35px;" id="analisiVidTime">0:00</span>
+                            <div class="video-progress-container" id="videoProgressContainer">
+                                <div class="video-progress-fill" id="videoProgressFill"></div>
+                                <div class="video-markers" id="videoMarkers"></div>
+                            </div>
+                            <span style="font-size:0.72rem;color:#aaa;min-width:35px;" id="analisiVidDur">0:00</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <button class="video-ctrl-btn" onclick="analisiSkip(-10)"><i class="fas fa-backward"></i></button>
+                            <button class="video-ctrl-btn video-play-btn" id="analisiPlayBtn" onclick="analisiTogglePlay()"><i class="fas fa-play"></i></button>
+                            <button class="video-ctrl-btn" onclick="analisiSkip(10)"><i class="fas fa-forward"></i></button>
+                            <select class="video-speed-select" onchange="document.getElementById('analisiVideo').playbackRate=parseFloat(this.value)">
+                                <option value="0.25">0.25×</option><option value="0.5">0.5×</option>
+                                <option value="0.75">0.75×</option><option value="1" selected>1×</option>
+                                <option value="1.25">1.25×</option><option value="1.5">1.5×</option>
+                                <option value="2">2×</option>
+                            </select>
+                            <button class="live-half-btn active" id="videoHalf1Btn" onclick="setVideoHalf(1)" style="margin-left:8px;">1° TEMPO</button>
+                            <button class="live-half-btn" id="videoHalf2Btn" onclick="setVideoHalf(2)">2° TEMPO</button>
+                        </div>
+                        <div class="eventi-list" id="videoEventiList">
+                            <div style="text-align:center;color:var(--text-3);padding:8px;">Nessun evento registrato</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="campo-wrap">
+                <div class="campo-header">
+                    <span><i class="fas fa-futbol" style="margin-right:5px;color:var(--green)"></i>CAMPO — clicca una zona</span>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <button class="posture-card-btn" onclick="analisiInvertiZone()" title="Inverti attacco/difesa"><i class="fas fa-exchange-alt"></i> Inverti</button>
+                        <button class="posture-card-btn danger" onclick="analisiResetEventi()" title="Reset eventi"><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>
+                <div id="campoVideo" class="campo-field">
+                    <div class="campo-center-circle"></div>
+                    <div class="campo-area sx"></div><div class="campo-area dx"></div>
+                    <div class="campo-porta sx"></div><div class="campo-porta dx"></div>
+                    <div class="campo-zones" id="campoVideoZones"></div>
+                </div>
+                <div class="campo-labels"><span>◀ DIFESA</span><span>ATTACCO ▶</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALITÀ LIVE (originale) -->
+    <div id="analisiLiveMode" style="display:none;">
+        <div id="liveTimerBar" style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 16px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <div class="live-timer">
+                    <div class="live-timer-display" id="liveTimerDisplay">00:00</div>
+                    <button class="live-timer-btn play" id="livePlayBtn" onclick="liveTimerToggle()"><i class="fas fa-play"></i></button>
+                    <button class="live-timer-btn reset" onclick="liveTimerReset()"><i class="fas fa-undo"></i></button>
+                </div>
+                <button class="live-half-btn active" id="liveHalf1Btn" onclick="setLiveHalf(1)">1° TEMPO</button>
+                <button class="live-half-btn" id="liveHalf2Btn" onclick="setLiveHalf(2)">2° TEMPO</button>
+                <div id="liveTimerHint" style="font-size:0.72rem;color:var(--orange);margin-left:auto;display:flex;align-items:center;gap:5px;">
+                    <i class="fas fa-exclamation-triangle"></i> Avvia il timer per registrare
+                </div>
+            </div>
+        </div>
+        <div class="live-campo-slider-wrap">
+            <i class="fas fa-compress-alt" style="color:var(--text-3)"></i>
+            <input type="range" min="30" max="100" value="55" id="liveCampoSlider" oninput="setLiveCampoSize(this.value)">
+            <i class="fas fa-expand-alt" style="color:var(--text-3)"></i>
+            <span class="live-campo-size-label" id="liveCampoSizeLabel">55%</span>
+        </div>
+        <div id="liveBannerNoTimer" style="display:flex;align-items:center;gap:12px;background:rgba(255,145,0,0.12);border:1px solid var(--orange);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;font-size:0.85rem;color:var(--orange);font-weight:600;">
+            <i class="fas fa-exclamation-triangle" style="font-size:1.2rem;flex-shrink:0;"></i>
+            <span>La sessione non è attiva — premi <strong>▶</strong> per avviare il timer prima di registrare eventi.</span>
+        </div>
+        <div class="live-campo-container" id="liveCampoContainer">
+            <div class="campo-wrap live-full-campo">
+                <div class="campo-header">
+                    <span><i class="fas fa-futbol" style="margin-right:5px;color:var(--green)"></i>CAMPO LIVE</span>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <button class="posture-card-btn" onclick="analisiInvertiZone()" title="Inverti attacco/difesa"><i class="fas fa-exchange-alt"></i> Inverti</button>
+                        <button class="posture-card-btn danger" onclick="analisiResetEventi()" title="Reset eventi"><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>
+                <div id="campoLive" class="campo-field">
+                    <div class="campo-center-circle"></div>
+                    <div class="campo-area sx"></div><div class="campo-area dx"></div>
+                    <div class="campo-porta sx"></div><div class="campo-porta dx"></div>
+                    <div class="campo-zones" id="campoLiveZones"></div>
+                </div>
+                <div class="campo-labels"><span>◀ DIFESA</span><span>ATTACCO ▶</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALITÀ ANALISI VIDEO (REVIEW) -->
+    <div id="analisiReviewMode" style="display:none;">
+        <div id="reviewPickScreen" class="review-pick-screen">
+            <div class="title"><i class="fas fa-folder-open" style="margin-right:6px;"></i>SELEZIONA PARTITA DA ANALIZZARE</div>
+            <div id="reviewSessioniList" style="display:flex;flex-direction:column;gap:10px;"></div>
+            <div id="reviewNoSessioni" style="display:none;text-align:center;padding:32px;color:var(--text-3);">
+                <i class="fas fa-database" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:10px;"></i>
+                Nessuna sessione salvata. Salva prima una sessione dalla Modalità Video.
+            </div>
+            <div class="review-pick-buttons">
+                <button class="btn btn-neon" onclick="reviewCaricaVideoSenzaSessione()" style="flex:1;"><i class="fas fa-film"></i> Carica video senza sessione</button>
+            </div>
+        </div>
+
+        <div id="reviewPlayerScreen" class="review-player-screen">
+            <div class="review-match-header">
+                <div>
+                    <div id="reviewMatchTitle" class="review-match-title"></div>
+                    <div id="reviewMatchMeta" class="review-match-meta"></div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="posture-card-btn" onclick="document.getElementById('reviewVideoInput').click()"><i class="fas fa-film"></i> Carica Video</button>
+                    <input type="file" id="reviewVideoInput" accept="video/*" style="display:none" onchange="reviewLoadVideo(event)">
+                    <button class="btn btn-ghost" onclick="reviewTornaLista()" style="font-size:0.78rem;padding:7px 12px;"><i class="fas fa-arrow-left"></i> Cambia Partita</button>
+                </div>
+            </div>
+
+            <div class="review-grid" id="reviewMainGrid">
+                <div>
+                    <div class="campo-wrap">
+                        <div class="campo-header">
+                            <span><i class="fas fa-search-plus" style="color:var(--neon);margin-right:5px;"></i>PLAYER DI ANALISI</span>
+                            <div style="display:flex;gap:6px;align-items:center;">
+                                <button class="posture-card-btn" id="reviewZoomBtn" onclick="reviewToggleZoom()" title="Lente ingrandimento"><i class="fas fa-search-plus"></i></button>
+                                <button class="posture-card-btn" id="reviewLaserBtn" onclick="reviewToggleLaser()" title="Puntatore laser"><i class="fas fa-dot-circle"></i></button>
+                                <button class="posture-card-btn" onclick="reviewAvviaClipManuale()" title="Taglia clip dal momento attuale" style="border-color:var(--purple);color:var(--purple);"><i class="fas fa-cut"></i> Clip</button>
+                            </div>
+                        </div>
+                        <div class="review-video-container" id="reviewVideoWrap">
+                            <div id="reviewVideoPlaceholder" class="review-video-placeholder">
+                                <i class="fas fa-film" style="font-size:3rem;opacity:0.15;display:block;margin-bottom:14px;"></i>
+                                <div style="font-size:0.9rem;font-weight:600;margin-bottom:6px;">Carica il video della partita</div>
+                                <div style="font-size:0.78rem;opacity:0.6;">Poi clicca un evento dalla lista per sincronizzarti</div>
+                            </div>
+                            <video id="reviewVideo" style="display:none;width:100%;display:block;cursor:crosshair;"></video>
+                            <div id="reviewLaserOrb" class="review-laser-orb"></div>
+                            <div id="reviewToolBadge" class="review-tool-badge"></div>
+                        </div>
+                        <div id="reviewVideoControls" style="padding:10px 14px;background:rgba(0,0,0,0.7);">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                <span style="font-size:0.72rem;color:#aaa;min-width:38px;" id="reviewVidTime">0:00</span>
+                                <div class="video-progress-container" id="reviewProgressContainer" style="flex:1;">
+                                    <div id="reviewProgressFill" class="video-progress-fill"></div>
+                                    <div id="reviewMarkers" class="video-markers"></div>
+                                </div>
+                                <span style="font-size:0.72rem;color:#aaa;min-width:38px;text-align:right;" id="reviewVidDur">0:00</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <button class="video-ctrl-btn" onclick="reviewSkip(-10)"><i class="fas fa-backward"></i></button>
+                                <button class="video-ctrl-btn" onclick="reviewSkip(-1)" style="font-size:0.65rem;padding:0 8px;height:30px;">-1s</button>
+                                <button class="video-ctrl-btn" onclick="reviewPrevFrame()"><i class="fas fa-step-backward"></i></button>
+                                <button class="video-ctrl-btn video-play-btn" id="reviewPlayBtn" onclick="reviewTogglePlay()"><i class="fas fa-play"></i></button>
+                                <button class="video-ctrl-btn" onclick="reviewNextFrame()"><i class="fas fa-step-forward"></i></button>
+                                <button class="video-ctrl-btn" onclick="reviewSkip(1)" style="font-size:0.65rem;padding:0 8px;height:30px;">+1s</button>
+                                <button class="video-ctrl-btn" onclick="reviewSkip(10)"><i class="fas fa-forward"></i></button>
+                                <select class="video-speed-select" id="reviewSpeedSelect" onchange="document.getElementById('reviewVideo').playbackRate=parseFloat(this.value)" style="margin-left:4px;">
+                                    <option value="0.1">0.1×</option><option value="0.25">0.25×</option><option value="0.5">0.5×</option>
+                                    <option value="0.75">0.75×</option><option value="1" selected>1×</option>
+                                    <option value="1.5">1.5×</option><option value="2">2×</option>
+                                </select>
+                                <span style="font-size:0.7rem;color:var(--text-3);margin-left:auto;" id="reviewFrameInfo"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:10px;font-size:0.75rem;color:var(--text-3);flex-wrap:wrap;">
+                        <span><i class="fas fa-search-plus" style="color:var(--blue);margin-right:4px;"></i>Lente: zoom 2× sul punto del cursore</span>
+                        <span><i class="fas fa-dot-circle" style="color:var(--red);margin-right:4px;"></i>Laser: orb rosso per indicare</span>
+                        <span><i class="fas fa-step-forward" style="color:var(--orange);margin-right:4px;"></i>Frame: avanzamento 1/30s</span>
+                    </div>
+                </div>
+
+                <div class="review-eventi-card">
+                    <div class="review-card-header">
+                        <span><i class="fas fa-list" style="color:var(--green);margin-right:5px;"></i>EVENTI (<span id="reviewEventiCount">0</span><span id="reviewEventiFiltered" style="color:var(--text-3);font-weight:400;"></span>)</span>
+                        <button onclick="reviewResetFiltri()" id="reviewResetFiltriBtn" style="display:none;" class="reset-filters-btn"><i class="fas fa-times"></i> Reset</button>
+                    </div>
+                    <div id="reviewFiltriContainer" style="display:flex;flex-direction:column;">
+                        <div style="padding:8px 8px 0;">
+                            <div style="font-size:0.65rem;font-weight:700;letter-spacing:1.5px;color:var(--text-3);margin-bottom:6px;">TIPO EVENTO</div>
+                            <div id="reviewFiltroTipi" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+                        </div>
+                        <div style="padding:8px;">
+                            <div style="font-size:0.65rem;font-weight:700;letter-spacing:1.5px;color:var(--text-3);margin-bottom:6px;">ZONA CAMPO</div>
+                            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                                <select id="reviewFiltroZona" onchange="reviewApplicaFiltri()" style="flex:1;background:var(--bg-3);border:1px solid var(--border);color:var(--text-1);border-radius:var(--r);padding:6px 10px;font-size:0.8rem;">
+                                    <option value="">Tutte le zone</option>
+                                    <option value="difesa">🛡 Solo Difesa (Z1–Z8)</option>
+                                    <option value="attacco">⚡ Solo Attacco (Z9–Z16)</option>
+                                    <option disabled>──────────────</option>
+                                </select>
+                            </div>
+                            <div style="display:flex;gap:5px;margin-top:6px;">
+                                <button id="reviewFiltroH1" onclick="reviewToggleFiltroHalf(1)" class="review-half-pill">1° Tempo</button>
+                                <button id="reviewFiltroH2" onclick="reviewToggleFiltroHalf(2)" class="review-half-pill">2° Tempo</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height:1px;background:var(--border);"></div>
+                    <div id="reviewEventiList" class="review-eventi-list">
+                        <div style="text-align:center;color:var(--text-3);padding:20px;">Carica un video per vedere gli eventi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODALITÀ STORICO ═══ -->
+    <div id="analisiStoricoMode" style="display:none;">
+      <div style="padding:20px 0;">
+
+        <!-- Filtri -->
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);text-transform:uppercase;font-family:var(--font-mono);">Storico Partite</div>
+          <select id="storicoFiltroN" onchange="storicoRender()" style="padding:6px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:13px;">
+            <option value="0">Tutte le partite</option>
+            <option value="3">Ultime 3</option>
+            <option value="5" selected>Ultime 5</option>
+            <option value="10">Ultime 10</option>
+          </select>
+          <select id="storicoFiltroEvento" onchange="storicoRender()" style="padding:6px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:13px;">
+            <option value="all">Tutti gli eventi</option>
+            <option value="gol">⚽ Gol</option>
+            <option value="tiro">Tiro</option>
+            <option value="tiro_fatto">Tiro in Porta</option>
+            <option value="cross">Cross</option>
+            <option value="cross_fatto">Cross Riuscito</option>
+            <option value="palla_persa">Palla Persa</option>
+            <option value="palla_recuperata">Palla Recuperata</option>
+            <option value="filtrante">Filtrante</option>
+          </select>
+          <button onclick="storicoLoad()" style="padding:6px 14px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);border-radius:8px;color:var(--neon);font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-sync-alt"></i> Aggiorna</button>
+          <span id="storicoMeta" style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);"></span>
+        </div>
+
+        <!-- Loading -->
+        <div id="storicoLoading" style="display:none;text-align:center;padding:40px;color:var(--text-3);">
+          <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;margin-bottom:10px;display:block;"></i>Caricamento dati...
+        </div>
+
+        <!-- Nessun dato -->
+        <div id="storicoEmpty" style="display:none;text-align:center;padding:60px;color:var(--text-3);">
+          <i class="fas fa-chart-bar" style="font-size:2rem;opacity:.2;display:block;margin-bottom:12px;"></i>
+          Nessuna partita con analisi trovata per questa squadra.
+        </div>
+
+        <!-- Contenuto -->
+        <div id="storicoContent" style="display:none;">
+
+          <!-- KPI row -->
+          <div id="storicoKpi" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+
+          <!-- Layout 2 colonne: heatmap + grafico tendenza -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+
+            <!-- Heatmap aggregata -->
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+              <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);">Heatmap Aggregata</div>
+              <div id="storicoHeatmapField" style="position:relative;background:#1a4a2e;aspect-ratio:105/68;width:100%;overflow:hidden;border-radius:6px;
+                background-image:linear-gradient(rgba(255,255,255,.45) 2px,transparent 2px),
+                linear-gradient(90deg,rgba(255,255,255,.45) 2px,transparent 2px),
+                linear-gradient(90deg,transparent calc(50% - 1px),rgba(255,255,255,.45) calc(50% - 1px),rgba(255,255,255,.45) calc(50% + 1px),transparent calc(50% + 1px));">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:18%;aspect-ratio:1;border:2px solid rgba(255,255,255,.45);border-radius:50%;"></div>
+                <div style="position:absolute;top:50%;transform:translateY(-50%);left:0;width:16%;height:57%;border:2px solid rgba(255,255,255,.45);border-left:none;"></div>
+                <div style="position:absolute;top:50%;transform:translateY(-50%);right:0;width:16%;height:57%;border:2px solid rgba(255,255,255,.45);border-right:none;"></div>
+                <div style="position:absolute;top:50%;transform:translateY(-50%);left:0;width:5%;height:30%;border:2px solid rgba(255,255,255,.45);border-left:none;"></div>
+                <div style="position:absolute;top:50%;transform:translateY(-50%);right:0;width:5%;height:30%;border:2px solid rgba(255,255,255,.45);border-right:none;"></div>
+                <div id="storicoHeatmapZones" style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.63rem;font-weight:700;letter-spacing:2px;color:var(--text-3);">
+                <span>◀ DIFESA</span><span>ATTACCO ▶</span>
+              </div>
+            </div>
+
+            <!-- Barre eventi aggregati -->
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+              <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);">Totale per Tipologia</div>
+              <div id="storicoBarre"></div>
+            </div>
+          </div>
+
+          <!-- Grafico tendenza -->
+          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+            <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);">Tendenza nel Tempo</div>
+            <canvas id="storicoChart" height="120"></canvas>
+          </div>
+
+          <!-- Lista partite incluse -->
+          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+            <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);">Partite Incluse</div>
+            <div id="storicoPartiteList"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+</main>
+
+<div class="live-timer-bar-fixed" id="liveTimerBarFixed">
+    <div class="live-timer" style="transform:scale(0.9);transform-origin:left center;">
+        <div class="live-timer-display" id="liveTimerDisplayFixed">00:00</div>
+        <button class="live-timer-btn play" id="livePlayBtnFixed" onclick="liveTimerToggle()"><i class="fas fa-play"></i></button>
+        <button class="live-timer-btn reset" onclick="liveTimerReset()"><i class="fas fa-undo"></i></button>
+    </div>
+    <button class="live-half-btn" id="liveHalf1BtnFixed" onclick="setLiveHalf(1)">1°</button>
+    <button class="live-half-btn" id="liveHalf2BtnFixed" onclick="setLiveHalf(2)">2°</button>
+    <span id="liveTimerHintFixed" style="font-size:0.7rem;color:var(--orange);display:none;"><i class="fas fa-exclamation-triangle"></i> Avvia timer</span>
+</div>
+
+<div class="evento-modal" id="eventoModal" style="display:none;">
+    <div class="evento-modal-box">
+        <div class="evento-modal-title"><span id="eventoModalTitle">Zona 1</span><button onclick="chiudiEventoModal()"><i class="fas fa-times"></i></button></div>
+        <div class="evento-grid" id="eventoGrid"></div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="analisiSalvaModal"><div class="modal-box"><div class="modal-header"><div class="modal-title"><i class="fas fa-save" style="color:var(--neon)"></i>Salva Sessione</div><button class="close-btn" onclick="document.getElementById('analisiSalvaModal').classList.remove('active')"><i class="fas fa-times"></i></button></div><div style="margin-bottom:16px;">Inserisci un nome per questa sessione</div><input type="text" class="form-input" id="analisiSalvaNome" placeholder="Es: Salernitana vs Napoli — 07/03/2026" style="margin-bottom:16px;"><div style="display:flex;gap:10px;"><button class="btn btn-neon" onclick="analisiConfermaSalva()" style="flex:1;"><i class="fas fa-save"></i> Salva</button><button class="btn btn-ghost" onclick="document.getElementById('analisiSalvaModal').classList.remove('active')">Annulla</button></div></div></div>
+<div class="modal-backdrop" id="analisiCaricaModal"><div class="modal-box"><div class="modal-header"><div class="modal-title"><i class="fas fa-folder-open" style="color:var(--purple)"></i>Sessioni Salvate</div><button class="close-btn" onclick="document.getElementById('analisiCaricaModal').classList.remove('active')"><i class="fas fa-times"></i></button></div><div id="analisiSessioniList" style="max-height:400px;overflow-y:auto;"></div></div></div>
+<div class="modal-backdrop" id="analisiReportModal"><div class="modal-box" style="max-width:800px;"><div class="modal-header"><div class="modal-title"><i class="fas fa-chart-bar" style="color:var(--neon)"></i>Report Sessione</div><div><button class="btn btn-ghost" onclick="analisiSalvaPDF()"><i class="fas fa-file-pdf" style="color:var(--red)"></i> Salva PDF</button><button class="close-btn" onclick="document.getElementById('analisiReportModal').classList.remove('active')"><i class="fas fa-times"></i></button></div></div><div id="analisiReportContent"></div></div></div>
+
+<div id="clipModal" class="clip-modal">
+    <div class="clip-modal-box">
+        <div class="clip-modal-header">
+            <div class="clip-modal-title"><div class="clip-modal-icon"><i class="fas fa-cut"></i></div><div><div style="font-weight:800;">Salva Clip Video</div><div id="clipModalSub" class="clip-modal-sub"></div></div></div>
+            <button onclick="clipModalChiudi()" id="clipModalCloseBtn" style="background:none;border:none;color:var(--text-3);cursor:pointer;"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="padding:18px 20px 0;">
+            <div class="clip-range-inputs">
+                <div class="clip-range-card"><div class="clip-range-label"><span>⏪ PRIMA</span><span id="clipPrimaVal" class="clip-range-value">5s</span></div><input type="range" id="clipPrimaSlider" min="2" max="15" value="5" oninput="clipAggiornaModalUI()" style="width:100%;"></div>
+                <div class="clip-range-card"><div class="clip-range-label"><span>⏩ DOPO</span><span id="clipDopoVal" class="clip-range-value">5s</span></div><input type="range" id="clipDopoSlider" min="2" max="15" value="5" oninput="clipAggiornaModalUI()" style="width:100%;"></div>
+            </div>
+            <div class="clip-timeline">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:0.68rem;font-weight:700;">INTERVALLO</span><span id="clipDurTotale" style="color:var(--purple);">10s totali</span></div>
+                <div class="clip-timeline-bar"><div id="clipRangeBar" class="clip-range-indicator"></div><div id="clipCursorBar" class="clip-cursor"></div><div style="position:absolute;inset:0;display:flex;justify-content:space-between;padding:0 8px;"><span id="clipLabelStart"></span><span id="clipLabelCenter">⏸</span><span id="clipLabelEnd"></span></div></div>
+            </div>
+            <div><div style="font-size:0.68rem;font-weight:700;margin-bottom:6px;">NOME FILE</div><input type="text" id="clipNomeFile" class="form-input" placeholder="es. cross_zona5"></div>
+            <div style="margin:12px 0;padding:8px;background:var(--bg-3);border-radius:var(--r);font-size:0.75rem;"><i class="fas fa-check-circle" style="color:var(--green);"></i> Formato WebM · acquisizione in tempo reale</div>
+            <div id="clipProgressWrap" class="clip-progress-wrap"><div class="clip-progress-bar"><div id="clipProgressFill" class="clip-progress-fill"></div></div><div id="clipProgressLabel" class="clip-progress-label"></div></div>
+        </div>
+        <div style="padding:16px 20px;display:flex;gap:10px;border-top:1px solid var(--border);">
+            <button id="clipSalvaBtn" onclick="clipEsegui()" style="flex:1;background:var(--purple);color:#fff;border:none;border-radius:var(--r);padding:11px;font-weight:700;"><i class="fas fa-scissors"></i> Taglia e Scarica</button>
+            <button onclick="clipModalChiudi()" class="btn btn-ghost">Annulla</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== THEME ==========
+    const savedTheme = localStorage.getItem('match_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    function updateThemeIcon(t) { document.getElementById('themeIcon').className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun'; }
+    updateThemeIcon(savedTheme);
+    function toggleTheme() {
+        const cur = document.documentElement.getAttribute('data-theme');
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('match_theme', next);
+        updateThemeIcon(next);
+    }
+
+    // ========== DATABASE ==========
+    const DB_NAME = 'MatchDB', DB_VERSION = 1;
+    let db = null;
+    function openDB() {
+        return new Promise((res, rej) => {
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = e => { if (!e.target.result.objectStoreNames.contains('kv')) e.target.result.createObjectStore('kv'); };
+            req.onsuccess = e => { db = e.target.result; res(db); };
+            req.onerror = e => rej(e.target.error);
+        });
+    }
+    function dbGet(store, key) { return new Promise((res, rej) => { const tx = db.transaction(store, 'readonly'); const req = tx.objectStore(store).get(key); req.onsuccess = () => res(req.result); req.onerror = e => rej(e.target.error); }); }
+    function dbSet(store, key, value) { return new Promise((res, rej) => { const tx = db.transaction(store, 'readwrite'); const req = tx.objectStore(store).put(value, key); req.onsuccess = () => res(); req.onerror = e => rej(e.target.error); }); }
+
+    const ANALISI_EVENTI = [
+        { id: 'gol', nome: '⚽ Gol', colore: '#ff1744' },
+        { id: 'cross', nome: 'Cross', colore: '#3b82f6' },
+        { id: 'tiro', nome: 'Tiro', colore: '#ef4444' },
+        { id: 'palla_persa', nome: 'Palla Persa', colore: '#f59e0b' },
+        { id: 'palla_recuperata', nome: 'Palla Recuperata', colore: '#10b981' },
+        { id: 'tiro_fatto', nome: 'Tiro in Porta', colore: '#8b5cf6' },
+        { id: 'cross_fatto', nome: 'Cross Riuscito', colore: '#06b6d4' },
+        { id: 'filtrante', nome: 'Filtrante', colore: '#ec4899' },
+    ];
+
+    let analisiMode = 'video';
+    let analisiEventi = {};
+    let analisiLogs = [];
+    let analisiSessioneName = 'Nuova Sessione';
+    let analisiSessioni = [];
+    let liveTimerInterval = null;
+    let liveTimerSeconds = 0;
+    let liveTimerRunning = false;
+    let liveTimerEverStarted = false;
+    let liveHalf = 1;
+    let matchInfo = { home: '', away: '', date: '', result: '' };
+    let zonaInvertita = false;
+
+    // ========== FUNZIONI COMUNI (invariate) ==========
+    function matchInfoChanged() {
+        matchInfo.home = document.getElementById('matchTeamHome').value.trim();
+        matchInfo.away = document.getElementById('matchTeamAway').value.trim();
+        matchInfo.date = document.getElementById('matchDate').value;
+        matchInfo.result = document.getElementById('matchResult').value.trim();
+        if (matchInfo.home && matchInfo.away) analisiSessioneName = `${matchInfo.home} vs ${matchInfo.away}${matchInfo.result ? ' ' + matchInfo.result : ''}`;
+        analisiUpdateUI();
+    }
+    function analisiUpdateUI() {
+        const tot = Object.values(analisiEventi).reduce((sum, z) => sum + Object.values(z).reduce((a,b)=>a+b,0),0);
+        document.getElementById('analisiEventiBadge').textContent = `${tot} eventi`;
+        document.getElementById('analisiEventiBadge').style.display = tot > 0 ? 'inline-block' : 'none';
+        document.getElementById('analisiSessionName').textContent = analisiSessioneName;
+    }
+    function analisiGetZonaCount(zona) { return analisiEventi[zona] ? Object.values(analisiEventi[zona]).reduce((a,b)=>a+b,0) : 0; }
+    function analisiTotaleEventi() { let t=0; Object.values(analisiEventi).forEach(z=>Object.values(z).forEach(v=>t+=v)); return t; }
+    function analisiUpdateCampo(containerId) {
+        const maxCount = Math.max(1, ...Object.keys(analisiEventi).map(z=>analisiGetZonaCount(z)));
+        for (let z=1;z<=16;z++) {
+            const c = analisiGetZonaCount(z);
+            const div = document.getElementById(`zona_${containerId}_${z}`);
+            const cnt = document.getElementById(`zcount_${containerId}_${z}`);
+            if(!div) continue;
+            if(c===0) div.style.background='transparent';
+            else div.style.background = `rgba(239,68,68,${0.15+(c/maxCount)*0.65})`;
+            if(cnt) cnt.textContent = c>0 ? c : '';
+        }
+    }
+    function analisiUpdateTutteCampo() { analisiUpdateCampo('campoVideoZones'); analisiUpdateCampo('campoLiveZones'); }
+    function analisiRenderCampo(containerId) {
+        const grid = document.getElementById(containerId);
+        if(!grid) return;
+        grid.innerHTML = '';
+        for(let row=0;row<4;row++) {
+            for(let col=0;col<4;col++) {
+                let zona = zonaInvertita ? 16-(col*4+row) : col*4+row+1;
+                const div = document.createElement('div');
+                div.className='campo-zone';
+                div.id = `zona_${containerId}_${zona}`;
+                div.dataset.zona=zona;
+                const lbl = zona<=8 ? 'Dif' : 'Att';
+                div.innerHTML = `<div class="campo-zone-label">Z${zona}<br><span style="font-size:0.5rem;opacity:0.6">${lbl}</span></div><div class="campo-zone-count" id="zcount_${containerId}_${zona}"></div>`;
+                div.addEventListener('click',()=>apriEventoModal(zona));
+                div.addEventListener('touchend',e=>{e.preventDefault();apriEventoModal(zona);});
+                grid.appendChild(div);
+            }
+        }
+        analisiUpdateCampo(containerId);
+    }
+    function analisiInvertiZone() {
+        zonaInvertita = !zonaInvertita;
+        document.querySelectorAll('.campo-labels').forEach(el=>{el.innerHTML=zonaInvertita?'<span>◀ ATTACCO</span><span>DIFESA ▶</span>':'<span>◀ DIFESA</span><span>ATTACCO ▶</span>';});
+        analisiRenderCampo('campoVideoZones');
+        analisiRenderCampo('campoLiveZones');
+    }
+    function analisiResetEventi() {
+        if(analisiTotaleEventi()>0 && !confirm('Cancellare tutti gli eventi?')) return;
+        analisiEventi={}; analisiLogs=[];
+        analisiUpdateTutteCampo(); analisiUpdateUI();
+        if(analisiMode==='video') updateVideoMarkersAndList();
+    }
+    function formatAnalisiTime(s) { if(!s||isNaN(s)) return '0:00'; const m=Math.floor(s/60),ss=Math.floor(s%60); return `${m}:${ss.toString().padStart(2,'0')}`; }
+    function apriEventoModal(zona) {
+        if(analisiMode==='live' && !liveTimerEverStarted) { ['liveTimerDisplay','liveTimerDisplayFixed'].forEach(id=>{let el=document.getElementById(id);if(el){el.style.transition='color 0.15s';el.style.color='var(--red)';setTimeout(()=>el.style.color='',700);}}); return; }
+        if(analisiMode==='video') { const vid=document.getElementById('analisiVideo'); if(vid && !vid.paused){ vid._wasPlaying=true; vid.pause(); document.getElementById('analisiPlayBtn').innerHTML='<i class="fas fa-play"></i>'; } }
+        document.getElementById('eventoModalTitle').textContent = `Zona ${zona} — ${zona<=8?'Difesa':'Attacco'}`;
+        document.getElementById('eventoGrid').innerHTML = ANALISI_EVENTI.map(ev=>`<button class="evento-btn" style="background:${ev.colore};" onclick="registraEvento(${zona},'${ev.id}')">${ev.nome}</button>`).join('');
+        document.getElementById('eventoModal').style.display='flex';
+    }
+    function chiudiEventoModal() {
+        document.getElementById('eventoModal').style.display='none';
+        if(analisiMode==='video') { const vid=document.getElementById('analisiVideo'); if(vid && vid._wasPlaying){ vid._wasPlaying=false; vid.play(); document.getElementById('analisiPlayBtn').innerHTML='<i class="fas fa-pause"></i>'; } }
+    }
+    function registraEvento(zona, tipo) {
+        if(!analisiEventi[zona]) analisiEventi[zona]={};
+        if(!analisiEventi[zona][tipo]) analisiEventi[zona][tipo]=0;
+        analisiEventi[zona][tipo]++;
+        let ts=null, timeSeconds=null;
+        if(analisiMode==='video') { const vid=document.getElementById('analisiVideo'); if(vid && vid.src){ ts=formatAnalisiTime(vid.currentTime); timeSeconds=vid.currentTime; } }
+        else { ts=document.getElementById('liveTimerDisplay').textContent; }
+        analisiLogs.push({ zona, tipo, ts, half: liveHalf, timeSeconds });
+        chiudiEventoModal();
+        if(analisiMode==='video') { const vid=document.getElementById('analisiVideo'); if(vid && vid._wasPlaying){ vid._wasPlaying=false; vid.play(); document.getElementById('analisiPlayBtn').innerHTML='<i class="fas fa-pause"></i>'; } updateVideoMarkersAndList(); }
+        analisiUpdateTutteCampo(); analisiUpdateUI();
+    }
+    async function analisiLoadSessioni() { try{ analisiSessioni = (await dbGet('kv','__match_sessioni__'))||[]; }catch{ analisiSessioni=[]; } }
+    async function analisiSaveSessioniDB() { try{ await dbSet('kv','__match_sessioni__',analisiSessioni); }catch{} }
+    function analisiNuovaSessione() {
+        if(analisiTotaleEventi()>0 && !confirm('Hai dati non salvati. Continuare?')) return;
+        analisiEventi={}; analisiLogs=[]; analisiSessioneName='Nuova Sessione'; matchInfo={home:'',away:'',date:'',result:''};
+        document.getElementById('matchTeamHome').value=''; document.getElementById('matchTeamAway').value=''; document.getElementById('matchResult').value=''; document.getElementById('matchDate').value=new Date().toISOString().split('T')[0];
+        liveTimerReset(); analisiUpdateTutteCampo(); analisiUpdateUI();
+        if(analisiMode==='video') updateVideoMarkersAndList();
+    }
+    function analisiSalvaSessione() { if(analisiTotaleEventi()===0){ alert('Nessun evento da salvare.'); return; } document.getElementById('analisiSalvaNome').value=analisiSessioneName!=='Nuova Sessione'?analisiSessioneName:''; document.getElementById('analisiSalvaModal').classList.add('active'); }
+    async function analisiConfermaSalva() {
+        const nome = document.getElementById('analisiSalvaNome').value.trim(); if(!nome){ alert('Inserisci un nome.'); return; }
+        const sessione = { id:Date.now(), nome, data:new Date().toISOString(), eventi:JSON.parse(JSON.stringify(analisiEventi)), logs:[...analisiLogs], matchInfo:{...matchInfo} };
+        analisiSessioni.push(sessione); await analisiSaveSessioniDB(); analisiSessioneName=nome; document.getElementById('analisiSalvaModal').classList.remove('active'); analisiUpdateUI();
+        // ── SUPABASE SYNC ──
+        if (window._sbSaveMatchSession) window._sbSaveMatchSession(matchInfo, analisiEventi, analisiLogs);
+        const payload={ _match:'sessione', versione:1, nome, data:sessione.data, matchInfo, eventi:analisiEventi, logs:analisiLogs };
+        const json=JSON.stringify(payload,null,2), blob=new Blob([json],{type:'application/json'});
+        const home=matchInfo.home?.replace(/[^a-zA-Z0-9]/g,'')||'Casa', away=matchInfo.away?.replace(/[^a-zA-Z0-9]/g,'')||'Ospite', fname=`Match_${home}_vs_${away}.json`;
+        if('showSaveFilePicker' in window){ try{ const fh=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Sessione Match',accept:{'application/json':['.json']}}]}); const w=await fh.createWritable(); await w.write(blob); await w.close(); return; }catch(e){ if(e.name!=='AbortError'){ const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(url),5000); } } }
+        else{ const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(url),5000); }
+    }
+    function analisiApriCarica() {
+        const list=document.getElementById('analisiSessioniList');
+        if(analisiSessioni.length===0) list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-3);"><i class="fas fa-folder-open" style="font-size:2rem;opacity:0.2;"></i>Nessuna sessione salvata</div>';
+        else list.innerHTML=analisiSessioni.slice().reverse().map(s=>{const tot=Object.values(s.eventi).reduce((sum,z)=>sum+Object.values(z).reduce((a,b)=>a+b,0),0); const data=new Date(s.data).toLocaleDateString('it-IT'); return `<div class="sessione-item" onclick="analisiCaricaSessione(${s.id})"><div style="flex:1;"><div class="sessione-item-name">${s.nome}</div><div class="sessione-item-meta">${data} · ${tot} eventi</div></div><button onclick="event.stopPropagation();analisiEliminaSessione(${s.id})" style="background:none;border:none;color:var(--red);cursor:pointer;"><i class="fas fa-trash"></i></button></div>`;}).join('');
+        document.getElementById('analisiCaricaModal').classList.add('active');
+    }
+    function analisiCaricaSessione(id) {
+        const s=analisiSessioni.find(x=>x.id===id); if(!s) return;
+        analisiEventi=JSON.parse(JSON.stringify(s.eventi)); analisiLogs=[...(s.logs||[])];
+        analisiSessioneName=s.nome;
+        if(s.matchInfo){ matchInfo={...s.matchInfo}; document.getElementById('matchTeamHome').value=matchInfo.home||''; document.getElementById('matchTeamAway').value=matchInfo.away||''; document.getElementById('matchDate').value=matchInfo.date||''; document.getElementById('matchResult').value=matchInfo.result||''; }
+        document.getElementById('analisiCaricaModal').classList.remove('active');
+        analisiUpdateTutteCampo(); analisiUpdateUI();
+        if(analisiMode==='video') updateVideoMarkersAndList();
+    }
+    async function analisiEliminaSessione(id){ if(!confirm('Eliminare?')) return; analisiSessioni=analisiSessioni.filter(s=>s.id!==id); await analisiSaveSessioniDB(); analisiApriCarica(); }
+    async function analisiExportJSON() { if(analisiTotaleEventi()===0){ alert('Nessun evento.'); return; } const payload={_match:'sessione',versione:1,nome:analisiSessioneName,data:new Date().toISOString(),matchInfo,eventi:analisiEventi,logs:analisiLogs}; const json=JSON.stringify(payload,null,2), blob=new Blob([json],{type:'application/json'}), home=matchInfo.home?.replace(/[^a-zA-Z0-9]/g,'')||'Casa', away=matchInfo.away?.replace(/[^a-zA-Z0-9]/g,'')||'Ospite', fname=`Match_${home}_vs_${away}.json`; if('showSaveFilePicker' in window){ try{ const fh=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Sessione Match',accept:{'application/json':['.json']}}]}); const w=await fh.createWritable(); await w.write(blob); await w.close(); return; }catch(e){ if(e.name!=='AbortError'){ const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(url),5000); } } } else{ const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(url),5000); } }
+    function analisiImportJSON(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ try{ const data=JSON.parse(ev.target.result); if(data._match!=='sessione'){ alert('File non valido.'); return; } if(analisiTotaleEventi()>0 && !confirm('Sostituire?')) return; analisiEventi=data.eventi||{}; analisiLogs=data.logs||[]; analisiSessioneName=data.nome||file.name.replace('.json',''); if(data.matchInfo){ matchInfo={...data.matchInfo}; document.getElementById('matchTeamHome').value=matchInfo.home||''; document.getElementById('matchTeamAway').value=matchInfo.away||''; document.getElementById('matchDate').value=matchInfo.date||''; document.getElementById('matchResult').value=matchInfo.result||''; } analisiUpdateTutteCampo(); analisiUpdateUI(); if(analisiMode==='video') updateVideoMarkersAndList(); alert(`✓ Sessione importata — ${analisiTotaleEventi()} eventi`); }catch(err){ alert('Errore: '+err.message); } }; reader.readAsText(file); e.target.value=''; }
+
+    // ========== VIDEO MODE ==========
+    function updateVideoMarkersAndList() {
+        const vid = document.getElementById('analisiVideo');
+        if(!vid || !vid.duration || vid.duration===0) return;
+        const videoLogs = analisiLogs.filter(l=>l.timeSeconds!==undefined && l.timeSeconds!==null && l.timeSeconds<=vid.duration).sort((a,b)=>a.timeSeconds-b.timeSeconds);
+        const markersContainer = document.getElementById('videoMarkers');
+        markersContainer.innerHTML = '';
+        videoLogs.forEach(log=>{ const percent=(log.timeSeconds/vid.duration)*100; const marker=document.createElement('div'); marker.className='video-marker'; marker.style.left=percent+'%'; marker.title=`${ANALISI_EVENTI.find(e=>e.id===log.tipo)?.nome||log.tipo} al ${log.ts}`; marker.addEventListener('click',(e)=>{ e.stopPropagation(); seekToEventTime(log.timeSeconds); }); markersContainer.appendChild(marker); });
+        const listContainer = document.getElementById('videoEventiList');
+        if(videoLogs.length===0){ listContainer.innerHTML='<div style="text-align:center;color:var(--text-3);padding:8px;">Nessun evento registrato</div>'; return; }
+        listContainer.innerHTML = videoLogs.map((log,idx)=>{ const ev=ANALISI_EVENTI.find(e=>e.id===log.tipo); const icon=ev?ev.nome.charAt(0):'⚽'; return `<div class="evento-list-item" data-time="${log.timeSeconds}" data-idx="${idx}"><div class="evento-list-time">${log.ts||formatAnalisiTime(log.timeSeconds)}</div><div class="evento-list-icon">${icon}</div><div class="evento-list-desc">${ev?ev.nome:log.tipo}</div><div class="evento-list-zona">Zona ${log.zona}</div></div>`; }).join('');
+        listContainer.querySelectorAll('.evento-list-item').forEach(el=>{ el.addEventListener('click',()=>{ const timeSec=parseFloat(el.dataset.time); if(!isNaN(timeSec)) seekToEventTime(timeSec); }); });
+    }
+    function seekToEventTime(seconds){ const vid=document.getElementById('analisiVideo'); if(!vid||!vid.duration) return; let target=Math.max(0,seconds-5); vid.currentTime=target; vid.pause(); document.getElementById('analisiPlayBtn').innerHTML='<i class="fas fa-play"></i>'; }
+    function closeAnalisiVideo(){ const vid=document.getElementById('analisiVideo'); vid.pause(); vid.src=''; vid.load(); vid.style.display='none'; document.getElementById('analisiVideoPlaceholder').style.display='flex'; document.getElementById('analisiVideoControls').style.display='none'; document.getElementById('analisiVideoCloseBtn').style.display='none'; document.getElementById('analisiVideoInput').value=''; document.getElementById('analisiPlayBtn').innerHTML='<i class="fas fa-play"></i>'; document.getElementById('videoMarkers').innerHTML=''; document.getElementById('videoEventiList').innerHTML='<div style="text-align:center;color:var(--text-3);padding:8px;">Nessun evento registrato</div>'; }
+    function analisiLoadVideo(e){ const file=e.target.files[0]; if(!file) return; const vid=document.getElementById('analisiVideo'); vid.src=URL.createObjectURL(file); vid.load(); vid.style.display='block'; document.getElementById('analisiVideoPlaceholder').style.display='none'; document.getElementById('analisiVideoControls').style.display='block'; document.getElementById('analisiVideoCloseBtn').style.display='inline-flex'; vid.onloadedmetadata=()=>{ document.getElementById('analisiVidDur').textContent=formatAnalisiTime(vid.duration||0); updateVideoMarkersAndList(); }; vid.ontimeupdate=()=>{ if(vid.duration) document.getElementById('videoProgressFill').style.width=(vid.currentTime/vid.duration)*100+'%'; document.getElementById('analisiVidTime').textContent=formatAnalisiTime(vid.currentTime); }; vid.onended=()=>{ document.getElementById('analisiPlayBtn').innerHTML='<i class="fas fa-play"></i>'; }; }
+    function analisiTogglePlay(){ const vid=document.getElementById('analisiVideo'); const btn=document.getElementById('analisiPlayBtn'); if(vid.paused){ vid.play(); btn.innerHTML='<i class="fas fa-pause"></i>'; }else{ vid.pause(); btn.innerHTML='<i class="fas fa-play"></i>'; } }
+    function analisiSkip(sec){ const vid=document.getElementById('analisiVideo'); vid.currentTime=Math.max(0, vid.currentTime+sec); }
+    function setVideoHalf(half){ liveHalf=half; document.getElementById('videoHalf1Btn').classList.toggle('active',half===1); document.getElementById('videoHalf2Btn').classList.toggle('active',half===2); }
+
+    // ========== LIVE MODE ==========
+    function liveTimerToggle(){ if(liveTimerRunning){ clearInterval(liveTimerInterval); liveTimerRunning=false; _liveTimerSetBtns(false); }else{ liveTimerInterval=setInterval(()=>{ liveTimerSeconds++; const txt=_liveTimerFmt(liveTimerSeconds); const cls='live-timer-display'+(liveHalf===2?' second-half':''); ['liveTimerDisplay','liveTimerDisplayFixed'].forEach(id=>{const el=document.getElementById(id); if(el){el.textContent=txt;el.className=cls;}}); },1000); liveTimerRunning=true; liveTimerEverStarted=true; _liveTimerSetBtns(true); _liveHintVisible(false); } }
+    function liveTimerReset(){ clearInterval(liveTimerInterval); liveTimerRunning=false; liveTimerEverStarted=false; liveTimerSeconds=0; ['liveTimerDisplay','liveTimerDisplayFixed'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent='00:00';el.className='live-timer-display';}}); _liveTimerSetBtns(false); _liveHintVisible(true); }
+    function _liveTimerFmt(s){ const m=Math.floor(s/60),ss=s%60; return `${m.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`; }
+    function _liveTimerSetBtns(running){ const icon=running?'<i class="fas fa-pause"></i>':'<i class="fas fa-play"></i>'; const cls=running?'live-timer-btn stop':'live-timer-btn play'; ['livePlayBtn','livePlayBtnFixed'].forEach(id=>{const b=document.getElementById(id); if(b){b.innerHTML=icon;b.className=cls;}}); }
+    function _liveHintVisible(show){ ['liveTimerHint','liveTimerHintFixed'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display=show?'flex':'none';}); const banner=document.getElementById('liveBannerNoTimer'); if(banner) banner.style.display=show?'flex':'none'; }
+    function setLiveHalf(half){ liveHalf=half; ['liveHalf1Btn','liveHalf1BtnFixed'].forEach(id=>{const b=document.getElementById(id); if(b) b.classList.toggle('active',half===1);}); ['liveHalf2Btn','liveHalf2BtnFixed'].forEach(id=>{const b=document.getElementById(id); if(b) b.classList.toggle('active',half===2);}); const cls='live-timer-display'+(half===2?' second-half':''); ['liveTimerDisplay','liveTimerDisplayFixed'].forEach(id=>{const el=document.getElementById(id); if(el) el.className=cls;}); }
+    function setLiveCampoSize(val){ val=parseInt(val); document.getElementById('liveCampoContainer').style.maxWidth=val+'%'; document.getElementById('liveCampoSizeLabel').textContent=val+'%'; localStorage.setItem('match_campo_size',val); }
+
+    // ========== REPORT ==========
+    function analisiApriReport(){ const tot=analisiTotaleEventi(); if(tot===0){ alert('Nessun evento registrato.'); return; } let zonaMax=1,zonaMaxVal=0; for(let z=1;z<=16;z++){ const c=analisiGetZonaCount(z); if(c>zonaMaxVal){ zonaMaxVal=c; zonaMax=z; } } const zoneAttive=Object.keys(analisiEventi).filter(z=>analisiGetZonaCount(z)>0).length; const totaliTipo={}; ANALISI_EVENTI.forEach(e=>totaliTipo[e.id]=0); Object.values(analisiEventi).forEach(z=>Object.entries(z).forEach(([t,c])=>{if(totaliTipo[t]!==undefined) totaliTipo[t]+=c;})); const maxTipo=Math.max(1,...Object.values(totaliTipo)); const matchLine=matchInfo.home&&matchInfo.away?`<div style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:20px;">${matchInfo.home} <span style="color:var(--neon)">vs</span> ${matchInfo.away}${matchInfo.result?' <span style="color:var(--text-3);font-size:0.85rem;">'+matchInfo.result+'</span>':''}${matchInfo.date?' · '+new Date(matchInfo.date).toLocaleDateString('it-IT'):''}</div>`:''; const content=document.getElementById('analisiReportContent'); content.innerHTML=`${matchLine}<div class="analisi-report-grid"><div class="analisi-stat-card"><div class="analisi-stat-icon" style="background:var(--neon-dim);color:var(--neon);"><i class="fas fa-bolt"></i></div><div><div class="analisi-stat-val">${tot}</div><div class="analisi-stat-lbl">TOTALE EVENTI</div></div></div><div class="analisi-stat-card"><div class="analisi-stat-icon" style="background:var(--green-dim);color:var(--green);"><i class="fas fa-th"></i></div><div><div class="analisi-stat-val">${zoneAttive}/16</div><div class="analisi-stat-lbl">ZONE ATTIVE</div></div></div><div class="analisi-stat-card"><div class="analisi-stat-icon" style="background:var(--orange-dim);color:var(--orange);"><i class="fas fa-fire"></i></div><div><div class="analisi-stat-val">Z${zonaMax}</div><div class="analisi-stat-lbl">ZONA PIÙ ATTIVA</div></div></div></div><div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:16px;"><div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);margin-bottom:14px;">EVENTI PER TIPOLOGIA</div>${ANALISI_EVENTI.map(e=>`<div class="evento-bar-row"><div class="evento-bar-label">${e.nome}</div><div class="evento-bar-track"><div class="evento-bar-fill" style="width:${(totaliTipo[e.id]/maxTipo*100).toFixed(1)}%;background:${e.colore};"></div></div><div class="evento-bar-count">${totaliTipo[e.id]}</div></div>`).join('')}</div><div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:16px;"><div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);margin-bottom:14px;">HEATMAP ZONE</div><div style="max-width:480px;"><div class="campo-field" style="min-height:180px;"><div class="campo-center-circle"></div><div class="campo-area sx"></div><div class="campo-area dx"></div><div class="campo-porta sx"></div><div class="campo-porta dx"></div><div class="campo-zones" id="reportHeatmap"></div></div><div class="campo-labels"><span>◀ DIFESA</span><span>ATTACCO ▶</span></div></div></div>${analisiLogs.length>0?`<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;"><div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;color:var(--neon);margin-bottom:14px;">LOG EVENTI (${analisiLogs.length})</div><div style="max-height:220px;overflow-y:auto;">${analisiLogs.slice().reverse().map(l=>{const ev=ANALISI_EVENTI.find(e=>e.id===l.tipo);return `<div style="display:flex;align-items:center;gap:10px;font-size:0.8rem;"><span style="color:${ev?.colore};font-weight:700;min-width:110px;">${ev?.nome||l.tipo}</span><span style="color:var(--text-3);">Zona ${l.zona}</span>${l.ts?`<span style="color:var(--text-3);margin-left:auto;">${l.half?l.half+'° · ':''}${l.ts}</span>`:''}</div>`;}).join('')}</div></div>`:''}`; document.getElementById('analisiReportModal').classList.add('active'); setTimeout(()=>{const hm=document.getElementById('reportHeatmap');if(hm){hm.innerHTML='';const mx=Math.max(1,...Array.from({length:16},(_,i)=>analisiGetZonaCount(i+1)));for(let row=0;row<4;row++){for(let col=0;col<4;col++){const zona=col*4+row+1,c=analisiGetZonaCount(zona);const div=document.createElement('div');div.className='campo-zone';div.style.pointerEvents='none';div.style.background=c>0?`rgba(239,68,68,${0.15+(c/mx)*0.7})`:'transparent';div.innerHTML=`<div class="campo-zone-label" style="font-size:0.55rem;">Z${zona}${c>0?`<br><b style="color:#fff;font-size:0.65rem;">${c}</b>`:''}</div>`;hm.appendChild(div);}}}},50); }
+    function analisiSalvaPDF(){ const contenuto=document.getElementById('analisiReportContent').innerHTML; const w=window.open('','_blank','width=900,height=700'); w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report Match</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#111;padding:32px 40px;} h1.report-title{font-size:1.5rem;font-weight:900;color:#cc0000;} .report-sub{font-size:0.75rem;color:#888;border-bottom:2px solid #eee;padding-bottom:12px;margin-bottom:24px;} .match-line{text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:20px;} .match-line span{color:#cc0000;} .analisi-report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;} .analisi-stat-card{background:#f5f5f5;border:1px solid #ddd;border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:12px;} .analisi-stat-val{font-size:1.7rem;font-weight:900;} .analisi-stat-lbl{font-size:0.68rem;color:#666;} .evento-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;} .evento-bar-label{width:130px;font-size:0.82rem;} .evento-bar-track{flex:1;height:8px;background:#ddd;border-radius:4px;overflow:hidden;} .evento-bar-fill{height:100%;border-radius:4px;} .evento-bar-count{width:28px;text-align:right;font-weight:700;} .campo-field{position:relative;background:#1a4a2e;aspect-ratio:105/68;width:100%;overflow:hidden;border-radius:6px;background-image:linear-gradient(rgba(255,255,255,0.45) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.45) 2px, transparent 2px), linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,255,255,0.45) calc(50% - 1px), rgba(255,255,255,0.45) calc(50% + 1px), transparent calc(50% + 1px)); -webkit-print-color-adjust: exact; print-color-adjust: exact;} .campo-center-circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:18%;aspect-ratio:1;border:2px solid rgba(255,255,255,0.45);border-radius:50%;} .campo-area{position:absolute;top:50%;transform:translateY(-50%);border:2px solid rgba(255,255,255,0.45);} .campo-area.sx{left:0;width:16%;height:57%;border-left:none;} .campo-area.dx{right:0;width:16%;height:57%;border-right:none;} .campo-porta{position:absolute;top:50%;transform:translateY(-50%);border:2px solid rgba(255,255,255,0.45);} .campo-porta.sx{left:0;width:5%;height:30%;border-left:none;} .campo-porta.dx{right:0;width:5%;height:30%;border-right:none;} .campo-zones{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);} .campo-zone{border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;} .campo-zone-label{font-size:0.55rem;font-weight:700;color:rgba(255,255,255,0.7);text-align:center;} .campo-labels{display:flex;justify-content:space-between;font-size:0.65rem;font-weight:700;letter-spacing:2px;color:#888;padding:5px 0 0 0;} .footer{margin-top:28px;text-align:center;font-size:0.7rem;color:#bbb;border-top:1px solid #eee;padding-top:12px;} @media print{body{padding:20px 28px;}}</style></head><body><h1 class="report-title">Match <span style="font-weight:400;font-size:1rem;color:#888;">— Report Sessione</span></h1><div class="report-sub">by SPORTHUB · generato il ${new Date().toLocaleString('it-IT')}</div>${contenuto}<div class="footer">Match by SPORTHUB</div></body></html>`); w.document.close(); w.onload = () => { w.focus(); w.print(); }; }
+
+    // ========== REVIEW MODE (con supporto a video senza sessione) ==========
+    let reviewSessione = null;
+    let reviewLaserActive = false, reviewZoomActive = false;
+    let reviewFPS = 30;
+    let reviewZoomMouseX = 0, reviewZoomMouseY = 0;
+    let reviewFiltroTipi = new Set(), reviewFiltroZona = '', reviewFiltroHalf = new Set();
+
+    function reviewInit() { reviewRenderSessioniList(); }
+    function reviewRenderSessioniList() {
+        const list = document.getElementById('reviewSessioniList'), noSess = document.getElementById('reviewNoSessioni');
+        if (analisiSessioni.length === 0) { list.innerHTML = ''; noSess.style.display = 'block'; return; }
+        noSess.style.display = 'none';
+        list.innerHTML = analisiSessioni.slice().reverse().map(s => {
+            const logs = s.logs || [], videoLogs = logs.filter(l => l.timeSeconds !== undefined);
+            const tot = Object.values(s.eventi || {}).reduce((sum, z) => sum + Object.values(z).reduce((a, b) => a + b, 0), 0);
+            const data = new Date(s.data).toLocaleDateString('it-IT');
+            const matchStr = s.matchInfo?.home && s.matchInfo?.away ? `${s.matchInfo.home} vs ${s.matchInfo.away}` : s.nome;
+            return `<div class="sessione-item" onclick="reviewSelezionaSessione(${s.id})"><div style="flex:1;"><div class="sessione-item-name">${matchStr}</div><div class="sessione-item-meta">${data} · ${tot} eventi · ${videoLogs.length} timestamp</div></div><div style="color:var(--neon);"><i class="fas fa-play-circle"></i> Analizza</div></div>`;
+        }).join('');
+    }
+    function reviewSelezionaSessione(id) {
+        const s = analisiSessioni.find(x => x.id === id); if (!s) return;
+        reviewSessione = s;
+        const mi = s.matchInfo || {};
+        document.getElementById('reviewMatchTitle').innerHTML = mi.home && mi.away ? `${mi.home} <span style="color:var(--neon)">vs</span> ${mi.away}` : s.nome;
+        let meta = []; if (mi.date) meta.push(new Date(mi.date).toLocaleDateString('it-IT')); if (mi.result) meta.push(mi.result);
+        const logs = (s.logs || []).filter(l => l.timeSeconds !== undefined);
+        meta.push(`${logs.length} eventi con timestamp`);
+        document.getElementById('reviewMatchMeta').textContent = meta.join(' · ');
+        reviewFiltroTipi.clear(); reviewFiltroZona = ''; reviewFiltroHalf.clear();
+        document.getElementById('reviewFiltroZona').value = '';
+        document.getElementById('reviewFiltroH1').classList.remove('active');
+        document.getElementById('reviewFiltroH2').classList.remove('active');
+        // Mostra i filtri
+        document.getElementById('reviewFiltriContainer').style.display = 'flex';
+        reviewApriPlayer(true);
+        reviewPopulateEventiList(null);
+    }
+
+    function reviewCaricaVideoSenzaSessione() {
+        reviewSessione = null;
+        document.getElementById('reviewMatchTitle').innerHTML = 'Analisi video senza sessione';
+        document.getElementById('reviewMatchMeta').textContent = 'Nessun evento associato. Puoi comunque creare clip e usare gli strumenti.';
+        // Nascondi i filtri perché non ci sono eventi
+        document.getElementById('reviewFiltriContainer').style.display = 'none';
+        // Resetta lista eventi
+        const list = document.getElementById('reviewEventiList');
+        list.innerHTML = '<div style="text-align:center;color:var(--text-3);padding:20px;">Nessun evento registrato per questo video</div>';
+        document.getElementById('reviewEventiCount').textContent = '0';
+        document.getElementById('reviewEventiFiltered').textContent = '';
+        document.getElementById('reviewResetFiltriBtn').style.display = 'none';
+        // Pulisci marker se presenti
+        const markersContainer = document.getElementById('reviewMarkers');
+        if (markersContainer) markersContainer.innerHTML = '';
+        reviewApriPlayer(false);
+    }
+
+    function reviewApriPlayer(hasSession) {
+        document.getElementById('reviewPickScreen').style.display = 'none';
+        document.getElementById('reviewPlayerScreen').style.display = 'block';
+        // Se non c'è sessione, disabilitiamo i filtri ma non li nascondiamo del tutto? Li nascondiamo già.
+        if (!hasSession) {
+            document.getElementById('reviewFiltriContainer').style.display = 'none';
+        } else {
+            document.getElementById('reviewFiltriContainer').style.display = 'flex';
+        }
+    }
+
+    function reviewTornaLista() {
+        const vid = document.getElementById('reviewVideo');
+        if (vid) { vid.pause(); vid.src = ''; vid.load(); vid.style.display = 'none'; }
+        document.getElementById('reviewVideoPlaceholder').style.display = 'flex';
+        reviewDeactivateTools();
+        document.getElementById('reviewPickScreen').style.display = 'block';
+        document.getElementById('reviewPlayerScreen').style.display = 'none';
+        reviewSessione = null;
+        reviewRenderSessioniList();
+    }
+
+    function reviewPopulateEventiList(vidDuration) {
+        if (!reviewSessione) return;
+        const allLogs = (reviewSessione.logs || []).filter(l => l.timeSeconds !== undefined).sort((a, b) => a.timeSeconds - b.timeSeconds);
+        reviewBuildTipiChips(allLogs);
+        reviewBuildZoneOptions(allLogs);
+        document.getElementById('reviewEventiCount').textContent = allLogs.length;
+        reviewRenderEventiList(allLogs, vidDuration);
+    }
+
+    function reviewBuildTipiChips(allLogs) {
+        const tipiPresenti = [...new Set(allLogs.map(l => l.tipo))];
+        const container = document.getElementById('reviewFiltroTipi');
+        container.innerHTML = tipiPresenti.map(tipo => {
+            const ev = ANALISI_EVENTI.find(e => e.id === tipo);
+            const colore = ev?.colore || '#888';
+            return `<button class="review-tipo-chip" data-tipo="${tipo}" data-colore="${colore}" onclick="reviewToggleTipo('${tipo}')"><span style="width:14px;height:14px;border-radius:50%;background:${colore};display:inline-block;"></span> ${ev?.nome || tipo}</button>`;
+        }).join('');
+    }
+
+    function reviewBuildZoneOptions(allLogs) {
+        const sel = document.getElementById('reviewFiltroZona');
+        while (sel.options.length > 4) sel.remove(4);
+        const zonePresenti = [...new Set(allLogs.map(l => l.zona))].sort((a, b) => a - b);
+        zonePresenti.forEach(z => { const opt = document.createElement('option'); opt.value = `Z${z}`; opt.text = `Zona ${z} (${z <= 8 ? 'Dif' : 'Att'})`; sel.appendChild(opt); });
+    }
+
+    function reviewToggleTipo(tipo) { if (reviewFiltroTipi.has(tipo)) reviewFiltroTipi.delete(tipo); else reviewFiltroTipi.add(tipo); reviewApplicaFiltri(); }
+    function reviewToggleFiltroHalf(half) { if (reviewFiltroHalf.has(half)) reviewFiltroHalf.delete(half); else reviewFiltroHalf.add(half); document.getElementById(`reviewFiltroH${half}`).classList.toggle('active', reviewFiltroHalf.has(half)); reviewApplicaFiltri(); }
+    function reviewApplicaFiltri() {
+        if (!reviewSessione) return;
+        const allLogs = (reviewSessione.logs || []).filter(l => l.timeSeconds !== undefined).sort((a, b) => a.timeSeconds - b.timeSeconds);
+        document.querySelectorAll('.review-tipo-chip').forEach(chip => {
+            const tipo = chip.dataset.tipo, colore = chip.dataset.colore, active = reviewFiltroTipi.has(tipo);
+            chip.classList.toggle('active', active);
+            chip.style.background = active ? colore : 'var(--bg-4)';
+            chip.style.color = active ? '#fff' : 'var(--text-2)';
+        });
+        const zonaVal = document.getElementById('reviewFiltroZona').value;
+        reviewFiltroZona = zonaVal;
+        const hasFiltri = reviewFiltroTipi.size > 0 || reviewFiltroZona !== '' || reviewFiltroHalf.size > 0;
+        document.getElementById('reviewResetFiltriBtn').style.display = hasFiltri ? 'inline-flex' : 'none';
+        const vid = document.getElementById('reviewVideo');
+        reviewRenderEventiList(allLogs, vid?.duration || null);
+    }
+    function reviewResetFiltri() { reviewFiltroTipi.clear(); reviewFiltroZona = ''; reviewFiltroHalf.clear(); document.getElementById('reviewFiltroZona').value = ''; document.getElementById('reviewFiltroH1').classList.remove('active'); document.getElementById('reviewFiltroH2').classList.remove('active'); reviewApplicaFiltri(); }
+    function reviewRenderEventiList(allLogs, vidDuration) {
+        let logs = allLogs;
+        if (reviewFiltroTipi.size > 0) logs = logs.filter(l => reviewFiltroTipi.has(l.tipo));
+        if (reviewFiltroZona === 'difesa') logs = logs.filter(l => parseInt(l.zona) <= 8);
+        else if (reviewFiltroZona === 'attacco') logs = logs.filter(l => parseInt(l.zona) > 8);
+        else if (reviewFiltroZona.startsWith('Z')) logs = logs.filter(l => parseInt(l.zona) === parseInt(reviewFiltroZona.slice(1)));
+        if (reviewFiltroHalf.size > 0) logs = logs.filter(l => reviewFiltroHalf.has(l.half));
+        const filtEl = document.getElementById('reviewEventiFiltered');
+        if (filtEl) filtEl.textContent = (reviewFiltroTipi.size > 0 || reviewFiltroZona !== '' || reviewFiltroHalf.size > 0) ? ` → ${logs.length} filtrati` : '';
+        const list = document.getElementById('reviewEventiList');
+        if (logs.length === 0) { list.innerHTML = '<div style="text-align:center;color:var(--text-3);padding:20px;">Nessun evento corrisponde ai filtri</div>'; if (vidDuration) reviewUpdateProgressMarkers([], vidDuration); return; }
+        list.innerHTML = logs.map((log, idx) => {
+            const ev = ANALISI_EVENTI.find(e => e.id === log.tipo);
+            const colore = ev?.colore || '#888';
+            const letter = ev ? ev.nome.replace(/[^a-zA-Z]/g, '').charAt(0).toUpperCase() : '?';
+            return `<div class="review-evento-item" data-time="${log.timeSeconds}" onclick="reviewSeekToEvent(${log.timeSeconds}, this)">
+                        <div class="review-evento-icon" style="background:${colore};">${letter}</div>
+                        <div class="review-evento-info">
+                            <div class="review-evento-tipo">${ev?.nome || log.tipo}</div>
+                            <div class="review-evento-meta">${log.half ? log.half + '° · ' : ''}Zona ${log.zona} · ${log.zona <= 8 ? 'Difesa' : 'Attacco'}</div>
+                        </div>
+                        <div class="review-evento-time" style="color:${colore};">${log.ts || formatAnalisiTime(log.timeSeconds)}</div>
+                        <button class="clip-evt-btn" onclick="event.stopPropagation();reviewApriClip(${log.timeSeconds},'${(ev?.nome || log.tipo).replace(/[^a-zA-Z0-9]/g, '_')}_Z${log.zona}')"><i class="fas fa-cut"></i></button>
+                    </div>`;
+        }).join('');
+        if (vidDuration) reviewUpdateProgressMarkers(logs, vidDuration);
+    }
+    function reviewSeekToEvent(seconds, el) {
+        const vid = document.getElementById('reviewVideo');
+        if (!vid || !vid.src || vid.src === window.location.href) { alert('Carica prima il video'); return; }
+        vid.currentTime = Math.max(0, seconds - 3);
+        vid.pause();
+        document.getElementById('reviewPlayBtn').innerHTML = '<i class="fas fa-play"></i>';
+        document.querySelectorAll('.review-evento-item').forEach(e => { e.style.borderColor = 'var(--border)'; e.style.background = 'var(--bg-3)'; });
+        if (el) { el.style.borderColor = 'var(--neon)'; el.style.background = 'var(--neon-dim)'; el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    }
+    function reviewLoadVideo(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const vid = document.getElementById('reviewVideo');
+        vid.src = URL.createObjectURL(file); vid.load(); vid.style.display = 'block';
+        document.getElementById('reviewVideoPlaceholder').style.display = 'none';
+        vid.onloadedmetadata = () => {
+            document.getElementById('reviewVidDur').textContent = formatAnalisiTime(vid.duration || 0);
+            // Se c'è una sessione, aggiorna marker e lista eventi
+            if (reviewSessione) {
+                const logs = (reviewSessione.logs || []).filter(l => l.timeSeconds !== undefined).sort((a, b) => a.timeSeconds - b.timeSeconds);
+                reviewUpdateProgressMarkers(logs, vid.duration);
+                reviewPopulateEventiList(vid.duration);
+            } else {
+                // Nessuna sessione: pulisci marker
+                const markersContainer = document.getElementById('reviewMarkers');
+                if (markersContainer) markersContainer.innerHTML = '';
+                // Aggiorna lista eventi per mostrare messaggio vuoto
+                const list = document.getElementById('reviewEventiList');
+                list.innerHTML = '<div style="text-align:center;color:var(--text-3);padding:20px;">Nessun evento registrato per questo video</div>';
+                document.getElementById('reviewEventiCount').textContent = '0';
+                document.getElementById('reviewEventiFiltered').textContent = '';
+                document.getElementById('reviewResetFiltriBtn').style.display = 'none';
+            }
+        };
+        vid.ontimeupdate = () => { if (vid.duration) document.getElementById('reviewProgressFill').style.width = (vid.currentTime / vid.duration) * 100 + '%'; document.getElementById('reviewVidTime').textContent = formatAnalisiTime(vid.currentTime); if (reviewZoomActive) reviewDrawZoom(); };
+        vid.onended = () => { document.getElementById('reviewPlayBtn').innerHTML = '<i class="fas fa-play"></i>'; };
+        const progressEl = document.getElementById('reviewProgressContainer');
+        progressEl.onclick = (ev) => { const rect = progressEl.getBoundingClientRect(); const pct = (ev.clientX - rect.left) / rect.width; if (vid.duration) vid.currentTime = pct * vid.duration; };
+        const wrap = document.getElementById('reviewVideoWrap');
+        wrap.addEventListener('mousemove', reviewHandleMouseMove);
+        wrap.addEventListener('mouseleave', () => { document.getElementById('reviewLaserOrb').style.display = 'none'; });
+        e.target.value = '';
+    }
+    function reviewTogglePlay() { const vid = document.getElementById('reviewVideo'); if (!vid.src || vid.src === window.location.href) { alert('Carica prima il video'); return; } const btn = document.getElementById('reviewPlayBtn'); if (vid.paused) { vid.play(); btn.innerHTML = '<i class="fas fa-pause"></i>'; } else { vid.pause(); btn.innerHTML = '<i class="fas fa-play"></i>'; } }
+    function reviewSkip(sec) { const vid = document.getElementById('reviewVideo'); if (!vid.src || vid.src === window.location.href) return; vid.currentTime = Math.max(0, Math.min(vid.duration || 0, vid.currentTime + sec)); }
+    function reviewNextFrame() { const vid = document.getElementById('reviewVideo'); if (!vid.src || vid.src === window.location.href) return; vid.pause(); document.getElementById('reviewPlayBtn').innerHTML = '<i class="fas fa-play"></i>'; vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 1 / reviewFPS); document.getElementById('reviewFrameInfo').textContent = `Frame ~${Math.round(vid.currentTime * reviewFPS)}`; }
+    function reviewPrevFrame() { const vid = document.getElementById('reviewVideo'); if (!vid.src || vid.src === window.location.href) return; vid.pause(); document.getElementById('reviewPlayBtn').innerHTML = '<i class="fas fa-play"></i>'; vid.currentTime = Math.max(0, vid.currentTime - 1 / reviewFPS); document.getElementById('reviewFrameInfo').textContent = `Frame ~${Math.round(vid.currentTime * reviewFPS)}`; }
+    function reviewUpdateProgressMarkers(logs, duration) {
+        const container = document.getElementById('reviewMarkers'); container.innerHTML = '';
+        if (!duration) return;
+        logs.forEach(log => {
+            const ev = ANALISI_EVENTI.find(e => e.id === log.tipo);
+            const color = ev?.colore || '#fff';
+            const pct = (log.timeSeconds / duration) * 100;
+            const m = document.createElement('div');
+            m.style.cssText = `position:absolute;left:${pct}%;top:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:${color};cursor:pointer;pointer-events:all;`;
+            m.title = `${ev?.nome || log.tipo} — ${log.ts || formatAnalisiTime(log.timeSeconds)}`;
+            m.addEventListener('click', (e) => { e.stopPropagation(); const vid = document.getElementById('reviewVideo'); if (vid.src && vid.src !== window.location.href) { vid.currentTime = Math.max(0, log.timeSeconds - 3); vid.pause(); document.getElementById('reviewPlayBtn').innerHTML = '<i class="fas fa-play"></i>'; } });
+            container.appendChild(m);
+        });
+    }
+    function reviewToggleLaser() { reviewLaserActive = !reviewLaserActive; if (reviewLaserActive) reviewZoomActive = false; reviewUpdateToolUI(); }
+    function reviewToggleZoom() { reviewZoomActive = !reviewZoomActive; if (reviewZoomActive) reviewLaserActive = false; if (!reviewZoomActive && document.getElementById('reviewZoomCanvas')) document.getElementById('reviewZoomCanvas').style.display = 'none'; reviewUpdateToolUI(); }
+    function reviewUpdateToolUI() {
+        const laserBtn = document.getElementById('reviewLaserBtn'), zoomBtn = document.getElementById('reviewZoomBtn'), badge = document.getElementById('reviewToolBadge');
+        if (laserBtn) { laserBtn.style.borderColor = reviewLaserActive ? 'var(--red)' : 'var(--border)'; laserBtn.style.color = reviewLaserActive ? 'var(--red)' : 'var(--text-2)'; }
+        if (zoomBtn) { zoomBtn.style.borderColor = reviewZoomActive ? 'var(--blue)' : 'var(--border)'; zoomBtn.style.color = reviewZoomActive ? 'var(--blue)' : 'var(--text-2)'; }
+        const wrap = document.getElementById('reviewVideoWrap');
+        if (reviewLaserActive) { wrap.style.cursor = 'none'; badge.style.display = 'block'; badge.textContent = '🔴 LASER ATTIVO'; badge.style.borderColor = 'var(--red)'; }
+        else if (reviewZoomActive) { wrap.style.cursor = 'zoom-in'; badge.style.display = 'block'; badge.textContent = '🔍 ZOOM ATTIVO'; badge.style.borderColor = 'var(--blue)'; }
+        else { wrap.style.cursor = 'default'; badge.style.display = 'none'; }
+    }
+    function reviewHandleMouseMove(e) {
+        const wrap = document.getElementById('reviewVideoWrap'); const rect = wrap.getBoundingClientRect();
+        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+        const pctX = x / rect.width, pctY = y / rect.height;
+        if (reviewLaserActive) { const orb = document.getElementById('reviewLaserOrb'); orb.style.display = 'block'; orb.style.left = pctX * 100 + '%'; orb.style.top = pctY * 100 + '%'; } else { document.getElementById('reviewLaserOrb').style.display = 'none'; }
+        if (reviewZoomActive) { reviewZoomMouseX = pctX; reviewZoomMouseY = pctY; reviewDrawZoom(); }
+    }
+    function reviewDrawZoom() {
+        const vid = document.getElementById('reviewVideo'); let canvas = document.getElementById('reviewZoomCanvas');
+        if (!vid || !vid.videoWidth) return;
+        const wrap = document.getElementById('reviewVideoWrap'); const rect = wrap.getBoundingClientRect();
+        if (!canvas) { canvas = document.createElement('canvas'); canvas.id = 'reviewZoomCanvas'; canvas.style.position = 'absolute'; canvas.style.inset = '0'; canvas.style.width = '100%'; canvas.style.height = '100%'; canvas.style.pointerEvents = 'none'; wrap.appendChild(canvas); }
+        canvas.width = rect.width; canvas.height = rect.height; canvas.style.display = 'block';
+        const ctx = canvas.getContext('2d'); const scale = 2.2; const magW = rect.width * 0.42, magH = rect.height * 0.42;
+        const srcCX = reviewZoomMouseX * vid.videoWidth, srcCY = reviewZoomMouseY * vid.videoHeight;
+        const srcW = vid.videoWidth / scale, srcH = vid.videoHeight / scale;
+        const srcX = Math.max(0, Math.min(vid.videoWidth - srcW, srcCX - srcW / 2));
+        const srcY = Math.max(0, Math.min(vid.videoHeight - srcH, srcCY - srcH / 2));
+        let destX = reviewZoomMouseX > 0.5 ? 10 : rect.width - magW - 10;
+        let destY = reviewZoomMouseY > 0.5 ? 10 : rect.height - magH - 10;
+        ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 18; ctx.strokeStyle = 'rgba(41,121,255,0.85)'; ctx.lineWidth = 2.5;
+        const rad = 10;
+        ctx.beginPath(); ctx.moveTo(destX + rad, destY); ctx.lineTo(destX + magW - rad, destY);
+        ctx.quadraticCurveTo(destX + magW, destY, destX + magW, destY + rad);
+        ctx.lineTo(destX + magW, destY + magH - rad);
+        ctx.quadraticCurveTo(destX + magW, destY + magH, destX + magW - rad, destY + magH);
+        ctx.lineTo(destX + rad, destY + magH);
+        ctx.quadraticCurveTo(destX, destY + magH, destX, destY + magH - rad);
+        ctx.lineTo(destX, destY + rad);
+        ctx.quadraticCurveTo(destX, destY, destX + rad, destY);
+        ctx.closePath(); ctx.clip();
+        ctx.drawImage(vid, srcX, srcY, srcW, srcH, destX, destY, magW, magH);
+        ctx.restore(); ctx.save();
+        ctx.strokeStyle = 'rgba(41,121,255,0.85)'; ctx.lineWidth = 2.5; ctx.shadowColor = 'rgba(41,121,255,0.6)'; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.moveTo(destX + rad, destY); ctx.lineTo(destX + magW - rad, destY);
+        ctx.quadraticCurveTo(destX + magW, destY, destX + magW, destY + rad);
+        ctx.lineTo(destX + magW, destY + magH - rad);
+        ctx.quadraticCurveTo(destX + magW, destY + magH, destX + magW - rad, destY + magH);
+        ctx.lineTo(destX + rad, destY + magH);
+        ctx.quadraticCurveTo(destX, destY + magH, destX, destY + magH - rad);
+        ctx.lineTo(destX, destY + rad);
+        ctx.quadraticCurveTo(destX, destY, destX + rad, destY);
+        ctx.closePath(); ctx.stroke();
+        ctx.fillStyle = 'rgba(41,121,255,0.9)'; ctx.font = 'bold 11px Inter, sans-serif'; ctx.fillText('×' + scale.toFixed(1), destX + magW - 34, destY + 16);
+        ctx.restore();
+    }
+
+    // ========== CLIP FUNCTIONS ==========
+    let clipCurrentTime = 0, clipCurrentLabel = '', clipIsRecording = false;
+    function clipGetPrima() { return parseInt(document.getElementById('clipPrimaSlider')?.value || 5); }
+    function clipGetDopo() { return parseInt(document.getElementById('clipDopoSlider')?.value || 5); }
+    function clipAggiornaModalUI() {
+        const prima = clipGetPrima(), dopo = clipGetDopo();
+        document.getElementById('clipPrimaVal').textContent = prima + 's'; document.getElementById('clipDopoVal').textContent = dopo + 's';
+        document.getElementById('clipDurTotale').textContent = (prima + dopo) + 's totali';
+        const vid = document.getElementById('reviewVideo'); const dur = vid?.duration || 999;
+        const start = Math.max(0, clipCurrentTime - prima), end = Math.min(dur, clipCurrentTime + dopo);
+        document.getElementById('clipLabelStart').textContent = formatAnalisiTime(start);
+        document.getElementById('clipLabelEnd').textContent = formatAnalisiTime(end);
+        document.getElementById('clipLabelCenter').textContent = '⏸ ' + formatAnalisiTime(clipCurrentTime);
+        const pctStart = (start / dur) * 100, pctEnd = (end / dur) * 100, pctCur = (clipCurrentTime / dur) * 100;
+        document.getElementById('clipRangeBar').style.left = pctStart + '%'; document.getElementById('clipRangeBar').style.width = (pctEnd - pctStart) + '%';
+        document.getElementById('clipCursorBar').style.left = pctCur + '%';
+    }
+    function _reviewHasVideo() { const vid = document.getElementById('reviewVideo'); return vid && vid.readyState >= 1; }
+    function reviewApriClip(timeSeconds, labelSuggerito) { if (!_reviewHasVideo()) { alert('Carica prima il video'); return; } clipCurrentTime = timeSeconds; clipCurrentLabel = labelSuggerito || 'clip_' + formatAnalisiTime(timeSeconds).replace(':', 'm') + 's'; clipApriModal('Da evento · ' + formatAnalisiTime(timeSeconds)); }
+    function reviewAvviaClipManuale() { if (!_reviewHasVideo()) { alert('Carica prima il video'); return; } const vid = document.getElementById('reviewVideo'); vid.pause(); document.getElementById('reviewPlayBtn').innerHTML = '<i class="fas fa-play"></i>'; clipCurrentTime = vid.currentTime; clipCurrentLabel = 'clip_' + formatAnalisiTime(vid.currentTime).replace(':', 'm') + 's'; clipApriModal('Clip manuale · ' + formatAnalisiTime(vid.currentTime)); }
+    function clipApriModal(subTitle) { document.getElementById('clipModalSub').textContent = subTitle; document.getElementById('clipNomeFile').value = clipCurrentLabel; clipAggiornaModalUI(); document.getElementById('clipProgressWrap').style.display = 'none'; document.getElementById('clipProgressFill').style.width = '0%'; document.getElementById('clipSalvaBtn').disabled = false; document.getElementById('clipModalCloseBtn').disabled = false; document.getElementById('clipModal').style.display = 'flex'; }
+    function clipModalChiudi() { if (clipIsRecording) return; document.getElementById('clipModal').style.display = 'none'; }
+    async function clipEsegui() {
+        if (!_reviewHasVideo()) { alert('Video non disponibile.'); return; }
+        if (clipIsRecording) return;
+        const vid = document.getElementById('reviewVideo'); const dur = vid.duration || 0;
+        const prima = clipGetPrima(), dopo = clipGetDopo();
+        const start = Math.max(0, clipCurrentTime - prima), end = Math.min(dur, clipCurrentTime + dopo);
+        const nome = (document.getElementById('clipNomeFile').value.trim() || clipCurrentLabel).replace(/[^a-zA-Z0-9_\-]/g, '_');
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : (MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm');
+        clipIsRecording = true;
+        document.getElementById('clipSalvaBtn').disabled = true; document.getElementById('clipSalvaBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrazione…';
+        document.getElementById('clipModalCloseBtn').disabled = true; document.getElementById('clipProgressWrap').style.display = 'block'; document.getElementById('clipProgressFill').style.width = '0%';
+        document.getElementById('clipProgressLabel').textContent = 'Posizionamento video…';
+        const canvas = document.createElement('canvas'); canvas.width = vid.videoWidth || 1280; canvas.height = vid.videoHeight || 720;
+        const ctx = canvas.getContext('2d'); vid.pause(); vid.currentTime = start;
+        await new Promise(r => { vid.onseeked = r; });
+        document.getElementById('clipProgressLabel').textContent = 'Avvio registrazione…'; document.getElementById('clipProgressFill').style.width = '5%';
+        const canvasStream = canvas.captureStream(30); const chunks = [];
+        const recorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 2500000 });
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.start(100); vid.play();
+        const clipDur = end - start;
+        const drawLoop = () => {
+            if (!clipIsRecording) return;
+            ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+            const elapsed = vid.currentTime - start;
+            const pct = Math.min(100, (elapsed / clipDur) * 100);
+            document.getElementById('clipProgressFill').style.width = pct + '%';
+            document.getElementById('clipProgressLabel').textContent = `Acquisizione… ${formatAnalisiTime(vid.currentTime)} / ${formatAnalisiTime(end)}`;
+            if (vid.currentTime < end && clipIsRecording) requestAnimationFrame(drawLoop);
+            else finisciClip();
+        };
+        requestAnimationFrame(drawLoop);
+        const timeout = setTimeout(finisciClip, (clipDur + 2) * 1000);
+        async function finisciClip() {
+            clearTimeout(timeout); if (!clipIsRecording) return;
+            clipIsRecording = false; vid.pause(); document.getElementById('reviewPlayBtn').innerHTML = '<i class="fas fa-play"></i>';
+            document.getElementById('clipProgressLabel').textContent = 'Finalizzazione…'; document.getElementById('clipProgressFill').style.width = '90%';
+            recorder.stop(); await new Promise(r => { recorder.onstop = r; });
+            const blob = new Blob(chunks, { type: mimeType }); const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = nome + '.webm'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
+            document.getElementById('clipProgressFill').style.width = '100%'; document.getElementById('clipProgressLabel').textContent = '✓ Clip salvata!';
+            document.getElementById('clipSalvaBtn').innerHTML = '<i class="fas fa-check"></i> Salvata!'; document.getElementById('clipModalCloseBtn').disabled = false;
+            setTimeout(clipModalChiudi, 1200);
+        }
+    }
+
+    // ========== SET MODALITÀ ==========
+    function setAnalisiMode(mode) {
+        analisiMode = mode;
+        document.getElementById('analisiModeVideo').classList.toggle('active', mode === 'video');
+        document.getElementById('analisiModeLive').classList.toggle('active', mode === 'live');
+        document.getElementById('analisiModeReview').classList.toggle('active', mode === 'review');
+        document.getElementById('analisiModeStorico').classList.toggle('active', mode === 'storico');
+        document.getElementById('analisiVideoMode').style.display = mode === 'video' ? 'block' : 'none';
+        document.getElementById('analisiLiveMode').style.display = mode === 'live' ? 'block' : 'none';
+        document.getElementById('analisiReviewMode').style.display = mode === 'review' ? 'block' : 'none';
+        document.getElementById('analisiStoricoMode').style.display = mode === 'storico' ? 'block' : 'none';
+        if (mode === 'review') reviewInit();
+        if (mode === 'storico') storicoLoad();
+    }
+
+
+    // ═══════════════════════════════════════════════════════════
+    // STORICO — Aggregazione e tendenza su N partite
+    // ═══════════════════════════════════════════════════════════
+    const ANALISI_EVENTI_LIST = [
+      { id:'gol',              nome:'⚽ Gol',          colore:'#ff1744' },
+      { id:'tiro',             nome:'Tiro',             colore:'#ef4444' },
+      { id:'tiro_fatto',       nome:'Tiro in Porta',    colore:'#8b5cf6' },
+      { id:'cross',            nome:'Cross',            colore:'#3b82f6' },
+      { id:'cross_fatto',      nome:'Cross Riuscito',   colore:'#06b6d4' },
+      { id:'palla_persa',      nome:'Palla Persa',      colore:'#f59e0b' },
+      { id:'palla_recuperata', nome:'Palla Recuperata', colore:'#10b981' },
+      { id:'filtrante',        nome:'Filtrante',        colore:'#ec4899' },
+    ];
+
+    let storicoPartite = [];   // partite caricate da Supabase con analisi
+    let storicoChart = null;   // istanza Chart.js
+
+    // Carica partite con analisi da Supabase
+    async function storicoLoad() {
+      const teamId = window._sbState?.teamId;
+      if (!teamId) {
+        document.getElementById('storicoLoading').style.display = 'none';
+        document.getElementById('storicoEmpty').style.display = 'block';
+        document.getElementById('storicoContent').style.display = 'none';
+        return;
+      }
+      document.getElementById('storicoLoading').style.display = 'block';
+      document.getElementById('storicoEmpty').style.display = 'none';
+      document.getElementById('storicoContent').style.display = 'none';
+
+      try {
+        const { data: matches } = await _sb.from('matches')
+          .select('id,date,opponent,goals_for,goals_against,notes')
+          .eq('team_id', teamId)
+          .order('date', { ascending: false });
+
+        // Filtra solo partite con analisi JSON valida
+        storicoPartite = (matches || []).filter(m => {
+          try { const p = JSON.parse(m.notes || ''); return p && p.eventi; } catch { return false; }
+        }).map(m => {
+          const p = JSON.parse(m.notes);
+          return { ...m, eventi: p.eventi || {}, logs: p.logs || [] };
+        });
+
+        document.getElementById('storicoLoading').style.display = 'none';
+        if (!storicoPartite.length) {
+          document.getElementById('storicoEmpty').style.display = 'block';
+        } else {
+          document.getElementById('storicoContent').style.display = 'block';
+          storicoRender();
+        }
+      } catch(e) {
+        document.getElementById('storicoLoading').style.display = 'none';
+        document.getElementById('storicoEmpty').style.display = 'block';
+      }
+    }
+
+    // Conta eventi per tipo da un oggetto eventi {zona: {tipo: count}}
+    function storicoContaEventi(eventi, filtroEvento) {
+      const tot = {};
+      ANALISI_EVENTI_LIST.forEach(e => tot[e.id] = 0);
+      Object.values(eventi || {}).forEach(zone =>
+        Object.entries(zone).forEach(([tipo, n]) => {
+          if (tot[tipo] !== undefined) tot[tipo] += n;
+        })
+      );
+      if (filtroEvento && filtroEvento !== 'all') {
+        const solo = {};
+        ANALISI_EVENTI_LIST.forEach(e => solo[e.id] = 0);
+        solo[filtroEvento] = tot[filtroEvento] || 0;
+        return solo;
+      }
+      return tot;
+    }
+
+    // Conta eventi per zona (aggregato)
+    function storicoContaZone(partiteSlice, filtroEvento) {
+      const zc = {};
+      for (let z = 1; z <= 16; z++) zc[z] = 0;
+      partiteSlice.forEach(m => {
+        for (let z = 1; z <= 16; z++) {
+          const zona = (m.eventi[String(z)] || {});
+          if (filtroEvento && filtroEvento !== 'all') {
+            zc[z] += zona[filtroEvento] || 0;
+          } else {
+            Object.values(zona).forEach(n => zc[z] += n);
+          }
+        }
+      });
+      return zc;
+    }
+
+    // Render principale
+    function storicoRender() {
+      const n = parseInt(document.getElementById('storicoFiltroN').value) || 0;
+      const filtroEvento = document.getElementById('storicoFiltroEvento').value;
+      const slice = n > 0 ? storicoPartite.slice(0, n) : storicoPartite;
+      if (!slice.length) return;
+
+      document.getElementById('storicoMeta').textContent =
+        slice.length + ' partite · ' + (filtroEvento === 'all' ? 'tutti gli eventi' : ANALISI_EVENTI_LIST.find(e=>e.id===filtroEvento)?.nome || filtroEvento);
+
+      // ── KPI ──────────────────────────────────────────────────
+      const totEventi = slice.reduce((s, m) => {
+        const t = storicoContaEventi(m.eventi, filtroEvento);
+        return s + Object.values(t).reduce((a,b)=>a+b,0);
+      }, 0);
+      const mediaEventi = (totEventi / slice.length).toFixed(1);
+      const wins = slice.filter(m => m.goals_for > m.goals_against).length;
+      const totGol = slice.reduce((s,m) => s + m.goals_for, 0);
+
+      // Zona più attiva aggregata
+      const zc = storicoContaZone(slice, filtroEvento);
+      const zonaMax = Object.entries(zc).sort((a,b)=>b[1]-a[1])[0];
+
+      document.getElementById('storicoKpi').innerHTML = [
+        { label:'Partite Analizzate', val: slice.length, color:'#00e5ff' },
+        { label:'Totale Eventi', val: totEventi, color:'#d500f9' },
+        { label:'Media per Partita', val: mediaEventi, color:'#ff9100' },
+        { label:'Zona Più Attiva', val: 'Z'+zonaMax[0], color:'#ff1744' },
+      ].map(k => `
+        <div style="background:var(--bg-3);border-radius:10px;padding:14px 16px;">
+          <div style="font-family:var(--font-mono);font-weight:900;font-size:1.6rem;color:${k.color};line-height:1;">${k.val}</div>
+          <div style="font-size:.65rem;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;">${k.label}</div>
+        </div>`).join('');
+
+      // ── Heatmap aggregata ─────────────────────────────────────
+      const mx = Math.max(1, ...Object.values(zc));
+      const zones = document.getElementById('storicoHeatmapZones');
+      zones.innerHTML = '';
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+          const zona = col * 4 + row + 1;
+          const c = zc[zona] || 0;
+          const bg = c > 0 ? `rgba(239,68,68,${Math.min(0.15+(c/mx)*0.75,0.92).toFixed(2)})` : 'transparent';
+          const div = document.createElement('div');
+          div.style.cssText = `border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;background:${bg};`;
+          div.innerHTML = `<div style="font-size:.52rem;font-weight:700;color:rgba(255,255,255,.7);text-align:center;line-height:1.3;">Z${zona}${c>0?`<br><b style="color:#fff;font-size:.62rem;">${c}</b>`:''}</div>`;
+          zones.appendChild(div);
+        }
+      }
+
+      // ── Barre per tipologia ───────────────────────────────────
+      const totTipo = {};
+      ANALISI_EVENTI_LIST.forEach(e => totTipo[e.id] = 0);
+      slice.forEach(m => {
+        const t = storicoContaEventi(m.eventi, null);
+        ANALISI_EVENTI_LIST.forEach(e => totTipo[e.id] += t[e.id] || 0);
+      });
+      const filtrati = filtroEvento === 'all' ? ANALISI_EVENTI_LIST : ANALISI_EVENTI_LIST.filter(e => e.id === filtroEvento);
+      const maxTipo = Math.max(1, ...filtrati.map(e => totTipo[e.id]));
+      document.getElementById('storicoBarre').innerHTML = filtrati.map(e => `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+          <div style="width:130px;font-size:.8rem;color:var(--text-2);flex-shrink:0;">${e.nome}</div>
+          <div style="flex:1;height:7px;background:var(--bg-3);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;border-radius:4px;width:${(totTipo[e.id]/maxTipo*100).toFixed(1)}%;background:${e.colore};transition:width .4s;"></div>
+          </div>
+          <div style="width:28px;text-align:right;font-size:.8rem;font-weight:700;color:var(--text-1);font-family:var(--font-mono);">${totTipo[e.id]}</div>
+        </div>`).join('');
+
+      // ── Grafico tendenza ──────────────────────────────────────
+      const cronologica = [...slice].reverse(); // ordine cronologico
+      const labels = cronologica.map(m => {
+        const d = new Date(m.date);
+        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} vs ${m.opponent.length > 8 ? m.opponent.slice(0,8)+'…' : m.opponent}`;
+      });
+
+      const eventiDaGraficareList = filtroEvento === 'all' ? ANALISI_EVENTI_LIST : ANALISI_EVENTI_LIST.filter(e => e.id === filtroEvento);
+      const datasets = eventiDaGraficareList.map(ev => ({
+        label: ev.nome,
+        data: cronologica.map(m => {
+          let tot = 0;
+          Object.values(m.eventi || {}).forEach(zona => tot += (zona[ev.id] || 0));
+          return tot;
+        }),
+        borderColor: ev.colore,
+        backgroundColor: ev.colore + '22',
+        tension: 0.35,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2,
+        fill: false,
+      }));
+
+      if (storicoChart) storicoChart.destroy();
+      const ctx = document.getElementById('storicoChart').getContext('2d');
+      storicoChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              labels: { color: '#8899aa', font: { size: 11 }, boxWidth: 12 }
+            },
+            tooltip: {
+              backgroundColor: '#0d1117',
+              borderColor: 'rgba(255,255,255,.1)',
+              borderWidth: 1,
+              titleColor: '#f0f4f8',
+              bodyColor: '#8899aa',
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#4d6070', font: { size: 10 }, maxRotation: 30 },
+              grid: { color: 'rgba(255,255,255,.05)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#4d6070', font: { size: 11 }, stepSize: 1 },
+              grid: { color: 'rgba(255,255,255,.05)' }
+            }
+          }
+        }
+      });
+
+      // ── Lista partite incluse ─────────────────────────────────
+      document.getElementById('storicoPartiteList').innerHTML = slice.map(m => {
+        const totM = Object.values(storicoContaEventi(m.eventi, filtroEvento)).reduce((a,b)=>a+b,0);
+        const res = m.goals_for > m.goals_against ? '#00e676' : m.goals_for < m.goals_against ? '#ff1744' : '#ff9100';
+        const d = new Date(m.date);
+        const dataFmt = d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});
+        return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:.75rem;color:var(--text-3);font-family:var(--font-mono);min-width:80px;">${dataFmt}</span>
+          <span style="flex:1;font-size:.88rem;color:var(--text-1);">vs ${m.opponent}</span>
+          <span style="font-family:var(--font-mono);font-weight:700;font-size:.95rem;color:${res};">${m.goals_for}—${m.goals_against}</span>
+          <span style="font-size:.75rem;color:var(--text-3);font-family:var(--font-mono);min-width:60px;text-align:right;">${totM} eventi</span>
+        </div>`;
+      }).join('');
+    }
+
+    // ========== INIT ==========
+    openDB().then(async () => {
+        await analisiLoadSessioni();
+        analisiRenderCampo('campoVideoZones');
+        analisiRenderCampo('campoLiveZones');
+        analisiUpdateUI();
+        const savedSize = localStorage.getItem('match_campo_size');
+        if (savedSize) { const slider = document.getElementById('liveCampoSlider'); if (slider) { slider.value = savedSize; setLiveCampoSize(savedSize); } }
+        document.getElementById('matchDate').value = new Date().toISOString().split('T')[0];
+    });
+
+    window.addEventListener('scroll', () => { if (analisiMode !== 'live') return; const bar = document.getElementById('liveTimerBar'); const fixed = document.getElementById('liveTimerBarFixed'); if (bar && fixed) fixed.classList.toggle('visible', bar.getBoundingClientRect().bottom < 0); }, { passive: true });
+    document.getElementById('eventoModal').addEventListener('click', e => { if (e.target === document.getElementById('eventoModal')) chiudiEventoModal(); });
+    window.addEventListener('beforeunload', e => { if (analisiTotaleEventi() > 0) { const msg = 'Hai eventi non salvati. Sei sicuro di voler chiudere?'; e.preventDefault(); e.returnValue = msg; return msg; } });
+</script>
+</body>
+</html>
