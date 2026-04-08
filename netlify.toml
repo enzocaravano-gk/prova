@@ -2,15 +2,13 @@
   command = "npm run build"
   publish = "dist"
 
-# Configura le intestazioni di sicurezza per permettere 'unsafe-eval' (necessario per Vite/React in alcuni casi)
-# e per gestire correttamente i font e le API esterne come Supabase
+# Rimuove l'intestazione Content-Security-Policy di Netlify per evitare conflitti con 'eval'
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: https://*.supabase.co;"
+    Content-Security-Policy = ""
 
-# Gestione dei redirect per React Router (SPA)
-# Permette di ricaricare la pagina su qualsiasi rotta senza dare errore 404
+# Gestione redirect per React Router (SPA)
 [[redirects]]
   from = "/*"
   to = "/index.html"
