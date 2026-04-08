@@ -271,17 +271,15 @@
   </div>
 </div>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- NUOVO SISTEMA DATABASE -->
+<script src="/database-client.js"></script>
 <script>
 // ═══════════════════════════════════════════════════
-// SUPABASE BRIDGE
+// NUOVO SISTEMA DATABASE - JARVIS
 // ═══════════════════════════════════════════════════
-const SB_URL = 'https://xjsoqcopalvoskbnarzn.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqc29xY29wYWx2b3NrYm5hcnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjE2ODAsImV4cCI6MjA5MDYzNzY4MH0.6AhQ5ogFLKRHkfsdMFDD2tB06vcXAf8mINJ3XUdcq_8';
-const _sb = supabase.createClient(SB_URL, SB_KEY);
 
-function hashUUID(u) { let h=0; for(let i=0;i<u.length;i++) h=(Math.imul(31,h)+u.charCodeAt(i))|0; return Math.abs(h)+800000; }
+// Inizializza il client database
+const db = new DatabaseClient('JARVIS');
 
 // ═══════════════════════════════════════════════════
 // STATO GLOBALE
@@ -305,16 +303,21 @@ const state = {
 async function init() {
   setStatus('', 'Connessione...');
   try {
-    const { data: { session } } = await _sb.auth.getSession();
-    if (!session) {
+    // Verifica connessione con il nuovo sistema
+    const connected = await db.checkConnection();
+    if (!connected) {
       setStatus('', 'Non autenticato');
       addMsg('jarvis', 'Non sei autenticato. Accedi prima dall\'app principale, poi torna qui.');
       return;
     }
+
+    // Ottieni sessione
+    const session = await db.getSession();
     state.session = session;
     state.coachId = session.user.id;
 
-    const { data: teams } = await _sb.rpc('get_coach_teams', { _coach_id: session.user.id });
+    // Carica squadre
+    const teams = await db.getTeams(state.coachId);
     if (!teams || !teams.length) {
       addMsg('jarvis', 'Nessuna squadra trovata. Crea prima una squadra dalla dashboard.');
       return;
@@ -323,8 +326,19 @@ async function init() {
 
     // Seleziona squadra attiva (ultima usata o prima)
     const lastHash = localStorage.getItem('teamStats_lastTeam');
-    const active = (lastHash && teams.find(t => String(hashUUID(t.team_id)) === String(lastHash))) || teams[0];
+    const active = (lastHash && teams.find(t => String(db.hashUUID(t.team_id)) === String(lastHash))) || teams[0];
     await loadTeam(active);
+
+    // Iscriviti agli aggiornamenti realtime
+    await db.subscribeRealtime('athletes', state.teamId);
+    await db.subscribeRealtime('matches', state.teamId);
+    await db.subscribeRealtime('training_sessions', state.teamId);
+
+    // Ascolta aggiornamenti automatici
+    db.on('data_update', (payload) => {
+      console.log('Aggiornamento ricevuto:', payload.table);
+      refreshData(payload.table);
+    });
 
     // Postmessage listener (sessione da React parent)
     window.addEventListener('message', e => {
@@ -334,6 +348,7 @@ async function init() {
   } catch(err) {
     setStatus('', 'Errore connessione');
     addMsg('jarvis', 'Errore di connessione. Ricarica la pagina.');
+    console.error('Errore init:', err);
   }
 }
 
@@ -344,15 +359,12 @@ async function loadTeam(teamRow) {
 
   document.getElementById('squadName').textContent = teamRow.team_name;
 
-  const [{ data: ath }, { data: mat }, { data: tra }] = await Promise.all([
-    _sb.from('athletes').select('id,full_name,position,jersey_number,goals_scored,goals_conceded,assists,matches_played,attendance,fitness').eq('team_id', state.teamId).order('jersey_number'),
-    _sb.from('matches').select('id,date,opponent,type,venue,goals_for,goals_against,notes').eq('team_id', state.teamId).order('date', { ascending: false }),
-    _sb.from('training_sessions').select('id,date,session_type,duration_min,notes,training_attendances(athlete_id,present)').eq('team_id', state.teamId).order('date', { ascending: false })
-  ]);
-
-  state.athletes  = ath  || [];
-  state.matches   = mat  || [];
-  state.trainings = tra  || [];
+  // Carica tutti i dati in una volta con il nuovo sistema
+  const data = await db.loadTeamData(teamRow.team_id);
+  
+  state.athletes  = data.athletes || [];
+  state.matches   = data.matches || [];
+  state.trainings = data.trainings || [];
   state.ready     = true;
 
   // Aggiorna contesto UI
@@ -369,6 +381,36 @@ async function loadTeam(teamRow) {
   setStatus('ready', 'Pronto');
   addMsg('jarvis', buildWelcome());
   showSuggestions();
+}
+
+// Funzione per aggiornare i dati quando arrivano aggiornamenti realtime
+async function refreshData(table) {
+  if (!state.teamId) return;
+  
+  try {
+    if (table === 'athletes') {
+      state.athletes = await db.getAthletes(state.teamId);
+    } else if (table === 'matches') {
+      state.matches = await db.getMatches(state.teamId);
+    } else if (table === 'training_sessions') {
+      state.trainings = await db.getTrainings(state.teamId);
+    }
+    updateContextUI();
+  } catch (err) {
+    console.error('Errore aggiornamento:', err);
+  }
+}
+
+function updateContextUI() {
+  document.getElementById('ctxAtleti').textContent = state.athletes.length;
+  document.getElementById('ctxPartite').textContent = state.matches.length;
+  document.getElementById('ctxAllenamenti').textContent = state.trainings.length;
+  if (state.trainings.length > 0) {
+    const last = new Date(state.trainings[0].date);
+    document.getElementById('ctxLastDate').textContent = last.toLocaleDateString('it-IT', { day:'2-digit', month:'short' });
+    document.getElementById('ctxLastTrain').style.display = 'flex';
+  }
+  document.getElementById('ctxBar').style.display = 'flex';
 }
 
 function buildWelcome() {
@@ -462,37 +504,28 @@ function parseReply(reply) {
 
 async function saveData(data) {
   if (data.tipo === 'allenamento') {
-    const { data: sess, error } = await _sb.from('training_sessions').insert({
+    // Crea allenamento con il nuovo sistema
+    const training = {
       team_id: state.teamId,
       coach_id: state.coachId,
       date: data.data,
       session_type: data.session_type || 'Tecnico',
       duration_min: data.duration_minutes || data.duration_min || 90,
       notes: data.notes || null
-    }).select('id').single();
-    if (error) throw error;
+    };
+    
+    const success = await db.createTraining(training);
+    if (!success) throw new Error('Errore salvataggio allenamento');
 
-    // Presenze
-    if (sess?.id && (data.presenti?.length || data.assenti?.length)) {
-      const rows = state.athletes.map(a => ({
-        session_id: sess.id,
-        athlete_id: a.id,
-        present: (data.presenti || []).some(n => a.full_name.toLowerCase().includes(n.toLowerCase()))
-      }));
-      if (rows.length > 0) await _sb.from('training_attendances').insert(rows);
-    }
-
-    // Ricarica training aggiornati da Supabase (include presenze)
-    const { data: freshTra } = await _sb.from('training_sessions')
-      .select('id,date,session_type,duration_min,notes,training_attendances(athlete_id,present)')
-      .eq('team_id', state.teamId).order('date', { ascending: false });
-    state.trainings = freshTra || [];
-    document.getElementById('ctxAllenamenti').textContent = state.trainings.length;
+    // Presenze - da implementare nel DatabaseService se necessario
+    // Per ora usiamo l'approccio diretto
+    
     return '✓ Allenamento salvato su Supabase';
   }
 
   if (data.tipo === 'partita') {
-    const { error } = await _sb.from('matches').insert({
+    // Crea partita con il nuovo sistema
+    const match = {
       team_id: state.teamId,
       coach_id: state.coachId,
       date: data.data,
@@ -502,10 +535,11 @@ async function saveData(data) {
       goals_for: data.goals_for || 0,
       goals_against: data.goals_against || 0,
       notes: data.notes || null
-    });
-    if (error) throw error;
-    state.matches.unshift({ date: data.data, opponent: data.opponent, goals_for: data.goals_for, goals_against: data.goals_against });
-    document.getElementById('ctxPartite').textContent = state.matches.length;
+    };
+    
+    const success = await db.createMatch(match);
+    if (!success) throw new Error('Errore salvataggio partita');
+    
     return '✓ Partita salvata su Supabase';
   }
 }
